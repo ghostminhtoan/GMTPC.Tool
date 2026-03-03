@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36401.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMT Tools", "MMT Tools.csproj", "{6E06A809-F289-49AD-897C-ECC7715371D0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E06A809-F289-49AD-897C-ECC7715371D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E06A809-F289-49AD-897C-ECC7715371D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E06A809-F289-49AD-897C-ECC7715371D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E06A809-F289-49AD-897C-ECC7715371D0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C6DC8191-0652-4F61-8691-FFE761E7CF48}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,14 @@
+﻿<!-- AI CONTEXT:
+    App.xaml — Application bootstrap for MMT Tools.
+    Defines StartupUri (MainWindow.xaml) and application resources.
+    See App.xaml.cs for startup checks (Administrator requirement).
+-->
+<Application x:Class="GMTPC.Tool.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>
