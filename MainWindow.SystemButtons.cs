@@ -657,6 +657,14 @@ namespace GMTPC.Tool
             if (ChkWin10_20H2_2022April?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://glennsferryschools-my.sharepoint.com/:u:/g/personal/billgates_glennsferryschools_onmicrosoft_com/Ed8HqTyoPFxLktIGaRFqDOYBQP5hWqV8d69Qq9TJ-k9L0A?download=1");
 
+            if (ChkSamuraiMaiden?.IsChecked == true)
+            {
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part1.exe");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part2.rar");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part3.rar");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part4.rar");
+            }
+
             // Hiển thị tooltip với danh sách link
             string tooltipText;
             if (_cachedDownloadLinks.Count == 0)
