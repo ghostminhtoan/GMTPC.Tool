@@ -658,9 +658,15 @@ namespace GMTPC.Tool
                 _cachedDownloadLinks.Add("https://glennsferryschools-my.sharepoint.com/:u:/g/personal/billgates_glennsferryschools_onmicrosoft_com/Ed8HqTyoPFxLktIGaRFqDOYBQP5hWqV8d69Qq9TJ-k9L0A?download=1");
 
             // Hiển thị tooltip với danh sách link
-            string tooltipText = _cachedDownloadLinks.Count == 0
-                ? "Chọn các checkbox bên trên để xem link download"
-                : $"Click để mở {_cachedDownloadLinks.Count} link:\n" + string.Join("\n", _cachedDownloadLinks);
+            string tooltipText;
+            if (_cachedDownloadLinks.Count == 0)
+            {
+                tooltipText = "Vui lòng chọn (check) các checkbox ứng với phần mềm muốn tải để xem link download trực tiếp";
+            }
+            else
+            {
+                tooltipText = $"Click để mở {_cachedDownloadLinks.Count} link:\n" + string.Join("\n", _cachedDownloadLinks);
+            }
 
             BtnDownloadPage.ToolTip = new System.Windows.Controls.ToolTip
             {
@@ -676,8 +682,7 @@ namespace GMTPC.Tool
                 // Sử dụng danh sách link đã được cache khi hover
                 if (_cachedDownloadLinks.Count == 0)
                 {
-                    Process.Start("https://github.com/ghostminhtoan/MMT/releases");
-                    UpdateStatus("Mở trang download tổng quát", "Cyan");
+                    UpdateStatus("Vui lòng chọn (check) các checkbox ứng với phần mềm muốn tải trước", "Orange");
                 }
                 else
                 {
