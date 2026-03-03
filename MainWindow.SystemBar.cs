@@ -114,8 +114,8 @@ namespace GMTPC.Tool
         }
 
         /// <summary>
-        /// Download đặc biệt cho OneDrive/SharePoint - Single threaded, không stall detection, không multi-thread
-        /// Chỉ tải đơn giản với progress reporting
+        /// Download đặc biệt cho OneDrive/SharePoint - Dùng 16 threads như DownloadWithProgressAsync
+        /// Nhưng với retry logic đơn giản hơn, không stall detection phức tạp
         /// </summary>
         private async Task DownloadOneDriveAsync(string downloadUrl, string destinationPath, string displayName)
         {
@@ -128,55 +128,41 @@ namespace GMTPC.Tool
                 {
                     UpdateStatus($"Đang tải {displayName}... (lần {retryCount + 1}/{MAX_RETRIES})", "Cyan");
 
+                    // Dùng lại DownloadWithProgressAsync nhưng với User-Agent đặc biệt
                     using (var client = new HttpClient())
                     {
-                        client.Timeout = TimeSpan.FromHours(2); // Timeout dài cho file lớn
+                        client.Timeout = TimeSpan.FromHours(2);
                         client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-
-                        using (var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                        client.DefaultRequestHeaders.Add("Accept", "*/*");
+                        
+                        // Thăm dò để lấy file size
+                        var headRequest = new HttpRequestMessage(HttpMethod.Head, downloadUrl);
+                        var headResponse = await client.SendAsync(headRequest);
+                        long fileSize = headResponse.Content.Headers.ContentLength ?? 0;
+                        
+                        if (fileSize == 0)
                         {
-                            response.EnsureSuccessStatusCode();
-
-                            long? totalBytes = response.Content.Headers.ContentLength;
+                            // Nếu không lấy được size, thử GET request với Range header
+                            var probeRequest = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+                            probeRequest.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(0, 0);
+                            var probeResponse = await client.SendAsync(probeRequest, HttpCompletionOption.ResponseHeadersRead);
                             
-                            using (var contentStream = await response.Content.ReadAsStreamAsync())
-                            using (var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
+                            if (probeResponse.StatusCode == System.Net.HttpStatusCode.PartialContent)
                             {
-                                byte[] buffer = new byte[81920]; // 80KB buffer
-                                long totalRead = 0;
-                                int read;
-
-                                while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                                {
-                                    await fileStream.WriteAsync(buffer, 0, read);
-                                    totalRead += read;
-
-                                    // Update progress mỗi 512KB để tránh spam UI
-                                    if (totalRead % (512 * 1024) < 81920)
-                                    {
-                                        Dispatcher.InvokeAsync(() =>
-                                        {
-                                            if (totalBytes.HasValue && totalBytes.Value > 0)
-                                            {
-                                                double percent = (double)totalRead / totalBytes.Value * 100;
-                                                DownloadProgressBar.Value = percent;
-                                                ProgressTextBlock.Text = $"{FormatBytes(totalRead)} / {FormatBytes(totalBytes.Value)}";
-                                            }
-                                            else
-                                            {
-                                                ProgressTextBlock.Text = $"{FormatBytes(totalRead)} downloaded";
-                                            }
-                                        });
-                                    }
-                                }
-
-                                Dispatcher.InvokeAsync(() =>
-                                {
-                                    DownloadProgressBar.Value = 100;
-                                    if (totalBytes.HasValue && totalBytes.Value > 0)
-                                        ProgressTextBlock.Text = $"{FormatBytes(totalBytes.Value)} / {FormatBytes(totalBytes.Value)}";
-                                });
+                                fileSize = probeResponse.Content.Headers.ContentRange?.Length ?? 0;
                             }
+                        }
+
+                        // Nếu vẫn không có size, tải single-thread
+                        if (fileSize == 0)
+                        {
+                            UpdateStatus("Không lấy được kích thước file, chuyển sang chế độ 1 thread...", "Yellow");
+                            await DownloadSingleConnectionAsync(downloadUrl, destinationPath, displayName);
+                        }
+                        else
+                        {
+                            // Dùng DownloadWithProgressAsync với 16 threads
+                            await DownloadWithProgressAsync(downloadUrl, destinationPath, displayName);
                         }
                     }
 
@@ -190,7 +176,8 @@ namespace GMTPC.Tool
                     
                     if (retryCount < MAX_RETRIES)
                     {
-                        await Task.Delay(3000 * retryCount); // Delay tăng dần
+                        UpdateStatus("Đang thử lại sau 3 giây...", "Cyan");
+                        await Task.Delay(3000);
                     }
                     
                     // Xóa file dở dang
@@ -323,12 +310,12 @@ namespace GMTPC.Tool
                         const double emaAlpha = 0.25;
                         string speedText = "0 B/s";
 
-                        // Auto-recovery tracking - Tăng threshold để tránh kích hoạt sai
+                        // Auto-recovery tracking - DISABLED completely for OneDrive
                         DateTime lastProgressTime = DateTime.Now;
                         long lastProgressBytes = 0;
                         int stallCount = 0;
-                        const int MAX_STALL_COUNT = 30; // ~6 seconds without progress = stall (tăng từ 6 lên 30)
-                        const double MIN_SPEED_THRESHOLD = 100; // 100 B/s minimum speed (giảm từ 1024 xuống)
+                        const int MAX_STALL_COUNT = int.MaxValue; // Never trigger auto-recovery
+                        const double MIN_SPEED_THRESHOLD = 0; // Disabled
 
                         // UI Update Task
                         var uiUpdateCts = new CancellationTokenSource();
@@ -350,8 +337,8 @@ namespace GMTPC.Tool
                                         speedText = FormatSpeed(smoothedSpeed);
                                         lastTotalForSpeed = currentTotal;
                                         lastSpeedUpdate = now;
-                                        
-                                        // Check for stall/speed drop
+
+                                        // Stall detection disabled - only track progress
                                         if (currentTotal > lastProgressBytes)
                                         {
                                             lastProgressBytes = currentTotal;
@@ -361,16 +348,8 @@ namespace GMTPC.Tool
                                         else
                                         {
                                             stallCount++;
-                                            // Auto-recovery disabled to prevent infinite loop on OneDrive/MediaFire
-                                            // Only manual pause/resume can trigger re-segmentation
-                                            if (stallCount >= MAX_STALL_COUNT && smoothedSpeed < MIN_SPEED_THRESHOLD)
-                                            {
-                                                // Just notify user, don't auto-recover
-                                                await Dispatcher.InvokeAsync(() =>
-                                                {
-                                                    UpdateStatus($"Tốc độ tải quá thấp ({speedText}). Nếu tiếp tục, vui lòng Pause và Resume.", "Yellow");
-                                                });
-                                            }
+                                            // Auto-recovery completely disabled
+                                            // User must manually Pause/Resume if needed
                                         }
                                     }
 

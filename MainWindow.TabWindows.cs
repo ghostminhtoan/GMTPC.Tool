@@ -33,7 +33,8 @@ namespace GMTPC.Tool
 
             try
             {
-                // OneDrive yêu cầu tải đơn luồng - không stall detection, không multi-thread
+                // OneDrive yêu cầu tải với 16 threads như MMT Apps
+                // Dùng DownloadWithProgressAsync() nhưng với User-Agent đặc biệt để tránh bị chặn
                 await DownloadOneDriveAsync(url, destinationPath, "Đang tải về ổ C - Win 10 - 20H2 April 2022");
 
                 UpdateStatus("Tải xong! Đang mở ổ C và file ISO...", "Green");
