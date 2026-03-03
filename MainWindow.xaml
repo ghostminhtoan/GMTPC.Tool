@@ -486,7 +486,8 @@
             <StackPanel>
                 <ProgressBar x:Name="DownloadProgressBar" x:FieldModifier="public" Height="20" Margin="0,0,0,10" Style="{StaticResource RoundedProgressBarStyle}" Background="#FF3E3E3E" Foreground="#FF005FB8"/>
                 <TextBlock x:Name="SpeedTextBlock" FontSize="15" FontWeight="Bold" Foreground="Cyan" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                <TextBlock x:Name="ProgressTextBlock" FontSize="13" Foreground="#FFCCCCCC" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <TextBlock x:Name="ProgressTextBlock" FontSize="13" Foreground="#FFCCCCCC" HorizontalAlignment="Center" Margin="0,0,0,5" FontWeight="Bold"/>
+                <TextBlock x:Name="SecondaryProgressTextBlock" FontSize="12" Foreground="#FF999999" HorizontalAlignment="Center" Margin="0,0,0,10" FontStyle="Italic"/>
                 <!-- Connection trace canvas: shows per-connection segments and active connection count -->
                 <Grid Margin="0,8,0,0">
                     <StackPanel>

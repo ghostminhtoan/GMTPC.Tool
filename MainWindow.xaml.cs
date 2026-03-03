@@ -28,6 +28,10 @@ namespace GMTPC.Tool
         private List<DownloadRange> _remainingRanges = new List<DownloadRange>();
         private bool _isReSegmenting = false;
         public string TestProperty { get; set; } = "Hello";
+        
+        // Flag để theo dõi trạng thái đang cài đặt
+        private bool _isInstalling = false;
+        private string _installationStatus = "";
         private double originalWidth;
         private double originalHeight;
 
@@ -102,8 +106,57 @@ namespace GMTPC.Tool
             // Tránh deadlock khi background thread gọi UpdateStatus trong khi UI thread đang đợi
             Dispatcher.InvokeAsync(() =>
             {
-                ProgressTextBlock.Text = message;
+                // Nếu đang trong quá trình cài đặt, lưu lại status và hiển thị ở dòng chính
+                if (_isInstalling)
+                {
+                    _installationStatus = message;
+                    ProgressTextBlock.Text = message;
+                    ProgressTextBlock.Foreground = GetBrush(color);
+                }
+                else
+                {
+                    // Không đang cài đặt thì hiển thị bình thường
+                    ProgressTextBlock.Text = message;
+                    ProgressTextBlock.Foreground = GetBrush(color);
+                }
             });
+        }
+        
+        // Cập nhật status phụ (cho các thao tác như DPI change)
+        private void UpdateSecondaryStatus(string message, string color = "Gray")
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                SecondaryProgressTextBlock.Text = message;
+                SecondaryProgressTextBlock.Foreground = GetBrush(color);
+                
+                // Nếu không đang cài đặt, dùng ProgressTextBlock làm status chính
+                if (!_isInstalling)
+                {
+                    ProgressTextBlock.Text = message;
+                    ProgressTextBlock.Foreground = GetBrush(color);
+                }
+            });
+        }
+        
+        // Đặt trạng thái đang cài đặt
+        private void SetInstallingState(bool isInstalling)
+        {
+            _isInstalling = isInstalling;
+            if (!isInstalling)
+            {
+                // Khi kết thúc cài đặt, xóa secondary status
+                Dispatcher.InvokeAsync(() =>
+                {
+                    SecondaryProgressTextBlock.Text = "";
+                });
+            }
+        }
+        
+        private SolidColorBrush GetBrush(string colorName)
+        {
+            Color color = GetColor(colorName);
+            return new SolidColorBrush(color);
         }
 
         private Color GetColor(string colorName)

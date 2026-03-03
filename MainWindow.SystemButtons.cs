@@ -30,6 +30,7 @@ namespace GMTPC.Tool
             // Update combo box selection if available
             try { if (CboDPIValue != null && idx >= 0 && idx < CboDPIValue.Items.Count) CboDPIValue.SelectedIndex = idx; } catch { }
             ApplyDPIScale();
+            UpdateSecondaryStatus($"Đã đổi DPI: {DPI_STEPS[idx]}%", "Cyan");
         }
 
         private void BtnDPIPlus_Click(object sender, RoutedEventArgs e)
@@ -51,6 +52,7 @@ namespace GMTPC.Tool
             currentDPIScale = DPI_STEPS[idx] / 100.0;
             try { if (CboDPIValue != null && idx >= 0 && idx < CboDPIValue.Items.Count) CboDPIValue.SelectedIndex = idx; } catch { }
             ApplyDPIScale();
+            UpdateSecondaryStatus($"Đã đổi DPI: {DPI_STEPS[idx]}%", "Cyan");
         }
 
         private void CboDPIValue_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -83,6 +85,7 @@ namespace GMTPC.Tool
                 // Keep combobox selection consistent
                 try { if (CboDPIValue != null && closest >= 0 && closest < CboDPIValue.Items.Count) CboDPIValue.SelectedIndex = closest; } catch { }
                 ApplyDPIScale();
+                UpdateSecondaryStatus($"Đã đổi DPI: {DPI_STEPS[closest]}%", "Cyan");
             }
         }
 
@@ -392,6 +395,9 @@ namespace GMTPC.Tool
 
         private async void BtnInstall_Click(object sender, RoutedEventArgs e)
         {
+            // Đặt trạng thái đang cài đặt
+            SetInstallingState(true);
+            
             UpdateStatus("Đang chờ...", "Yellow"); // Thêm phản hồi tức thì
             await Task.Delay(1); // Cho phép UI cập nhật ngay lập tức
 
@@ -514,6 +520,9 @@ namespace GMTPC.Tool
                 BtnPause.IsEnabled = false;
                 UpdateInstallButtonState();
                 UpdateStatus("Hoàn tất tất cả các tác vụ.", "Green");
+                
+                // Đặt lại trạng thái không còn cài đặt
+                SetInstallingState(false);
             }
         }
 
