@@ -471,6 +471,12 @@ namespace GMTPC.Tool
                         break;
                     }
 
+                    // Delay 500ms giữa các task để tránh tải nhiều file cùng lúc gây lỗi server
+                    if (tasks.Count > 1)
+                    {
+                        await Task.Delay(500);
+                    }
+
                     await taskInfo.Action();
 
                     if (_cancellationTokenSource.Token.IsCancellationRequested)

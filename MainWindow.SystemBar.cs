@@ -32,14 +32,14 @@ namespace GMTPC.Tool
 
         private async Task DownloadWithProgressAsync(string downloadUrl, string destinationPath, string displayName = "File")
         {
-            if (IsDownloading) 
+            if (IsDownloading)
                 throw new InvalidOperationException("Tiến trình trước đó chưa kết thúc hoàn toàn. Vui lòng chờ 1-2 giây rồi thử lại.");
-            
+
             IsDownloading = true;
             try
             {
                 var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
-                int maxRetries = 5;
+                int maxRetries = 10;
                 int retryCount = 0;
 
             while (retryCount < maxRetries)
@@ -518,7 +518,7 @@ namespace GMTPC.Tool
         private async Task DownloadSingleConnectionAsync(string downloadUrl, string destinationPath, string displayName)
         {
             var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
-            int maxRetries = 5;
+            int maxRetries = 10;
             int retryCount = 0;
 
             while (retryCount < maxRetries)
