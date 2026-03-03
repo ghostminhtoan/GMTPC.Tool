@@ -24,7 +24,7 @@ namespace GMTPC.Tool
 
         private async Task InstallWin10_20H2_2022AprilAsync()
         {
-            // Link tải thẳng từ OneDrive/SharePoint - thêm ?download=1 để tải ngầm không cần tương tác UI
+            // Link tải thẳng từ OneDrive/SharePoint
             string url = "https://glennsferryschools-my.sharepoint.com/:u:/g/personal/billgates_glennsferryschools_onmicrosoft_com/Ed8HqTyoPFxLktIGaRFqDOYBQP5hWqV8d69Qq9TJ-k9L0A?download=1";
             string fileName = "en-us_windows_10_consumer_editions_version_20h2_updated_april_2022_x64.iso";
             string destinationPath = Path.Combine("C:\\", fileName);
@@ -33,7 +33,8 @@ namespace GMTPC.Tool
 
             try
             {
-                await DownloadWithProgressAsync(url, destinationPath, "Đang tải về ổ C - Win 10 - 20H2 April 2022");
+                // OneDrive yêu cầu tải đơn luồng - không stall detection, không multi-thread
+                await DownloadOneDriveAsync(url, destinationPath, "Đang tải về ổ C - Win 10 - 20H2 April 2022");
 
                 UpdateStatus("Tải xong! Đang mở ổ C và file ISO...", "Green");
                 Process.Start("explorer.exe", "C:\\");

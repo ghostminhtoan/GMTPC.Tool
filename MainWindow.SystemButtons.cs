@@ -803,5 +803,181 @@ namespace GMTPC.Tool
                     chk.ClearValue(System.Windows.Controls.Control.ForegroundProperty);
             }
         }
+
+        // Hiển thị link download khi hover vào checkbox
+        private void Checkbox_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is CheckBox checkBox)
+            {
+                string link = null;
+                switch (checkBox.Name)
+                {
+                    case "ChkInstallIDM":
+                        link = "https://tinyurl.com/idmhcmvn";
+                        break;
+                    case "ChkInstallWinRAR":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe";
+                        break;
+                    case "ChkInstallBID":
+                        link = "https://antibodysoftware-17031.kxcdn.com/files/bid_6_60_setup_x64.exe";
+                        break;
+                    case "ChkVcredist":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe";
+                        break;
+                    case "ChkDirectX":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/DirectX.exe";
+                        break;
+                    case "ChkJava":
+                        link = "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=252627_99a6cb9582554a09bd4ac60f73f9b8e6";
+                        break;
+                    case "ChkOpenAL":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OpenAL.exe";
+                        break;
+                    case "Chk3DPChip":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Chip.exe";
+                        break;
+                    case "Chk3DPNet":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Net.exe";
+                        break;
+                    case "ChkRevoUninstaller":
+                        link = "https://www.hibitsoft.ir/HiBitUninstaller/RevoUninstaller-setup.exe";
+                        break;
+                    case "ChkZalo":
+                        link = "https://zalo.me/download/zalo-pc?utm=90000";
+                        break;
+                    case "ChkOfficeToolPlus":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OfficeToolPlus.exe";
+                        break;
+                    case "ChkOfficeSoftmaker":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/SoftMaker.Office.exe";
+                        break;
+                    case "ChkNotepadPP":
+                        link = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.6.2/npp.8.6.2.Installer.x64.exe";
+                        break;
+                    case "ChkPotPlayer":
+                        link = "https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup64.exe";
+                        break;
+                    case "ChkFastStone":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FastStone.Capture.exe";
+                        break;
+                    case "ChkFoxit":
+                        link = "https://cdn01.foxitsoftware.com/product/reader/desktop/win/2025.2.0/FoxitPDFReader20252_L10N_Setup_Prom_x64.exe";
+                        break;
+                    case "ChkBandiview":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Bandiview.exe";
+                        break;
+                    case "ChkMMTApps":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/MMT.Apps.exe";
+                        break;
+                    case "ChkDISMPP":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/WinPE/DISM++.exe";
+                        break;
+                    case "ChkComfortClipboardPro":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Comfort.Clipboard.Pro.exe";
+                        break;
+                    case "ChkPowerISO":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe";
+                        break;
+                    case "ChkTeracopy":
+                        link = "https://www.codesector.com/files/teracopy.exe";
+                        break;
+                    case "ChkGoogleDrive":
+                        link = "https://dl.google.com/drive-file-stream/GoogleDriveSetup.exe";
+                        break;
+                    case "ChkNetLimiter":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/netlimiter-4.1.12.0.exe";
+                        break;
+                    case "ChkAomeiPartitionAssistant":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/AOMEI.Partition.Assistant.exe";
+                        break;
+                    case "ChkDiskGenius":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/WinPE/Disk.Genius.exe";
+                        break;
+                    case "ChkProcessLasso":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/ProcessLasso.exe";
+                        break;
+                    case "ChkThrottlestop":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Throttlestop.exe";
+                        break;
+                    case "ChkMSIAfterburner":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/MSI.Afterburner.exe";
+                        break;
+                    case "ChkChrome":
+                        link = "https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7BE9FD60DA-2FFA-E657-6449-67646C84E6C0%7D%26lang%3Dvi%26browser%3D5%26usagestats%3D1%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-statsdef_1%26installdataindex%3Dempty/update2/installers/ChromeSetup.exe";
+                        break;
+                    case "ChkCocCoc":
+                        link = "https://files.coccoc.com/browser/coccoc_standalone_vi.exe";
+                        break;
+                    case "ChkEdge":
+                        link = "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&source=EdgeStablePage&Channel=Stable&language=vi&brand=M100";
+                        break;
+                    case "ChkUltraviewer":
+                        link = "https://dl2.ultraviewer.net/UltraViewer_setup_6.6_vi.exe";
+                        break;
+                    case "ChkTeamViewerQS":
+                        link = "https://download.teamviewer.com/download/TeamViewerQS.exe";
+                        break;
+                    case "ChkTeamViewerFull":
+                        link = "https://download.teamviewer.com/download/TeamViewer_Setup.exe";
+                        break;
+                    case "ChkAnyDesk":
+                        link = "https://anydesk.com/en/downloads/thank-you?dv=win_exe";
+                        break;
+                    case "ChkVMWare162Lite":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/VMware.Workstation.Pro.16.2.Lite.exe";
+                        break;
+                    case "ChkWin11_26H1":
+                        link = "https://archive.org/download/win-11-26h1";
+                        break;
+                    case "ChkActivateWindows":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/activate-windows.bat";
+                        break;
+                    case "ChkPauseWindowsUpdate":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/pause-windows-update.bat";
+                        break;
+                    case "ChkActivateOffice":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/activate-office.bat";
+                        break;
+                    case "ChkFonts":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/fonts/Fonts.Collection.exe";
+                        break;
+                    case "ChkAdvancedCodec":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Advanced.Codec.Pack.exe";
+                        break;
+                    case "ChkFolderSize":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FolderSize.exe";
+                        break;
+                    case "ChkVPN1111":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.1.1.1/1.1.1.1-setup.exe";
+                        break;
+                    case "ChkLeagueOfLegends":
+                        link = "https://lol.qq.com/download/";
+                        break;
+                    case "ChkPorofessor":
+                        link = "https://porofessor.gg/downloads";
+                        break;
+                    case "ChkSamuraiMaiden":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN.LinkNeverDie.Com.part1.exe";
+                        break;
+                    case "ChkWin10_20H2_2022April":
+                        link = "https://www.mediafire.com/file/your_file_id/Win10_20H2_2022_April.iso/file";
+                        break;
+                    case "ChkWin10LtscIot21H2":
+                        link = "https://www.mediafire.com/file/your_file_id/Win10_LTSC_IoT_21H2_NoDefender_Office_MMTPC3.iso/file";
+                        break;
+                }
+
+                if (!string.IsNullOrEmpty(link))
+                {
+                    checkBox.ToolTip = new ToolTip
+                    {
+                        Content = "Link: " + link,
+                        Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse,
+                        HorizontalOffset = 10,
+                        VerticalOffset = 10
+                    };
+                }
+            }
+        }
     }
 }

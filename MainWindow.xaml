@@ -331,52 +331,52 @@
                         <WrapPanel x:Name="CheckBoxPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
                             <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="206">
                                 <StackPanel>
-                                    <CheckBox x:Name="ChkInstallIDM" Content="IDM" Width="175" Height="34" Click="ChkInstallIDM_Click" Margin="3"/>
+                                    <CheckBox x:Name="ChkInstallIDM" Content="IDM" Width="175" Height="34" Click="ChkInstallIDM_Click" Margin="3" MouseEnter="Checkbox_MouseEnter"/>
                                     <StackPanel Orientation="Horizontal" Margin="3,0">
                                         <Button x:Name="BtnFixIDMExtension" Content="Fix extension IDM" Width="104" Height="22" Click="BtnFixIDMExtension_Click" Margin="6,0,3,3"/>
                                         <Button x:Name="BtnCrackIDM" Content="Cờ rắck IDM" Width="79" Height="22" Click="BtnCrackIDM_Click" Margin="3,0,0,3"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
-                            <CheckBox x:Name="ChkInstallWinRAR" Content="Winrar" Width="200" Height="34" Click="ChkInstallWinRAR_Click"/>
+                            <CheckBox x:Name="ChkInstallWinRAR" Content="Winrar" Width="200" Height="34" Click="ChkInstallWinRAR_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205">
                                 <StackPanel>
-                                    <CheckBox x:Name="ChkInstallBID" Content="Bulk Image Downloader" Width="175" Height="34" Click="ChkInstallBID_Click" Margin="3"/>
+                                    <CheckBox x:Name="ChkInstallBID" Content="Bulk Image Downloader" Width="175" Height="34" Click="ChkInstallBID_Click" Margin="3" MouseEnter="Checkbox_MouseEnter"/>
                                     <Button x:Name="BtnRunBIDActivation" Content="Run BID Activation" Width="155" Height="22" Click="BtnRunBIDActivation_Click" Margin="9,0,3,3"/>
                                 </StackPanel>
                             </Border>
-                            <CheckBox x:Name="ChkActivateWindows" Content="Tự động kích hoạt Windows" Width="200" Height="34" Click="ChkActivateWindows_Click"/>
-                            <CheckBox x:Name="ChkPauseWindowsUpdate" Content="Pause Windows Update" Width="200" Height="34" Click="ChkPauseWindowsUpdate_Click"/>
-                            <CheckBox x:Name="ChkVcredist" Content="Vcredist 2005-2022" Width="200" Height="34" Click="ChkVcredist_Click"/>
-                            <CheckBox x:Name="ChkDirectX" Content="Directx" Width="200" Height="34" Click="ChkDirectX_Click"/>
-                            <CheckBox x:Name="ChkJava" Content="Java" Width="200" Height="34" Click="ChkJava_Click"/>
-                            <CheckBox x:Name="ChkOpenAL" Content="OpenAL" Width="200" Height="34" Click="ChkOpenAL_Click"/>
-                            <CheckBox x:Name="Chk3DPChip" Content="3DP Chip &#10;(all driver trừ internet)" Width="200" Height="34" Click="Chk3DPChip_Click"/>
-                            <CheckBox x:Name="Chk3DPNet" Content="3DP Net - driver internet" Width="200" Height="34" Click="Chk3DPNet_Click"/>
-                            <CheckBox x:Name="ChkRevoUninstaller" Content="Revo Uninstaller" Width="200" Height="34" Click="ChkRevoUninstaller_Click"/>
-                            <CheckBox x:Name="ChkZalo" Content="Zalo" Width="200" Height="34" Click="ChkZalo_Click"/>
+                            <CheckBox x:Name="ChkActivateWindows" Content="Tự động kích hoạt Windows" Width="200" Height="34" Click="ChkActivateWindows_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkPauseWindowsUpdate" Content="Pause Windows Update" Width="200" Height="34" Click="ChkPauseWindowsUpdate_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkVcredist" Content="Vcredist 2005-2022" Width="200" Height="34" Click="ChkVcredist_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkDirectX" Content="Directx" Width="200" Height="34" Click="ChkDirectX_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkJava" Content="Java" Width="200" Height="34" Click="ChkJava_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkOpenAL" Content="OpenAL" Width="200" Height="34" Click="ChkOpenAL_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="Chk3DPChip" Content="3DP Chip &#10;(all driver trừ internet)" Width="200" Height="34" Click="Chk3DPChip_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="Chk3DPNet" Content="3DP Net - driver internet" Width="200" Height="34" Click="Chk3DPNet_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkRevoUninstaller" Content="Revo Uninstaller" Width="200" Height="34" Click="ChkRevoUninstaller_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkZalo" Content="Zalo" Width="200" Height="34" Click="ChkZalo_Click" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Office">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="OfficePanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkOfficeToolPlus" Content="Office Tool Plus" Width="200" Height="34" Click="ChkOfficeToolPlus_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkOfficeSoftmaker" Content="Office Softmaker" Width="200" Height="34" Click="ChkOfficeSoftmaker_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkActivateOffice" Content="Tự động kích hoạt Office" Width="200" Height="34" Click="ChkActivateOffice_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkFonts" Content="Font MTO, SFU, UTM, UVN, VNI" Width="200" Height="34" Click="ChkFonts_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkNotepadPP" Content="Notepad++" Width="200" Height="34" Click="ChkNotepadPP_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkOfficeToolPlus" Content="Office Tool Plus" Width="200" Height="34" Click="ChkOfficeToolPlus_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkOfficeSoftmaker" Content="Office Softmaker" Width="200" Height="34" Click="ChkOfficeSoftmaker_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkActivateOffice" Content="Tự động kích hoạt Office" Width="200" Height="34" Click="ChkActivateOffice_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkFonts" Content="Font MTO, SFU, UTM, UVN, VNI" Width="200" Height="34" Click="ChkFonts_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkNotepadPP" Content="Notepad++" Width="200" Height="34" Click="ChkNotepadPP_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Multimedia">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="MultimediaPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkPotPlayer" Content="PotPlayer" Width="200" Height="34" Click="ChkPotPlayer_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkFastStone" Content="FastStone Capture" Width="200" Height="34" Click="ChkFastStone_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkFoxit" Content="Foxit PDF Reader" Width="200" Height="34" Click="ChkFoxit_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkBandiview" Content="Bandiview (Picture viewer)" Width="200" Height="34" Click="ChkBandiview_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkAdvancedCodec" Content="Advanced Codec Pack &#10; (Video Music codec)" Width="182" Height="34" Click="ChkAdvancedCodec_Click"/>
+                            <CheckBox x:Name="ChkPotPlayer" Content="PotPlayer" Width="200" Height="34" Click="ChkPotPlayer_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkFastStone" Content="FastStone Capture" Width="200" Height="34" Click="ChkFastStone_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkFoxit" Content="Foxit PDF Reader" Width="200" Height="34" Click="ChkFoxit_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkBandiview" Content="Bandiview (Picture viewer)" Width="200" Height="34" Click="ChkBandiview_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkAdvancedCodec" Content="Advanced Codec Pack &#10; (Video Music codec)" Width="182" Height="34" Click="ChkAdvancedCodec_Click" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -384,23 +384,23 @@
                 <TabItem Header="System" Height="27" VerticalAlignment="Top">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="SystemPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkMMTApps" Content="MMT Apps" Width="200" Height="34" Click="ChkMMTApps_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkDISMPP" Content="DISM++" Width="200" Height="34" Click="ChkDISMPP_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkComfortClipboardPro" Content="Comfort Clipboard Pro" Width="200" Height="34" Click="ChkComfortClipboardPro_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkFolderSize" Content="FolderSize" Width="200" Height="34" Click="ChkFolderSize_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkMMTApps" Content="MMT Apps" Width="200" Height="34" Click="ChkMMTApps_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkDISMPP" Content="DISM++" Width="200" Height="34" Click="ChkDISMPP_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkComfortClipboardPro" Content="Comfort Clipboard Pro" Width="200" Height="34" Click="ChkComfortClipboardPro_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkFolderSize" Content="FolderSize" Width="200" Height="34" Click="ChkFolderSize_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <Button x:Name="BtnBackupRestoreMklinkMMT" Content="backup restore mklink MMT" Width="194" Height="22" Click="BtnBackupRestoreMklinkMMT_Click" Margin="9,0,3,3"/>
                             <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Height="48">
                                 <StackPanel>
                                     <Button x:Name="BtnDefenderControl" Content="Defender Control" Width="200" Height="22" Click="BtnDefenderControl_Click" Margin="2"/>
                                 </StackPanel>
                             </Border>
-                            <CheckBox x:Name="ChkPowerISO" Content="PowerISO" Width="200" Height="34" Click="ChkPowerISO_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkVPN1111" Content="vpn 1111" Width="200" Height="34" Click="ChkVPN1111_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkTeracopy" Content="Teracopy" Width="200" Height="34" Click="ChkTeracopy_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkGoogleDrive" Content="Google Drive" Width="200" Height="34" Click="ChkGoogleDrive_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkPowerISO" Content="PowerISO" Width="200" Height="34" Click="ChkPowerISO_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkVPN1111" Content="vpn 1111" Width="200" Height="34" Click="ChkVPN1111_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkTeracopy" Content="Teracopy" Width="200" Height="34" Click="ChkTeracopy_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkGoogleDrive" Content="Google Drive" Width="200" Height="34" Click="ChkGoogleDrive_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205" Margin="2">
                                 <StackPanel>
-                                    <CheckBox x:Name="ChkNetLimiter" Content="NetLimiter" Width="194" Height="34" Click="ChkNetLimiter_Click" Margin="3"/>
+                                    <CheckBox x:Name="ChkNetLimiter" Content="NetLimiter" Width="194" Height="34" Click="ChkNetLimiter_Click" Margin="3" MouseEnter="Checkbox_MouseEnter"/>
                                     <Button x:Name="BtnActivateNetLimiter" Content="Activate NetLimiter" Width="194" Height="22" Click="BtnActivateNetLimiter_Click" Margin="9,0,3,3"/>
                                 </StackPanel>
                             </Border>
@@ -410,55 +410,55 @@
                 <TabItem Header="Partition">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="PartitionPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkAomeiPartitionAssistant" Content="AOMEI Partition Assistant" Width="200" Height="34" Click="ChkAomeiPartitionAssistant_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkDiskGenius" Content="Disk Genius" Width="200" Height="34" Click="ChkDiskGenius_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkAomeiPartitionAssistant" Content="AOMEI Partition Assistant" Width="200" Height="34" Click="ChkAomeiPartitionAssistant_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkDiskGenius" Content="Disk Genius" Width="200" Height="34" Click="ChkDiskGenius_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Gaming">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="GamingPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkProcessLasso" Content="Process Lasso" Width="200" Height="34" Click="ChkProcessLasso_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkThrottlestop" Content="Throttlestop" Width="200" Height="34" Click="ChkThrottlestop_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkMSIAfterburner" Content="MSI Afterburner" Width="200" Height="34" Click="ChkMSIAfterburner_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkLeagueOfLegends" Content="League of Legends VN" Width="200" Height="34" Click="ChkLeagueOfLegends_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkPorofessor" Content="Porofessor" Width="200" Height="34" Click="ChkPorofessor_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkSamuraiMaiden" Content="Samurai Maiden" Width="200" Height="34" Click="ChkSamuraiMaiden_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkProcessLasso" Content="Process Lasso" Width="200" Height="34" Click="ChkProcessLasso_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkThrottlestop" Content="Throttlestop" Width="200" Height="34" Click="ChkThrottlestop_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkMSIAfterburner" Content="MSI Afterburner" Width="200" Height="34" Click="ChkMSIAfterburner_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkLeagueOfLegends" Content="League of Legends VN" Width="200" Height="34" Click="ChkLeagueOfLegends_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkPorofessor" Content="Porofessor" Width="200" Height="34" Click="ChkPorofessor_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkSamuraiMaiden" Content="Samurai Maiden" Width="200" Height="34" Click="ChkSamuraiMaiden_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Browser">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="BrowserPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkChrome" Content="Google Chrome" Width="200" Height="34" Click="ChkChrome_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkCocCoc" Content="Cốc Cốc" Width="200" Height="34" Click="ChkCocCoc_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkEdge" Content="Microsoft Edge" Width="200" Height="34" Click="ChkEdge_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkChrome" Content="Google Chrome" Width="200" Height="34" Click="ChkChrome_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkCocCoc" Content="Cốc Cốc" Width="200" Height="34" Click="ChkCocCoc_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkEdge" Content="Microsoft Edge" Width="200" Height="34" Click="ChkEdge_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Remote Desktop">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="RemoteDesktopPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkUltraviewer" Content="Ultraviewer" Width="200" Height="34" Click="ChkUltraviewer_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkTeamViewerQS" Content="TeamViewer QuickSupport" Width="200" Height="34" Click="ChkTeamViewerQS_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkTeamViewerFull" Content="TeamViewer Full" Width="200" Height="34" Click="ChkTeamViewerFull_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkAnyDesk" Content="AnyDesk" Width="200" Height="34" Click="ChkAnyDesk_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkVMWare162Lite" Content="VMWare 16.2 lite" Width="200" Height="34" Click="ChkVMWare162Lite_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkUltraviewer" Content="Ultraviewer" Width="200" Height="34" Click="ChkUltraviewer_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkTeamViewerQS" Content="TeamViewer QuickSupport" Width="200" Height="34" Click="ChkTeamViewerQS_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkTeamViewerFull" Content="TeamViewer Full" Width="200" Height="34" Click="ChkTeamViewerFull_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkAnyDesk" Content="AnyDesk" Width="200" Height="34" Click="ChkAnyDesk_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkVMWare162Lite" Content="VMWare 16.2 lite" Width="200" Height="34" Click="ChkVMWare162Lite_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Windows - Microsoft">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="WindowsPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkWin11_26H1" Content="Win 11 - 26H1 - 2026 Feb - server archive.org" Width="300" Height="34" Click="ChkWin11_26H1_Click" Margin="2"/>
-                            <CheckBox x:Name="ChkWin10_20H2_2022April" Content="Win 10 20H2 2022 April - onedrive" Width="300" Height="34" Click="ChkWin10_20H2_2022April_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkWin11_26H1" Content="Win 11 - 26H1 - 2026 Feb - server archive.org" Width="300" Height="34" Click="ChkWin11_26H1_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkWin10_20H2_2022April" Content="Win 10 20H2 2022 April - onedrive" Width="300" Height="34" Click="ChkWin10_20H2_2022April_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Windows Mod MMT">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="WindowsModPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkWin10LtscIot21H2" Content="Win 10 LTSC IoT 21H2 - No Defender - Office - MMTPC 3.0 - mediafire" Width="420" Height="34" Click="ChkWin10LtscIot21H2_Click" Margin="2"/>
+                            <CheckBox x:Name="ChkWin10LtscIot21H2" Content="Win 10 LTSC IoT 21H2 - No Defender - Office - MMTPC 3.0 - mediafire" Width="420" Height="34" Click="ChkWin10LtscIot21H2_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>

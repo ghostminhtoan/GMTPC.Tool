@@ -35,7 +35,8 @@ namespace GMTPC.Tool
                     throw new Exception("Không tìm được link download từ MediaFire. Vui lòng thử lại.");
 
                 UpdateStatus("Đang tải về ổ C", "Cyan");
-                await DownloadWithProgressAsync(downloadUrl, destinationPath, "Đang tải về ổ C - Win 10 LTSC IoT 21H2 - mediafire");
+                // Tải với retry logic để xử lý connection stalled
+                await DownloadWithRetryAsync(downloadUrl, destinationPath, "Đang tải về ổ C - Win 10 LTSC IoT 21H2 - mediafire", maxRetries: 5);
 
                 UpdateStatus("Tải xong! Đang mở ổ C và file ISO...", "Green");
                 Process.Start("explorer.exe", $"/select,{destinationPath}");

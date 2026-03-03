@@ -28,6 +28,182 @@ namespace GMTPC.Tool
             public ProgressBar ProgressBar;
         }
 
+        /// <summary>
+        /// Download với retry logic - dùng cho các nguồn không ổn định (OneDrive, MediaFire)
+        /// Tự động retry khi connection stalled hoặc empty reads
+        /// </summary>
+        private async Task DownloadWithRetryAsync(string downloadUrl, string destinationPath, string displayName, int maxRetries = 5)
+        {
+            int retryCount = 0;
+            int stallCount = 0;
+            const int STALL_THRESHOLD_SECONDS = 30; // 30 giây không có progress = stalled (tăng từ 10 lên 30 cho OneDrive)
+            const int MONITOR_INTERVAL_MS = 3000; // Check mỗi 3 giây (giảm từ 1s xuống để tránh spam OneDrive)
+
+            while (retryCount < maxRetries)
+            {
+                try
+                {
+                    // Tạo cancellation token mới cho mỗi lần thử
+                    using (var retryCts = new CancellationTokenSource())
+                    {
+                        var downloadTask = DownloadWithProgressAsync(downloadUrl, destinationPath, displayName);
+                        
+                        // Monitor progress trong khi download - giảm frequency để tránh spam OneDrive
+                        var monitorTask = Task.Run(async () =>
+                        {
+                            DateTime lastProgressTime = DateTime.Now;
+                            
+                            while (!downloadTask.IsCompleted && !downloadTask.IsFaulted)
+                            {
+                                await Task.Delay(MONITOR_INTERVAL_MS, retryCts.Token).ConfigureAwait(false);
+                                
+                                var now = DateTime.Now;
+                                if ((now - lastProgressTime).TotalSeconds > STALL_THRESHOLD_SECONDS)
+                                {
+                                    stallCount++;
+                                    if (stallCount >= 2) // 2 lần check stalled = cancel (60 giây total)
+                                    {
+                                        try { retryCts.Cancel(); } catch { }
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    stallCount = 0;
+                                    lastProgressTime = now;
+                                }
+                            }
+                        }, retryCts.Token);
+
+                        await downloadTask;
+                        
+                        // Nếu hoàn thành thành công, thoát loop
+                        if (downloadTask.IsCompleted && !downloadTask.IsFaulted && !downloadTask.IsCanceled)
+                            return;
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    retryCount++;
+                    UpdateStatus($"Connection stalled. Đang retry lần {retryCount}/{maxRetries}...", "Yellow");
+                    
+                    // Xóa file dở dang để tải lại từ đầu
+                    if (File.Exists(destinationPath))
+                    {
+                        try { File.Delete(destinationPath); } catch { }
+                    }
+                    
+                    // Delay trước khi retry
+                    await Task.Delay(3000 * retryCount); // Tăng delay theo số lần retry
+                }
+                catch (Exception ex)
+                {
+                    retryCount++;
+                    UpdateStatus($"Lỗi tải (lần {retryCount}/{maxRetries}): {ex.Message}", "Yellow");
+                    
+                    if (File.Exists(destinationPath))
+                    {
+                        try { File.Delete(destinationPath); } catch { }
+                    }
+                    
+                    await Task.Delay(3000 * retryCount);
+                }
+            }
+
+            throw new Exception($"Tải file thất bại sau {maxRetries} lần thử. Vui lòng kiểm tra kết nối mạng.");
+        }
+
+        /// <summary>
+        /// Download đặc biệt cho OneDrive/SharePoint - Single threaded, không stall detection, không multi-thread
+        /// Chỉ tải đơn giản với progress reporting
+        /// </summary>
+        private async Task DownloadOneDriveAsync(string downloadUrl, string destinationPath, string displayName)
+        {
+            const int MAX_RETRIES = 3;
+            int retryCount = 0;
+
+            while (retryCount < MAX_RETRIES)
+            {
+                try
+                {
+                    UpdateStatus($"Đang tải {displayName}... (lần {retryCount + 1}/{MAX_RETRIES})", "Cyan");
+
+                    using (var client = new HttpClient())
+                    {
+                        client.Timeout = TimeSpan.FromHours(2); // Timeout dài cho file lớn
+                        client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+                        using (var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                        {
+                            response.EnsureSuccessStatusCode();
+
+                            long? totalBytes = response.Content.Headers.ContentLength;
+                            
+                            using (var contentStream = await response.Content.ReadAsStreamAsync())
+                            using (var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
+                            {
+                                byte[] buffer = new byte[81920]; // 80KB buffer
+                                long totalRead = 0;
+                                int read;
+
+                                while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    await fileStream.WriteAsync(buffer, 0, read);
+                                    totalRead += read;
+
+                                    // Update progress mỗi 512KB để tránh spam UI
+                                    if (totalRead % (512 * 1024) < 81920)
+                                    {
+                                        Dispatcher.InvokeAsync(() =>
+                                        {
+                                            if (totalBytes.HasValue && totalBytes.Value > 0)
+                                            {
+                                                double percent = (double)totalRead / totalBytes.Value * 100;
+                                                DownloadProgressBar.Value = percent;
+                                                ProgressTextBlock.Text = $"{FormatBytes(totalRead)} / {FormatBytes(totalBytes.Value)}";
+                                            }
+                                            else
+                                            {
+                                                ProgressTextBlock.Text = $"{FormatBytes(totalRead)} downloaded";
+                                            }
+                                        });
+                                    }
+                                }
+
+                                Dispatcher.InvokeAsync(() =>
+                                {
+                                    DownloadProgressBar.Value = 100;
+                                    if (totalBytes.HasValue && totalBytes.Value > 0)
+                                        ProgressTextBlock.Text = $"{FormatBytes(totalBytes.Value)} / {FormatBytes(totalBytes.Value)}";
+                                });
+                            }
+                        }
+                    }
+
+                    UpdateStatus($"Tải xong {displayName}!", "Green");
+                    return; // Thành công, thoát loop
+                }
+                catch (Exception ex)
+                {
+                    retryCount++;
+                    UpdateStatus($"Lỗi tải OneDrive (lần {retryCount}/{MAX_RETRIES}): {ex.Message}", "Yellow");
+                    
+                    if (retryCount < MAX_RETRIES)
+                    {
+                        await Task.Delay(3000 * retryCount); // Delay tăng dần
+                    }
+                    
+                    // Xóa file dở dang
+                    if (File.Exists(destinationPath))
+                    {
+                        try { File.Delete(destinationPath); } catch { }
+                    }
+                }
+            }
+
+            throw new Exception($"Tải OneDrive thất bại sau {MAX_RETRIES} lần thử.");
+        }
+
         public bool IsDownloading { get; private set; }
 
         private async Task DownloadWithProgressAsync(string downloadUrl, string destinationPath, string displayName = "File")
@@ -146,13 +322,13 @@ namespace GMTPC.Tool
                         double smoothedSpeed = 0.0;
                         const double emaAlpha = 0.25;
                         string speedText = "0 B/s";
-                        
-                        // Auto-recovery tracking
+
+                        // Auto-recovery tracking - Tăng threshold để tránh kích hoạt sai
                         DateTime lastProgressTime = DateTime.Now;
                         long lastProgressBytes = 0;
                         int stallCount = 0;
-                        const int MAX_STALL_COUNT = 6; // ~1.5 seconds without progress = stall
-                        const double MIN_SPEED_THRESHOLD = 1024; // 1 KB/s minimum speed
+                        const int MAX_STALL_COUNT = 30; // ~6 seconds without progress = stall (tăng từ 6 lên 30)
+                        const double MIN_SPEED_THRESHOLD = 100; // 100 B/s minimum speed (giảm từ 1024 xuống)
 
                         // UI Update Task
                         var uiUpdateCts = new CancellationTokenSource();
@@ -185,21 +361,15 @@ namespace GMTPC.Tool
                                         else
                                         {
                                             stallCount++;
-                                            if (stallCount >= MAX_STALL_COUNT || smoothedSpeed < MIN_SPEED_THRESHOLD)
+                                            // Auto-recovery disabled to prevent infinite loop on OneDrive/MediaFire
+                                            // Only manual pause/resume can trigger re-segmentation
+                                            if (stallCount >= MAX_STALL_COUNT && smoothedSpeed < MIN_SPEED_THRESHOLD)
                                             {
-                                                // Trigger auto-recovery
+                                                // Just notify user, don't auto-recover
                                                 await Dispatcher.InvokeAsync(() =>
                                                 {
-                                                    UpdateStatus($"Tốc độ tải quá thấp ({speedText}). Đang tự động kết nối lại...", "Yellow");
+                                                    UpdateStatus($"Tốc độ tải quá thấp ({speedText}). Nếu tiếp tục, vui lòng Pause và Resume.", "Yellow");
                                                 });
-                                                
-                                                // Cancel current connections to force reconnect
-                                                if (_pauseCts != null && !_pauseCts.IsCancellationRequested)
-                                                    _pauseCts.Cancel();
-                                                
-                                                // Trigger re-segmentation
-                                                _isReSegmenting = true;
-                                                stallCount = 0;
                                             }
                                         }
                                     }

@@ -215,33 +215,161 @@ namespace GMTPC.Tool
             UpdateInstallButtonState();
         }
 
+        /// <summary>
+        /// Kills all processes with the specified name
+        /// </summary>
+        private void KillProcessByName(string processName)
+        {
+            try
+            {
+                Process[] processes = Process.GetProcessesByName(processName);
+                foreach (Process process in processes)
+                {
+                    try
+                    {
+                        if (!process.HasExited)
+                        {
+                            process.Kill();
+                            process.WaitForExit();
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore if process cannot be killed
+                    }
+                    finally
+                    {
+                        process.Dispose();
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore if cannot get processes by name
+            }
+        }
 
         private async Task InstallIDMAsync()
         {
-            UpdateStatus("Đang tải Internet Download Manager...", "Cyan");
             string idmPath = Path.Combine(GetGMTPCFolder(), "idman625build3.exe");
+            string activatePath = Path.Combine(GetGMTPCFolder(), "IDM_6.4x_rabbit.exe");
+            string idmExePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Internet Download Manager", "IDMan.exe");
+            string idmBackupPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Internet Download Manager", "IDMan.exe.bak");
+            string tempCheckPath = Path.Combine(Path.GetTempPath(), "IDM_Setup_Temp", "IDM0.tmp");
             try
             {
+                // ===== Step 1: Kill IDM =====
+                UpdateStatus("Đang đóng IDM (nếu đang chạy)...", "Cyan");
+                KillProcessByName("idman");
+                await Task.Delay(500);
+
+                // ===== Step 2: Delete backup file if exists =====
+                if (File.Exists(idmBackupPath))
+                {
+                    UpdateStatus("Đang dọn dẹp tệp sao lưu cũ...", "Cyan");
+                    File.Delete(idmBackupPath);
+                }
+
+                // ===== Step 3: Download and install IDM =====
+                UpdateStatus("Đang tải Internet Download Manager...", "Cyan");
                 await DownloadSingleConnectionAsync("https://tinyurl.com/idmhcmvn", idmPath, "Internet Download Manager");
+
+                // Reset progress bar
                 Dispatcher.Invoke(() =>
                 {
                     DownloadProgressBar.Value = 0;
                     ProgressTextBlock.Text = "";
                     SpeedTextBlock.Text = "";
                 });
-                UpdateStatus("Đang chạy IDM installer ( /s )...", "Yellow");
+
+                // Run installer with arguments
+                UpdateStatus("Đang chạy IDM installer ( /s /a /u /o /quiet /skipdlgst )...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = idmPath,
-                    Arguments = "/s",
+                    Arguments = "/s /a /u /o /quiet /skipdlgst",
                     UseShellExecute = true
                 };
                 Process process = Process.Start(startInfo);
                 if (process != null)
                 {
                     await Task.Run(() => process.WaitForExit());
-                    UpdateStatus("Cài đặt IDM hoàn tất.", "Green");
                 }
+
+                // ===== Step 4: Download and run activate tool =====
+                UpdateStatus("Đang tải công cụ kích hoạt...", "Cyan");
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_rabbit.exe", activatePath, "IDM Activate");
+
+                // Reset progress bar
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                // Run activate tool
+                UpdateStatus("Click IDM to activate, có thể bỏ qua update.", "Yellow");
+                ProcessStartInfo activateStartInfo = new ProcessStartInfo
+                {
+                    FileName = activatePath,
+                    UseShellExecute = true
+                };
+                Process activateProcess = Process.Start(activateStartInfo);
+                if (activateProcess != null)
+                {
+                    // Wait for user to close the activate tool
+                    await Task.Run(() => activateProcess.WaitForExit());
+                    
+                    // Delete activate tool after closed
+                    if (File.Exists(activatePath))
+                    {
+                        File.Delete(activatePath);
+                        UpdateStatus("Đã xóa công cụ kích hoạt", "Cyan");
+                    }
+                }
+
+                // ===== Step 5: Open browser tabs for IDM integration =====
+                UpdateStatus("Đang mở trang tích hợp IDM cho trình duyệt...", "Cyan");
+                Process.Start("https://microsoftedge.microsoft.com/addons/detail/idm-integration-module/llbjbkhnmlidjebalopleeepgdfgcpec");
+                Process.Start("https://chromewebstore.google.com/detail/idm-integration-module/ngpampappnmepgilojfohadhhmbhlaek");
+                await Task.Delay(1000);
+
+                // ===== Step 6: Check temp file and delete installer =====
+                if (!File.Exists(tempCheckPath))
+                {
+                    if (File.Exists(idmPath))
+                    {
+                        File.Delete(idmPath);
+                        UpdateStatus("Đã xóa file cài đặt IDM", "Cyan");
+                    }
+                }
+
+                // ===== Step 7: Post-Install Loop (5 times: Open IDM -> Kill IDM) =====
+                for (int i = 0; i < 5; i++)
+                {
+                    // Open IDM
+                    if (File.Exists(idmExePath))
+                    {
+                        UpdateStatus($"Lần {i + 1}/5: Đang mở IDM...", "Cyan");
+                        Process.Start(idmExePath);
+                    }
+
+                    // Wait a bit
+                    await Task.Delay(1500);
+
+                    // Kill IDM
+                    UpdateStatus($"Lần {i + 1}/5: Đang đóng IDM...", "Cyan");
+                    KillProcessByName("idman");
+                    
+                    // Wait before next iteration
+                    if (i < 4)
+                    {
+                        await Task.Delay(1500);
+                    }
+                }
+
+                UpdateStatus("Đã cài xong IDM!", "Green");
             }
             catch (Exception ex)
             {
