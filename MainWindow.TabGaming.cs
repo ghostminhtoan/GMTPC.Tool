@@ -20,6 +20,88 @@ namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
+        private async Task InstallMSIAfterburnerAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang tải MSI Afterburner...", "Cyan");
+                string msiAfterburnerPath = Path.Combine(GetGMTPCFolder(), "MSIAfterburner.exe");
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/MSI.Afterburner.exe", msiAfterburnerPath, "MSI Afterburner");
+
+                UpdateStatus("Đang cài đặt MSI Afterburner...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = msiAfterburnerPath,
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("Cài đặt MSI Afterburner hoàn tất!", "Green");
+                }
+
+                if (File.Exists(msiAfterburnerPath))
+                {
+                    File.Delete(msiAfterburnerPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài đặt MSI Afterburner: {ex.Message}", "Red");
+            }
+        }
+
+        private async Task InstallHibitUninstallerAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang tải Revo Uninstaller...", "Cyan");
+                string RevoPath = Path.Combine(GetGMTPCFolder(), "RevoUninstaller-setup.exe");
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Revo.Uninstaller.Pro.exe", RevoPath, "Revo Uninstaller Installer");
+
+                // Reset progress UI after download
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ConnectionTraceGrid.Children.Clear();
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                UpdateStatus("Đang chạy Revo Uninstaller với lệnh /S /I...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = RevoPath,
+                    Arguments = "/S /I",
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    if (process.ExitCode == 0)
+                    {
+                        UpdateStatus("Cài đặt Revo Uninstaller thành công!", "Green");
+                    }
+                    else
+                    {
+                        UpdateStatus($"Cài đặt Revo Uninstaller thất bại. Mã lỗi: {process.ExitCode}", "Red");
+                    }
+                }
+
+                if (File.Exists(RevoPath))
+                {
+                    File.Delete(RevoPath);
+                    UpdateStatus("Đã xóa file Revo Uninstaller installer tạm thời", "Cyan");
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi tải hoặc cài đặt Revo Uninstaller: {ex.Message}", "Red");
+            }
+        }
 
         private void ChkProcessLasso_Click(object sender, RoutedEventArgs e)
         {

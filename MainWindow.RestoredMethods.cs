@@ -1,14 +1,111 @@
+// =======================================================================
+// MainWindow.RestoredMethods.cs
+// Chức năng: Hàm bổ trợ, phương thức dùng chung cho toàn ứng dụng
+//            (GetBrush, GetColor, GetGMTPCFolder, Defender exclusion...)
+// Cập nhật gần đây:
+//   - 2026-03-05: Thêm GetBrush, GetColor, GetGMTPCFolder, AddDefenderExclusion,
+//                 RemoveDefenderExclusion, StartAutomatedProcessAsync từ xaml.cs
+//                 theo AI_WORKFLOW.md
+// =======================================================================
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
+        // ===================== Color / Brush Helpers =====================
+        private SolidColorBrush GetBrush(string colorName)
+        {
+            Color color = GetColor(colorName);
+            return new SolidColorBrush(color);
+        }
+
+        private Color GetColor(string colorName)
+        {
+            switch (colorName.ToLower())
+            {
+                case "red":     return Colors.Red;
+                case "green":   return Colors.LimeGreen;
+                case "yellow":  return Colors.Yellow;
+                case "cyan":    return Colors.Cyan;
+                case "orange":  return Colors.Orange;
+                case "gray":    return Colors.Gray;
+                default:        return Colors.Yellow;
+            }
+        }
+
+        // ===================== GMTPC Folder Helper =====================
+        private string GetGMTPCFolder()
+        {
+            string tempPath = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "GMTPC", "GMTPC Tools");
+
+            if (!Directory.Exists(tempPath))
+                Directory.CreateDirectory(tempPath);
+
+            return tempPath;
+        }
+
+        // ===================== Windows Defender Exclusion =====================
+        private void AddDefenderExclusion()
+        {
+            try
+            {
+                string exclusionPath = GetGMTPCFolder();
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"-Command \"Add-MpPreference -ExclusionPath '{exclusionPath}' -Force\"",
+                    UseShellExecute = true,
+                    Verb = "runas",
+                    CreateNoWindow = true
+                };
+                Process process = Process.Start(startInfo);
+                if (process != null) process.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi thêm exclusion cho Windows Defender: {ex.Message}", "Red");
+            }
+        }
+
+        private void RemoveDefenderExclusion()
+        {
+            try
+            {
+                string exclusionPath = GetGMTPCFolder();
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"-Command \"Remove-MpPreference -ExclusionPath '{exclusionPath}' -Force\"",
+                    UseShellExecute = true,
+                    Verb = "runas",
+                    CreateNoWindow = true
+                };
+                Process process = Process.Start(startInfo);
+                if (process != null) process.WaitForExit();
+
+                if (Directory.Exists(exclusionPath))
+                    Directory.Delete(exclusionPath, true);
+            }
+            catch { }
+        }
+
+        // ===================== Automated Process =====================
+        private async Task StartAutomatedProcessAsync()
+        {
+            await Task.Delay(500, _cancellationTokenSource?.Token ?? CancellationToken.None);
+            await RunAutomatedProcessAsync();
+        }
+
+        private void ScrollToBottom() { /* Không dùng */ }
         private void ActivateWindows()
         {
             UpdateStatus("Đang kích hoạt Windows...", "Cyan");

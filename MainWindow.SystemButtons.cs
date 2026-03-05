@@ -1,4 +1,13 @@
-﻿using System;
+﻿// =======================================================================
+// MainWindow.SystemButtons.cs
+// Chức năng: Logic các nút điều khiển chung: Select All, Select None,
+//            SelectNoneAllTabs, Install, Pause, Resume, Refresh Color,
+//            BtnDownloadPage, DPI controls
+// Cập nhật gần đây:
+//   - 2026-03-05: Thêm currentDPIScale, DPI_STEPS, ApplyDPIScale từ xaml.cs
+//                 theo AI_WORKFLOW.md
+// =======================================================================
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,11 +24,83 @@ using System.Windows.Input;
 using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media.Animation;
 
 namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
+        // ===================== DPI Scale Fields =====================
+        private double currentDPIScale = 1.0;
+        private readonly int[] DPI_STEPS = new int[] { 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 200 };
+
+        private void ApplyDPIScale()
+        {
+            ScaleTransform scaleTransform = new ScaleTransform(currentDPIScale, currentDPIScale);
+            MainGrid.LayoutTransform = scaleTransform;
+
+            bool isPortrait = SystemParameters.PrimaryScreenWidth < SystemParameters.PrimaryScreenHeight;
+            double designMaxWidth  = isPortrait ? 580  : 1000;
+            double designMaxHeight = isPortrait ? 950  : 750;
+
+            var workArea = SystemParameters.WorkArea;
+            this.MaxHeight = Math.Min(designMaxHeight * currentDPIScale, workArea.Height);
+            this.MaxWidth  = Math.Min(designMaxWidth  * currentDPIScale, workArea.Width);
+
+            MainGrid.InvalidateMeasure();
+            this.InvalidateMeasure();
+
+            this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Render, new Action(() =>
+            {
+                this.SizeToContent = SizeToContent.Manual;
+                this.Width  = double.NaN;
+                this.Height = double.NaN;
+                this.SizeToContent = SizeToContent.WidthAndHeight;
+            }));
+
+            this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, new Action(() =>
+            {
+                const double margin = 12.0;
+                try
+                {
+                    double maxAllowedHeight = Math.Max(0, workArea.Height - margin);
+                    double maxAllowedWidth  = Math.Max(0, workArea.Width  - margin);
+
+                    if (this.ActualHeight > maxAllowedHeight) this.Height = maxAllowedHeight;
+                    if (this.ActualWidth  > maxAllowedWidth)  this.Width  = maxAllowedWidth;
+
+                    if (this.Top  < workArea.Top  + margin) this.Top  = workArea.Top  + margin;
+                    if (this.Left < workArea.Left + margin) this.Left = workArea.Left + margin;
+                    if (this.Top  + this.Height > workArea.Bottom - margin) this.Top  = workArea.Bottom - margin - this.Height;
+                    if (this.Left + this.Width  > workArea.Right  - margin) this.Left = workArea.Right  - margin - this.Width;
+                }
+                catch { }
+
+                try { this.SizeToContent = SizeToContent.Manual; } catch { }
+            }));
+
+            int dpiPercent = (int)(currentDPIScale * 100);
+            string dpiText = $"{dpiPercent}%";
+
+            ComboBoxItem selectedItem = CboDPIValue.SelectedItem as ComboBoxItem;
+            string currentSelection  = selectedItem?.Content.ToString() ?? "";
+
+            if (currentSelection != dpiText)
+            {
+                foreach (ComboBoxItem item in CboDPIValue.Items)
+                {
+                    if (item.Content.ToString() == dpiText)
+                    {
+                        CboDPIValue.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
+
+            UpdateStatus($"Đã đặt tỷ lệ DPI: {dpiText}", "Green");
+        }
+
+        private void ResetDPIButtonStates() { /* Kept for compatibility */ }
         private void BtnDPIMinus_Click(object sender, RoutedEventArgs e)
         {
             // Find current index in DPI_STEPS
@@ -449,7 +530,7 @@ namespace GMTPC.Tool
             if (ChkDiskGenius.IsChecked == true) tasks.Add((InstallDiskGeniusAsync, ChkDiskGenius));
             if (ChkProcessLasso.IsChecked == true) tasks.Add((InstallProcessLassoAsync, ChkProcessLasso));
             if (ChkThrottlestop.IsChecked == true) tasks.Add((InstallThrottlestopAsync, ChkThrottlestop));
-            if (ChkMSIAfterburner.IsChecked == true) tasks.Add((InstallMSIAfterbumerAsync, ChkMSIAfterburner));
+            if (ChkMSIAfterburner.IsChecked == true) tasks.Add((InstallMSIAfterburnerAsync, ChkMSIAfterburner));
             if (ChkLeagueOfLegends.IsChecked == true) tasks.Add((InstallLeagueOfLegendsVNAsync, ChkLeagueOfLegends));
             if (ChkPorofessor.IsChecked == true) tasks.Add((InstallPorofessorAsync, ChkPorofessor));
             if (ChkSamuraiMaiden.IsChecked == true) tasks.Add((InstallSamuraiMaidenAsync, ChkSamuraiMaiden));
