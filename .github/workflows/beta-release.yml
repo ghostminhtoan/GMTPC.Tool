@@ -1,4 +1,4 @@
-name: Beta Release
+name: Build & Beta Release
 
 on:
   push:
@@ -9,58 +9,69 @@ on:
 jobs:
   build-and-release:
     runs-on: windows-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET Framework
+      - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Restore dependencies
-        run: dotnet restore "MMT Tools.sln"
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
 
-      - name: Build Release
-        run: dotnet build "MMT Tools.sln" --configuration Release --no-restore
+      - name: Restore NuGet packages
+        run: nuget restore "MMT Tools.sln"
 
-      - name: Publish Release
+      - name: Build Release (x64)
         run: |
-          dotnet publish "MMT Tools.csproj" `
-            --configuration Release `
-            --output "publish" `
-            --runtime win-x64 `
-            --self-contained false `
-            -p:PublishSingleFile=true `
-            -p:EnableCompressionInSingleFile=true
+          msbuild "MMT Tools.sln" `
+            /p:Configuration=Release `
+            /p:Platform=x64 `
+            /t:Rebuild `
+            /v:minimal
 
-      - name: Determine next beta version
-        id: version
+      - name: Verify output exists
         shell: pwsh
         run: |
-          $existing = git tag -l "v*beta*" | Sort-Object -Descending
-          if ($existing.Count -eq 0) {
-            $next = "v0.1.0-beta.1"
-          } else {
-            $last = $existing[0]
-            if ($last -match "v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)-beta\.(?<num>\d+)") {
-              $next = "v$($Matches['major']).$($Matches['minor']).$($Matches['patch'])-beta.$([int]$Matches['num'] + 1)"
-            } else {
-              $next = "v0.1.0-beta.1"
+          $exe = "bin\x64\Release\GMTPC.Tool.exe"
+          if (-not (Test-Path $exe)) {
+            # Try alternate output path
+            $alt = Get-ChildItem -Recurse -Filter "GMTPC.Tool.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($null -eq $alt) {
+              Write-Error "Build output GMTPC.Tool.exe not found anywhere."
+              exit 1
             }
+            Write-Host "Found at: $($alt.FullName)"
+          } else {
+            Write-Host "Build output verified: $exe"
           }
-          Write-Host "Next beta version: $next"
-          echo "beta_version=$next" >> $env:GITHUB_OUTPUT
 
-      - name: Create GitHub Release
+      - name: Build timestamp
+        id: meta
+        shell: pwsh
+        run: |
+          $ts  = Get-Date -Format "yyyy-MM-dd HH:mm UTC"
+          $msg = "${{ github.event.head_commit.message }}" -replace "`n"," "
+          echo "ts=$ts"   >> $env:GITHUB_OUTPUT
+          echo "msg=$msg" >> $env:GITHUB_OUTPUT
+
+      - name: Upload to fixed beta release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.beta_version }}
-          name: "Beta Release ${{ steps.version.outputs.beta_version }}"
+          tag_name: beta
+          name: "🔥 Beta (Latest Build)"
+          body: |
+            **Build tự động** — ${{ steps.meta.outputs.ts }}
+
+            > **Commit:** `${{ github.sha }}`
+            > **Message:** ${{ steps.meta.outputs.msg }}
+
+            ⚠️ Đây là bản beta tự động. Không đảm bảo ổn định.
           draft: false
           prerelease: true
+          make_latest: false
           files: |
-            publish/GMTPC.Tool.exe
-            publish/GMTPC.Tool.dll
-            publish/App.config
-            publish/HtmlAgilityPack.dll
+            bin/x64/Release/GMTPC.Tool.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

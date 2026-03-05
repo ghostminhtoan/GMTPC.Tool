@@ -75,7 +75,13 @@ Sau khi code:
 2. Nếu có **Error/Warning** → Tự động phân tích và **Fix Bug**
 3. Lặp lại cho đến khi **Build thành công 100%**
 
-### Bước 5: Checkpoint
+### Bước 5: Release Beta
+Sau khi Build thành công:
+- **Push lên `main`/`master`** → GitHub Actions tự động build và upload lên:
+  `https://github.com/ghostminhtoan/GMTPC.Tool/releases/tag/beta`
+- Workflow file: `.github/workflows/beta-release.yml`
+
+### Bước 6: Checkpoint
 Sau khi hoàn tất và Build thành công:
 - Thông báo: **"✅ Checkpoint đã lưu"**
 - Tóm tắt ngắn gọn những gì đã làm
@@ -191,6 +197,7 @@ Dispatcher.Invoke(() =>
 - [ ] Checkbox đã đăng ký với `SystemButtons.cs` (Select All, Install, etc.)
 - [ ] Progress reporting đã kết nối với `SystemBar.cs`
 - [ ] **Build thành công 100%** (không Error/Warning)
+- [ ] Push lên `main`/`master` → **Beta release tự động upload**
 - [ ] Đã thông báo **Checkpoint**
 
 ---
