@@ -1,0 +1,66 @@
+name: Beta Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Framework
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore dependencies
+        run: dotnet restore "MMT Tools.sln"
+
+      - name: Build Release
+        run: dotnet build "MMT Tools.sln" --configuration Release --no-restore
+
+      - name: Publish Release
+        run: |
+          dotnet publish "MMT Tools.csproj" `
+            --configuration Release `
+            --output "publish" `
+            --runtime win-x64 `
+            --self-contained false `
+            -p:PublishSingleFile=true `
+            -p:EnableCompressionInSingleFile=true
+
+      - name: Determine next beta version
+        id: version
+        shell: pwsh
+        run: |
+          $existing = git tag -l "v*beta*" | Sort-Object -Descending
+          if ($existing.Count -eq 0) {
+            $next = "v0.1.0-beta.1"
+          } else {
+            $last = $existing[0]
+            if ($last -match "v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)-beta\.(?<num>\d+)") {
+              $next = "v$($Matches['major']).$($Matches['minor']).$($Matches['patch'])-beta.$([int]$Matches['num'] + 1)"
+            } else {
+              $next = "v0.1.0-beta.1"
+            }
+          }
+          Write-Host "Next beta version: $next"
+          echo "beta_version=$next" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.beta_version }}
+          name: "Beta Release ${{ steps.version.outputs.beta_version }}"
+          draft: false
+          prerelease: true
+          files: |
+            publish/GMTPC.Tool.exe
+            publish/GMTPC.Tool.dll
+            publish/App.config
+            publish/HtmlAgilityPack.dll
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
