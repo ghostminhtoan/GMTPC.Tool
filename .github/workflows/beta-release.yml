@@ -23,18 +23,17 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore "MMT Tools.sln"
 
-      - name: Build Release (x64)
+      - name: Build Release
         run: |
           msbuild "MMT Tools.sln" `
             /p:Configuration=Release `
-            /p:Platform=x64 `
             /t:Rebuild `
             /v:minimal
 
       - name: Verify output exists
         shell: pwsh
         run: |
-          $exe = "bin\x64\Release\GMTPC.Tool.exe"
+          $exe = "bin\Release\net48\GMTPC.Tool.exe"
           if (-not (Test-Path $exe)) {
             # Try alternate output path
             $alt = Get-ChildItem -Recurse -Filter "GMTPC.Tool.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -72,6 +71,6 @@ jobs:
           prerelease: true
           make_latest: false
           files: |
-            bin/x64/Release/GMTPC.Tool.exe
+            bin/Release/net48/GMTPC.Tool.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
