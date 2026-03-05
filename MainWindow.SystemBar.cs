@@ -28,7 +28,6 @@ namespace GMTPC.Tool
         private CancellationTokenSource _pauseCts;
         private System.Threading.ManualResetEventSlim _pauseEvent = new System.Threading.ManualResetEventSlim(true);
         private List<DownloadRange> _remainingRanges = new List<DownloadRange>();
-        private bool _isReSegmenting = false;
 
         private bool _isInstalling = false;
         private string _installationStatus = "";
@@ -88,11 +87,7 @@ namespace GMTPC.Tool
             public long Length => End - Start + 1;
         }
 
-        private class WorkerData
-        {
-            public int Index;
-            public ProgressBar ProgressBar;
-        }
+
 
         /// <summary>
         /// Download với retry logic - dùng cho các nguồn không ổn định (OneDrive, MediaFire)
@@ -601,7 +596,6 @@ namespace GMTPC.Tool
             {
                 if (int.TryParse(item.Content.ToString(), out int newCount))
                 {
-                    _isReSegmenting = true; // Luôn đánh dấu để khi Resume (hoặc Auto-restart) sẽ có delay 3s
 
                     if (_pauseEvent != null && _pauseEvent.IsSet)
                     {
