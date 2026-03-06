@@ -150,6 +150,196 @@ namespace GMTPC.Tool
             await InstallBIDAsync();
         }
 
+        private async Task InstallWinRARAsync()
+        {
+            UpdateStatus("Đang tải WinRAR...", "Cyan");
+            string winrarPath = Path.Combine(GetGMTPCFolder(), "winrar-x64-621.exe");
+            try
+            {
+                await DownloadWithProgressAsync("https://www.rarlab.com/rar/winrar-x64-621.exe", winrarPath, "WinRAR");
+                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+                UpdateStatus("Đang chạy WinRAR installer ( /S )...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = winrarPath, Arguments = "/S", UseShellExecute = true };
+                Process process = Process.Start(startInfo);
+                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Cài đặt WinRAR hoàn tất.", "Green"); }
+                if (File.Exists(winrarPath)) File.Delete(winrarPath);
+            }
+            catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
+        }
+
+        private async Task InstallBIDAsync()
+        {
+            UpdateStatus("Đang tải Bulk Image Downloader...", "Cyan");
+            string bidPath = Path.Combine(GetGMTPCFolder(), "bid_6_36_setup.exe");
+            try
+            {
+                await DownloadWithProgressAsync("https://bulkimagedownloader.com/files/bid_6_36_setup.exe", bidPath, "Bulk Image Downloader");
+                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+                UpdateStatus("Đang chạy BID installer ( /S )...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = bidPath, Arguments = "/S", UseShellExecute = true };
+                Process process = Process.Start(startInfo);
+                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Cài đặt BID hoàn tất.", "Green"); }
+                if (File.Exists(bidPath)) File.Delete(bidPath);
+            }
+            catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
+        }
+
+        private async Task InstallIDMAsync()
+        {
+            string idmPath = Path.Combine(GetGMTPCFolder(), "idman625build3.exe");
+            string activatePath = Path.Combine(GetGMTPCFolder(), "IDM_6.4x_rabbit.exe");
+            string idmExePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Internet Download Manager", "IDMan.exe");
+            string idmBackupPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Internet Download Manager", "IDMan.exe.bak");
+            string tempCheckPath = Path.Combine(Path.GetTempPath(), "IDM_Setup_Temp", "IDM0.tmp");
+            try
+            {
+                // ===== Step 1: Kill IDM =====
+                UpdateStatus("Đang đóng IDM (nếu đang chạy)...", "Cyan");
+                KillProcessByName("idman");
+                await Task.Delay(500);
+
+                // ===== Step 2: Delete backup file if exists =====
+                if (File.Exists(idmBackupPath))
+                {
+                    UpdateStatus("Đang dọn dẹp tệp sao lưu cũ...", "Cyan");
+                    File.Delete(idmBackupPath);
+                }
+
+                // ===== Step 3: Download and install IDM =====
+                UpdateStatus("Đang tải Internet Download Manager...", "Cyan");
+                await DownloadSingleConnectionAsync("https://tinyurl.com/idmhcmvn", idmPath, "Internet Download Manager");
+
+                // Reset progress bar
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                // Run installer with arguments
+                UpdateStatus("Đang chạy IDM installer ( /s /a /u /o /quiet /skipdlgst )...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = idmPath,
+                    Arguments = "/s /a /u /o /quiet /skipdlgst",
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                }
+
+                // ===== Step 4: Download and run activate tool =====
+                UpdateStatus("Đang tải công cụ kích hoạt...", "Cyan");
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_rabbit.exe", activatePath, "IDM Activate");
+
+                // Reset progress bar
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                // Run activate tool
+                UpdateStatus("Click IDM to activate, có thể bỏ qua update.", "Yellow");
+                ProcessStartInfo activateStartInfo = new ProcessStartInfo
+                {
+                    FileName = activatePath,
+                    UseShellExecute = true
+                };
+                Process activateProcess = Process.Start(activateStartInfo);
+                if (activateProcess != null)
+                {
+                    await Task.Run(() => activateProcess.WaitForExit());
+
+                    if (File.Exists(activatePath))
+                    {
+                        File.Delete(activatePath);
+                        UpdateStatus("Đã xóa công cụ kích hoạt", "Cyan");
+                    }
+                }
+
+                // ===== Step 5: Open browser tabs for IDM integration =====
+                UpdateStatus("Đang mở trang tích hợp IDM cho trình duyệt...", "Cyan");
+                Process.Start("https://microsoftedge.microsoft.com/addons/detail/idm-integration-module/llbjbkhnmlidjebalopleeepgdfgcpec");
+                Process.Start("https://chromewebstore.google.com/detail/idm-integration-module/ngpampappnmepgilojfohadhhmbhlaek");
+                await Task.Delay(1000);
+
+                // ===== Step 6: Check temp file and delete installer =====
+                if (!File.Exists(tempCheckPath))
+                {
+                    if (File.Exists(idmPath))
+                    {
+                        File.Delete(idmPath);
+                        UpdateStatus("Đã xóa file cài đặt IDM", "Cyan");
+                    }
+                }
+
+                // ===== Step 7: Post-Install Loop (5 times: Open IDM -> Kill IDM) =====
+                for (int i = 0; i < 5; i++)
+                {
+                    if (File.Exists(idmExePath))
+                    {
+                        UpdateStatus($"Lần {i + 1}/5: Đang mở IDM...", "Cyan");
+                        Process.Start(idmExePath);
+                    }
+
+                    await Task.Delay(1500);
+
+                    UpdateStatus($"Lần {i + 1}/5: Đang đóng IDM...", "Cyan");
+                    KillProcessByName("idman");
+
+                    if (i < 4)
+                    {
+                        await Task.Delay(1500);
+                    }
+                }
+
+                UpdateStatus("Đã cài xong IDM!", "Green");
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài IDM: {ex.Message}", "Red");
+            }
+        }
+
+        /// <summary>
+        /// Kills all processes with the specified name
+        /// </summary>
+        private void KillProcessByName(string processName)
+        {
+            try
+            {
+                Process[] processes = Process.GetProcessesByName(processName);
+                foreach (Process process in processes)
+                {
+                    try
+                    {
+                        if (!process.HasExited)
+                        {
+                            process.Kill();
+                            process.WaitForExit();
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore if process cannot be killed
+                    }
+                    finally
+                    {
+                        process.Dispose();
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore if cannot get processes by name
+            }
+        }
+
         private async Task InstallVcredistAsync()
         {
             UpdateStatus("Đang tải Vcredist...", "Cyan");
@@ -303,6 +493,89 @@ namespace GMTPC.Tool
             if (ChkNotepadPP.IsChecked == true) UpdateStatus("Đã chọn: Notepad++", "Green");
             else UpdateStatus("Đã hủy chọn: Notepad++", "Yellow");
             UpdateInstallButtonState();
+        }
+
+        // ===================== TabPopular — Button Click Handlers =====================
+        private async void BtnDirectX_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateStatus("Đang tải DirectX...", "Cyan");
+            string directXPath = Path.Combine(GetGMTPCFolder(), "directx_installer.exe");
+            try
+            {
+                await DownloadWithProgressAsync("https://download.microsoft.com/download/1/7/1/1718CCC4-6315-4D8E-9543-8E28A4E99C9C/dxwebsetup.exe", directXPath, "DirectX Installer");
+                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+                UpdateStatus("Đang chạy DirectX installer với lệnh /q...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = directXPath, Arguments = "/q", UseShellExecute = true };
+                Process process = Process.Start(startInfo);
+                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "Cài đặt DirectX thành công!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
+                if (File.Exists(directXPath)) File.Delete(directXPath);
+            }
+            catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
+        }
+
+        private async void BtnJava_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateStatus("Đang tải Java...", "Cyan");
+            string javaInstallerPath = Path.Combine(GetGMTPCFolder(), "java_installer.exe");
+            try
+            {
+                await DownloadWithProgressAsync("https://javadl.oracle.com/webapps/download/AutoDL?BundleId=252627_99a6cb9582554a09bd4ac60f73f9b8e6", javaInstallerPath, "Java Installer");
+                UpdateStatus("Đang chạy Java installer với lệnh /s...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = javaInstallerPath, Arguments = "/s", UseShellExecute = true };
+                Process process = Process.Start(startInfo);
+                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "Cài đặt Java thành công!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
+                if (File.Exists(javaInstallerPath)) File.Delete(javaInstallerPath);
+            }
+            catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
+        }
+
+        private async void BtnOpenAL_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateStatus("Đang tải OpenAL...", "Cyan");
+            string openALInstallerPath = Path.Combine(GetGMTPCFolder(), "OpenAL.exe");
+            try
+            {
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OpenAL.exe", openALInstallerPath, "OpenAL Installer");
+                UpdateStatus("Đang chạy OpenAL installer với lệnh /s...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = openALInstallerPath, Arguments = "/s", UseShellExecute = true };
+                Process process = Process.Start(startInfo);
+                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "Cài đặt OpenAL thành công!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
+                if (File.Exists(openALInstallerPath)) File.Delete(openALInstallerPath);
+            }
+            catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
+        }
+
+        private async void Btn3DPChip_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateStatus("Đang chạy 3DP Chip - all driver trừ internet...", "Cyan");
+            string driverChipPath = Path.Combine(@"R:\HDD R\ZC SYMLINK\USERS\Downloads\Programs", "3DP_Chip_v2510.exe");
+            if (File.Exists(driverChipPath))
+            {
+                try
+                {
+                    ProcessStartInfo startInfo = new ProcessStartInfo { FileName = driverChipPath, UseShellExecute = true };
+                    Process process = Process.Start(startInfo);
+                    if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "3DP Chip hoàn tất!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
+                }
+                catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
+            }
+            else { UpdateStatus("Không tìm thấy file 3DP_Chip_v2510.exe", "Red"); }
+        }
+
+        private async void Btn3DPNet_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateStatus("Đang tải 3DP Net - driver internet...", "Cyan");
+            string driverNetPath = Path.Combine(GetGMTPCFolder(), "3DP_Net_v2101.exe");
+            try
+            {
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Net.exe", driverNetPath, "3DP Net Driver Installer");
+                UpdateStatus("Đang chạy 3DP Net với lệnh /y...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = driverNetPath, Arguments = "/y", UseShellExecute = true };
+                Process process = Process.Start(startInfo);
+                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "3DP Net hoàn tất!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
+                if (File.Exists(driverNetPath)) File.Delete(driverNetPath);
+            }
+            catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
         }
     }
 }
