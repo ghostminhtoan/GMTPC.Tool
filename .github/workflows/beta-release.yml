@@ -49,32 +49,31 @@ jobs:
         id: meta
         shell: pwsh
         run: |
-          $date = Get-Date -Format "yy-MM-dd"
+          $timestamp = Get-Date -Format "yy-MM-dd-HH-mm"
           $ts  = Get-Date -Format "yyyy-MM-dd HH:mm UTC"
           $msg = "${{ github.event.head_commit.message }}" -replace "`n"," "
           $shortSha = "${{ github.sha }}" | Select-Object -First 7
           
           # Rename the exe
           $src = "bin\Release\net48\GMTPC.Tool.exe"
-          $dst = "bin\Release\net48\GMTPC.Tool.${date}.exe"
+          $dst = "bin\Release\net48\GMTPC.Tool.${timestamp}.exe"
           if (Test-Path $src) {
             Copy-Item $src $dst
             Write-Host "Renamed to: $dst"
           }
           
-          echo "date=$date" >> $env:GITHUB_OUTPUT
+          echo "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
           echo "ts=$ts" >> $env:GITHUB_OUTPUT
           echo "msg=$msg" >> $env:GITHUB_OUTPUT
           echo "sha=$shortSha" >> $env:GITHUB_OUTPUT
-          echo "filename=GMTPC.Tool.${date}.exe" >> $env:GITHUB_OUTPUT
+          echo "filename=GMTPC.Tool.${timestamp}.exe" >> $env:GITHUB_OUTPUT
 
       - name: Create unique tag
         id: tag
         shell: pwsh
         run: |
-          $date = "${{ steps.meta.outputs.date }}"
-          $time = Get-Date -Format "HHmmss"
-          $tag = "beta-${date}-${time}"
+          $timestamp = "${{ steps.meta.outputs.timestamp }}"
+          $tag = "beta-${timestamp}"
           echo "name=$tag" >> $env:GITHUB_OUTPUT
 
       - name: Upload to new beta release
@@ -93,6 +92,6 @@ jobs:
           prerelease: true
           make_latest: true
           files: |
-            bin/Release/net48/GMTPC.Tool.${{ steps.meta.outputs.date }}.exe
+            bin/Release/net48/GMTPC.Tool.${{ steps.meta.outputs.timestamp }}.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
