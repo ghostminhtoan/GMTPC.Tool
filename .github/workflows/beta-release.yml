@@ -45,31 +45,54 @@ jobs:
             Write-Host "Build output verified: $exe"
           }
 
-      - name: Build timestamp
+      - name: Generate timestamp and rename exe
         id: meta
         shell: pwsh
         run: |
+          $date = Get-Date -Format "yy-MM-dd"
           $ts  = Get-Date -Format "yyyy-MM-dd HH:mm UTC"
           $msg = "${{ github.event.head_commit.message }}" -replace "`n"," "
-          echo "ts=$ts"   >> $env:GITHUB_OUTPUT
+          $shortSha = "${{ github.sha }}" | Select-Object -First 7
+          
+          # Rename the exe
+          $src = "bin\Release\net48\GMTPC.Tool.exe"
+          $dst = "bin\Release\net48\GMTPC.Tool.${date}.exe"
+          if (Test-Path $src) {
+            Copy-Item $src $dst
+            Write-Host "Renamed to: $dst"
+          }
+          
+          echo "date=$date" >> $env:GITHUB_OUTPUT
+          echo "ts=$ts" >> $env:GITHUB_OUTPUT
           echo "msg=$msg" >> $env:GITHUB_OUTPUT
+          echo "sha=$shortSha" >> $env:GITHUB_OUTPUT
+          echo "filename=GMTPC.Tool.${date}.exe" >> $env:GITHUB_OUTPUT
 
-      - name: Upload to fixed beta release
+      - name: Create unique tag
+        id: tag
+        shell: pwsh
+        run: |
+          $date = "${{ steps.meta.outputs.date }}"
+          $time = Get-Date -Format "HHmmss"
+          $tag = "beta-${date}-${time}"
+          echo "name=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Upload to new beta release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: beta
-          name: "🔥 Beta (Latest Build)"
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: "🔥 Beta ${{ steps.meta.outputs.filename }}"
           body: |
             **Build tự động** — ${{ steps.meta.outputs.ts }}
 
-            > **Commit:** `${{ github.sha }}`
+            > **Commit:** `${{ steps.meta.outputs.sha }}`
             > **Message:** ${{ steps.meta.outputs.msg }}
 
             ⚠️ Đây là bản beta tự động. Không đảm bảo ổn định.
           draft: false
           prerelease: true
-          make_latest: false
+          make_latest: true
           files: |
-            bin/Release/net48/GMTPC.Tool.exe
+            bin/Release/net48/GMTPC.Tool.${{ steps.meta.outputs.date }}.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
