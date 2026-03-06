@@ -179,8 +179,8 @@ namespace GMTPC.Tool
                 
                 await DownloadWithProgressAsync(downloadUrl, bidPath, "Bulk Image Downloader");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-                UpdateStatus("Đang chạy BID installer ( /S )...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = bidPath, Arguments = "/S", UseShellExecute = true };
+                UpdateStatus("Đang chạy BID installer ( /silent )...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = bidPath, Arguments = "/silent", UseShellExecute = true };
                 Process process = Process.Start(startInfo);
                 if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Cài đặt BID hoàn tất.", "Green"); }
                 if (File.Exists(bidPath)) File.Delete(bidPath);
