@@ -10,6 +10,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -170,10 +171,13 @@ namespace GMTPC.Tool
         private async Task InstallBIDAsync()
         {
             UpdateStatus("Đang tải Bulk Image Downloader...", "Cyan");
-            string bidPath = Path.Combine(GetGMTPCFolder(), "bid_6_36_setup.exe");
+            string bidPath = Path.Combine(GetGMTPCFolder(), "bid_setup_x64.exe");
             try
             {
-                await DownloadWithProgressAsync("https://bulkimagedownloader.com/files/bid_6_36_setup.exe", bidPath, "Bulk Image Downloader");
+                // Tự động tìm link tải mới nhất từ website
+                string downloadUrl = await GetBIDDownloadLinkAsync();
+                
+                await DownloadWithProgressAsync(downloadUrl, bidPath, "Bulk Image Downloader");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
                 UpdateStatus("Đang chạy BID installer ( /S )...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo { FileName = bidPath, Arguments = "/S", UseShellExecute = true };
@@ -182,6 +186,45 @@ namespace GMTPC.Tool
                 if (File.Exists(bidPath)) File.Delete(bidPath);
             }
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
+        }
+
+        /// <summary>
+        /// Lấy link tải BID mới nhất từ bulkimagedownloader.com
+        /// Tìm link có dạng: bid_*_*_setup_x64.exe
+        /// </summary>
+        private async Task<string> GetBIDDownloadLinkAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang lấy link tải BID mới nhất...", "Cyan");
+                
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                    
+                    // Tải trang download
+                    string html = await client.GetStringAsync("https://bulkimagedownloader.com/download");
+                    
+                    // Tìm link có dạng bid_*_*_setup_x64.exe
+                    string pattern = @"/files/bid_\d+_\d+_setup_x64\.exe";
+                    System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(html, pattern);
+                    
+                    if (match.Success)
+                    {
+                        string downloadPath = match.Value;
+                        string fullUrl = "https://bulkimagedownloader.com" + downloadPath;
+                        UpdateStatus($"Đã tìm thấy link BID mới: {fullUrl}", "Green");
+                        return fullUrl;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Không thể lấy link tự động, dùng link dự phòng: {ex.Message}", "Yellow");
+            }
+            
+            // Fallback link cũ nếu không tìm thấy
+            return "https://bulkimagedownloader.com/files/bid_6_62_setup_x64.exe";
         }
 
         private async Task InstallIDMAsync()

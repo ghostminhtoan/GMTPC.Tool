@@ -34,14 +34,7 @@ jobs:
           $ts = Get-Date -Format "yyyy-MM-dd HH:mm UTC"
           $msg = (git log -1 --pretty=%s) -replace "`n"," "
           $sha = (git rev-parse --short HEAD)
-          
-          $src = "bin\Release\net48\GMTPC.Tool.exe"
-          $dst = "bin\Release\net48\GMTPC.Tool.${timestamp}.exe"
-          if (Test-Path $src) {
-            Copy-Item $src $dst
-            Write-Host "Created: $dst"
-          }
-          
+
           echo "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
           echo "ts=$ts" >> $env:GITHUB_OUTPUT
           echo "msg=$msg" >> $env:GITHUB_OUTPUT
@@ -52,17 +45,17 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: beta-${{ steps.meta.outputs.timestamp }}
-          name: "🔥 Beta GMTPC.Tool.${{ steps.meta.outputs.timestamp }}.exe"
+          name: "🔥 Beta GMTPC.Tool.exe (Build ${{ steps.meta.outputs.timestamp }})"
           body: |
             **Build tự động** — ${{ steps.meta.outputs.ts }}
-            
+
             > **Commit:** ${{ steps.meta.outputs.sha }}
             > **Message:** ${{ steps.meta.outputs.msg }}
-            
+
             ⚠️ Đây là bản beta tự động. Không đảm bảo ổn định.
           draft: false
           prerelease: true
           make_latest: true
-          files: bin/Release/net48/GMTPC.Tool.${{ steps.meta.outputs.timestamp }}.exe
+          files: bin/Release/net48/GMTPC.Tool.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

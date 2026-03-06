@@ -622,7 +622,7 @@ namespace GMTPC.Tool
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe");
 
             if (ChkInstallBID?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://antibodysoftware-17031.kxcdn.com/files/bid_6_60_setup_x64.exe");
+                _cachedDownloadLinks.Add("https://bulkimagedownloader.com/download");
 
             if (ChkVcredist?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe");
@@ -900,7 +900,7 @@ namespace GMTPC.Tool
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe";
                         break;
                     case "ChkInstallBID":
-                        link = "https://antibodysoftware-17031.kxcdn.com/files/bid_6_60_setup_x64.exe";
+                        link = "https://bulkimagedownloader.com/download";
                         break;
                     case "ChkVcredist":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe";
