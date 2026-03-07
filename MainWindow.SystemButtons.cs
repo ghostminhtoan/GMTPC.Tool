@@ -208,6 +208,7 @@ namespace GMTPC.Tool
                     Chk3DPChip.IsChecked = true;
                     Chk3DPNet.IsChecked = true;
                     ChkRevoUninstaller.IsChecked = true;
+                    ChkInstallZalo.IsChecked = true;
                 }
                 // Nếu tab là "System"
                 else if (tabHeader == "System")
@@ -314,6 +315,7 @@ namespace GMTPC.Tool
                     Chk3DPChip.IsChecked = false;
                     Chk3DPNet.IsChecked = false;
                     ChkRevoUninstaller.IsChecked = false;
+                    ChkInstallZalo.IsChecked = false;
                 }
                 // Nếu tab là "System"
                 else if (tabHeader == "System")
@@ -420,6 +422,7 @@ namespace GMTPC.Tool
             ChkFoxit.IsChecked = false;
             ChkBandiview.IsChecked = false;
             ChkRevoUninstaller.IsChecked = false;
+            ChkInstallZalo.IsChecked = false;
 
             // Bỏ chọn checkbox trong tab System
             ChkMMTApps.IsChecked = false;
@@ -508,6 +511,7 @@ namespace GMTPC.Tool
             if (ChkFoxit.IsChecked == true) tasks.Add((InstallFoxitAsync, ChkFoxit));
             if (ChkBandiview.IsChecked == true) tasks.Add((InstallBandiviewAsync, ChkBandiview));
             if (ChkRevoUninstaller.IsChecked == true) tasks.Add((InstallHibitUninstallerAsync, ChkRevoUninstaller));
+            if (ChkInstallZalo.IsChecked == true) tasks.Add((InstallZaloAsync, ChkInstallZalo));
             if (Chk3DPChip.IsChecked == true) tasks.Add((Run3DPChipAsync, Chk3DPChip));
             if (Chk3DPNet.IsChecked == true) tasks.Add((Install3DPNetAsync, Chk3DPNet));
             if (ChkMMTApps.IsChecked == true) tasks.Add((InstallMMTAppsAsync, ChkMMTApps));
