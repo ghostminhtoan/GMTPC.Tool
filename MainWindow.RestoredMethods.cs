@@ -118,8 +118,16 @@ namespace GMTPC.Tool
                      client.DownloadFile("https://github.com/ghostminhtoan/MMT/releases/download/activate/ACTIVATE.WINDOWS.cmd", activateWindowsCmdPath);
                 }
                 ProcessStartInfo startInfo = new ProcessStartInfo { FileName = activateWindowsCmdPath, UseShellExecute = true, Verb = "runas" };
-                Process.Start(startInfo);
+                Process process = Process.Start(startInfo);
+                if (process != null)
+                {
+                    process.WaitForExit();
+                }
                 UpdateStatus("Đã mở cửa sổ kích hoạt Windows", "Green");
+                
+                // Show message after activation completes
+                UpdateStatus("Press \"0\" to continue", "Yellow");
+                MessageBox.Show("Press \"0\" to continue", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
         }
