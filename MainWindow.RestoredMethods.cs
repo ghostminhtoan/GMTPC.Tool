@@ -3,9 +3,8 @@
 // Chức năng: Hàm bổ trợ, phương thức dùng chung cho toàn ứng dụng
 //            (GetBrush, GetColor, GetGMTPCFolder, Defender exclusion...)
 // Cập nhật gần đây:
-//   - 2026-03-05: Thêm GetBrush, GetColor, GetGMTPCFolder, AddDefenderExclusion,
-//                 RemoveDefenderExclusion, StartAutomatedProcessAsync từ xaml.cs
-//                 theo AI_WORKFLOW.md
+//   - 2026-03-07: Cập nhật các Install methods sử dụng constants từ
+//                 SystemArguments.cs theo AI_WORKFLOW.md
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -174,40 +173,16 @@ namespace GMTPC.Tool
 
         private async Task InstallWinRARAsync()
         {
-            string winrarPath = Path.Combine(GetGMTPCFolder(), "WinRAR.7.13.exe");
-            string winrarKeyPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WinRAR", "rarreg.key");
-            string winrarKeyTempPath = Path.Combine(GetGMTPCFolder(), "rarreg.key");
+            string winrarPath = Path.Combine(GetGMTPCFolder(), "WinRAR.exe");
             try
             {
-                // ===== Step 1: Delete old key if exists =====
-                if (File.Exists(winrarKeyPath))
-                {
-                    UpdateStatus("Đang xóa key WinRAR cũ...", "Cyan");
-                    File.Delete(winrarKeyPath);
-                }
-
-                // ===== Step 2: Download key =====
-                UpdateStatus("Đang tải WinRAR key...", "Cyan");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/rarreg.key", winrarKeyTempPath, "WinRAR Key");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                // ===== Step 3: Copy key to WinRAR folder =====
-                string winrarFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WinRAR");
-                if (!Directory.Exists(winrarFolder))
-                {
-                    Directory.CreateDirectory(winrarFolder);
-                }
-                File.Copy(winrarKeyTempPath, winrarKeyPath, true);
-                if (File.Exists(winrarKeyTempPath)) File.Delete(winrarKeyTempPath);
-                UpdateStatus("Đã copy key WinRAR", "Green");
-
-                // ===== Step 4: Download and Install WinRAR =====
+                // ===== Step 1: Download and Install WinRAR =====
                 UpdateStatus("Đang tải WinRAR...", "Cyan");
-                await DownloadWithRetryAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe", winrarPath, "WinRAR");
+                await DownloadWithRetryAsync(WINRAR_DOWNLOAD_URL, winrarPath, "WinRAR");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
 
-                UpdateStatus("Đang chạy WinRAR installer ( /silent )...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = winrarPath, Arguments = "/silent", UseShellExecute = true };
+                UpdateStatus("Đang chạy WinRAR installer ( " + WINRAR_INSTALL_ARGUMENTS + " )...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = winrarPath, Arguments = WINRAR_INSTALL_ARGUMENTS, UseShellExecute = true };
                 Process process = Process.Start(startInfo);
                 if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Cài đặt WinRAR hoàn tất.", "Green"); }
                 if (File.Exists(winrarPath)) File.Delete(winrarPath);
@@ -228,9 +203,9 @@ namespace GMTPC.Tool
 
                 await DownloadWithProgressAsync(downloadUrl, bidPath, "Bulk Image Downloader");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-                
-                UpdateStatus("Đang chạy BID installer ( /silent )...", "Yellow");
-                ProcessStartInfo installStartInfo = new ProcessStartInfo { FileName = bidPath, Arguments = "/silent", UseShellExecute = true };
+
+                UpdateStatus("Đang chạy BID installer...", "Yellow");
+                ProcessStartInfo installStartInfo = new ProcessStartInfo { FileName = bidPath, Arguments = BID_INSTALL_ARGUMENTS, UseShellExecute = true };
                 Process installProcess = Process.Start(installStartInfo);
                 if (installProcess != null)
                 {
@@ -344,7 +319,7 @@ namespace GMTPC.Tool
 
                 // ===== Step 3: Download and install IDM =====
                 UpdateStatus("Đang tải Internet Download Manager...", "Cyan");
-                await DownloadSingleConnectionAsync("https://tinyurl.com/idmhcmvn", idmPath, "Internet Download Manager");
+                await DownloadSingleConnectionAsync(IDM_DOWNLOAD_URL, idmPath, "Internet Download Manager");
 
                 // Reset progress bar
                 Dispatcher.Invoke(() =>
@@ -355,11 +330,11 @@ namespace GMTPC.Tool
                 });
 
                 // Run installer with arguments
-                UpdateStatus("Đang chạy IDM installer ( /s /a /u /o /quiet /skipdlgst )...", "Yellow");
+                UpdateStatus("Đang chạy IDM installer ( " + IDM_INSTALL_ARGUMENTS + " )...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = idmPath,
-                    Arguments = "/s /a /u /o /quiet /skipdlgst",
+                    Arguments = IDM_INSTALL_ARGUMENTS,
                     UseShellExecute = true
                 };
                 Process process = Process.Start(startInfo);
@@ -370,7 +345,7 @@ namespace GMTPC.Tool
 
                 // ===== Step 4: Download and run activate tool =====
                 UpdateStatus("Đang tải công cụ kích hoạt...", "Cyan");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_rabbit.exe", activatePath, "IDM Activate");
+                await DownloadWithProgressAsync(IDM_ACTIVATE_URL, activatePath, "IDM Activate");
 
                 // Reset progress bar
                 Dispatcher.Invoke(() =>
@@ -379,6 +354,14 @@ namespace GMTPC.Tool
                     ProgressTextBlock.Text = "";
                     SpeedTextBlock.Text = "";
                 });
+
+                // ===== Step 4.1: Wait for IDM0.tmp to disappear before running crack =====
+                UpdateStatus("Đang chờ IDM hoàn tất cài đặt (IDM0.tmp biến mất)...", "Yellow");
+                while (File.Exists(tempCheckPath))
+                {
+                    await Task.Delay(500);
+                }
+                await Task.Delay(1000); // Thêm delay nhỏ để đảm bảo ổn định
 
                 // Run activate tool
                 UpdateStatus("Click IDM to activate, có thể bỏ qua update.", "Yellow");
@@ -480,23 +463,33 @@ namespace GMTPC.Tool
         private async Task InstallVcredistAsync()
         {
             UpdateStatus("Đang tải Vcredist...", "Cyan");
-            string vcredistPath = Path.Combine(GetGMTPCFolder(), "vcredist_x64.exe");
+            string vcredistPath = Path.Combine(GetGMTPCFolder(), "vcredist.all.in.one.by.MMT.Windows.Tech.exe");
             try
             {
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist_x64.exe", vcredistPath, "Vcredist");
+                await DownloadWithProgressAsync(VCREDIST_DOWNLOAD_URL, vcredistPath, "Vcredist");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-                UpdateStatus("Đang cài đặt Vcredist...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = vcredistPath, Arguments = "/install /passive /norestart", UseShellExecute = true };
+                UpdateStatus("Đang cài đặt Vcredist ( " + VCREDIST_INSTALL_ARGUMENTS + " )...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = vcredistPath, Arguments = VCREDIST_INSTALL_ARGUMENTS, UseShellExecute = true };
                 Process process = Process.Start(startInfo);
                 if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Cài đặt Vcredist hoàn tất.", "Green"); }
                 if (File.Exists(vcredistPath)) File.Delete(vcredistPath);
             } catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
         }
 
-        private Task InstallDirectXAsync()
+        private async Task InstallDirectXAsync()
         {
-            BtnDirectX_Click(null, null);
-            return Task.CompletedTask;
+            UpdateStatus("Đang tải DirectX...", "Cyan");
+            string directxPath = Path.Combine(GetGMTPCFolder(), "DirectX.exe");
+            try
+            {
+                await DownloadWithProgressAsync(DIRECTX_DOWNLOAD_URL, directxPath, "DirectX");
+                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+                UpdateStatus("Đang cài đặt DirectX ( " + DIRECTX_INSTALL_ARGUMENTS + " )...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = directxPath, Arguments = DIRECTX_INSTALL_ARGUMENTS, UseShellExecute = true };
+                Process process = Process.Start(startInfo);
+                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Cài đặt DirectX hoàn tất.", "Green"); }
+                if (File.Exists(directxPath)) File.Delete(directxPath);
+            } catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
         }
 
         private Task InstallJavaAsync()
@@ -516,9 +509,9 @@ namespace GMTPC.Tool
             UpdateStatus("Đang tải Zalo...", "Cyan");
             string zaloPath = Path.Combine(GetGMTPCFolder(), "ZaloSetup.exe");
             try {
-                await DownloadWithProgressAsync("https://res-zaloapp-aka.zdn.vn/mac/ZaloSetup.exe", zaloPath, "Zalo");
+                await DownloadWithProgressAsync(ZALO_DOWNLOAD_URL, zaloPath, "Zalo");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = zaloPath, UseShellExecute = true };
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = zaloPath, Arguments = ZALO_INSTALL_ARGUMENTS, UseShellExecute = true };
                 Process process = Process.Start(startInfo);
                 if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Zalo hoàn tất.", "Green"); }
             } catch(Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }

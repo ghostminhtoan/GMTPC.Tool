@@ -491,8 +491,10 @@
                 <!-- Connection trace canvas: shows per-connection segments and active connection count -->
                 <Grid Margin="0,8,0,0">
                     <StackPanel>
-                        <!-- Segments control centered, always visible even in portrait -->
+                        <!-- Build number (left) | Segments (center) -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
+                            <TextBlock x:Name="BuildNumberTextBlock" Text="Build: ----" FontSize="11" Foreground="#FFF0F0F0" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                            <TextBlock Text="|" FontSize="11" Foreground="#FF666666" VerticalAlignment="Center" Margin="0,0,16,0"/>
                             <TextBlock Text="Segments:" FontSize="11" Foreground="#FFF0F0F0" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <ComboBox x:Name="CboSegmentCount" Width="72" Height="20" FontSize="11" SelectedValuePath="Content" PreviewMouseWheel="CboSegmentCount_PreviewMouseWheel" SelectionChanged="CboSegmentCount_SelectionChanged">
                                 <ComboBoxItem Content="1" />

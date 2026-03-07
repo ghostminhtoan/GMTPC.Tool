@@ -5,6 +5,7 @@
 // Cập nhật gần đây:
 //   - 2026-03-05: Chuyển UpdateStatus, UpdateSecondaryStatus, SetInstallingState
 //                 và các shared fields từ xaml.cs về đây theo AI_WORKFLOW.md
+//   - 2026-03-07: Thêm hiển thị Build Number theo định dạng YYYY-MM-DD-hh-mm-ss
 // =======================================================================
 using System;
 using System.Collections.Concurrent;
@@ -33,6 +34,18 @@ namespace GMTPC.Tool
         private string _installationStatus = "";
         private double originalWidth;
         private double originalHeight;
+
+        // ===================== Build Number Display =====================
+        private void SetBuildNumber()
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (BuildNumberTextBlock != null)
+                {
+                    BuildNumberTextBlock.Text = $"Build: {BuildInfo.BUILD_NUMBER}";
+                }
+            });
+        }
 
         // ===================== Status Methods =====================
         private void UpdateStatus(string message, string color)

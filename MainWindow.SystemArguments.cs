@@ -9,6 +9,12 @@ using System.Windows.Media;
 
 namespace GMTPC.Tool
 {
+    /*
+     * AI Summary:
+     * Date: 2026-03-07
+     * - Updated Java download URL to https://www.java.com/en/download/
+     * - Updated Java install arguments to /s
+     */
     // =======================================================================
     // MainWindow.SystemArguments.cs
     // Chứa toàn bộ code phức tạp liên quan đến:
@@ -20,7 +26,80 @@ namespace GMTPC.Tool
     public partial class MainWindow
     {
         // ===================================================================
+        // TabPopular — Links (B) and Arguments (C)
+        // TabItem Header: "Popular"
+        // Checkboxes: ChkInstallIDM, ChkInstallWinRAR, ChkInstallBID,
+        //             ChkActivateWindows, ChkPauseWindowsUpdate, ChkVcredist,
+        //             ChkDirectX, ChkJava, ChkOpenAL, Chk3DPChip, Chk3DPNet,
+        //             ChkRevoUninstaller, ChkZalo
+        // ===================================================================
+        // IDM
+        private const string IDM_DOWNLOAD_URL = "https://tinyurl.com/idmhcmvn";
+        private const string IDM_ACTIVATE_URL = "https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_rabbit.exe";
+        private const string IDM_INSTALL_ARGUMENTS = "/s /a /u /o /quiet /skipdlgst";
+
+        // WinRAR
+        private const string WINRAR_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.exe";
+        private const string WINRAR_INSTALL_ARGUMENTS = "/silent /I /EN";
+
+        // BID (Bulk Image Downloader)
+        private const string BID_DOWNLOAD_URL = "https://bulkimagedownloader.com/files/bid_6_62_setup_x64.exe";
+        private const string BID_INSTALL_ARGUMENTS = "";
+
+        // Activate Windows
+        // Vcredist
+        private const string VCREDIST_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe";
+        private const string VCREDIST_INSTALL_ARGUMENTS = "/passive";
+
+        // DirectX
+        private const string DIRECTX_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/DirectX.exe";
+        private const string DIRECTX_INSTALL_ARGUMENTS = "/passive";
+
+        // Java
+        private const string JAVA_DOWNLOAD_URL = "https://www.java.com/en/download/";
+        private const string JAVA_INSTALL_ARGUMENTS = "/s";
+
+        // OpenAL
+        private const string OPENAL_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/oalinst.exe";
+        private const string OPENAL_INSTALL_ARGUMENTS = "/S";
+
+        // 3DP Chip
+        private const string DPCHIP_DOWNLOAD_URL = "https://www.3dpchip.com/3dp/chip.exe";
+        private const string DPCHIP_INSTALL_ARGUMENTS = "/S";
+
+        // 3DP Net
+        private const string DPNET_DOWNLOAD_URL = "https://www.3dpchip.com/3dp/net.exe";
+        private const string DPNET_INSTALL_ARGUMENTS = "/S";
+
+        // Revo Uninstaller
+        private const string REVO_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/RevoUninstallerPro.exe";
+        private const string REVO_INSTALL_ARGUMENTS = "/S";
+
+        // Zalo
+        private const string ZALO_DOWNLOAD_URL = "https://dl.zalo.me/ZaloSetup.exe";
+        private const string ZALO_INSTALL_ARGUMENTS = "/silent";
+
+        // ===================================================================
+        // TabBrowser — Links (B) and Arguments (C)
+        // TabItem Header: "Browser"
+        // Checkboxes: ChkChrome, ChkCocCoc, ChkEdge
+        // ===================================================================
+        // Chrome (Tab: Browser)
+        private const string CHROME_DOWNLOAD_URL = "https://dl.google.com/chrome/install/latest/chrome_installer.exe";
+        private const string CHROME_INSTALL_ARGUMENTS = "/silent /install";
+
+        // CocCoc (Tab: Browser)
+        private const string COCCOC_DOWNLOAD_URL = "https://coccoc.com/download/win32";
+        private const string COCCOC_INSTALL_ARGUMENTS = "/silent";
+
+        // Edge (Tab: Browser)
+        private const string EDGE_DOWNLOAD_URL = "https://go.microsoft.com/fwlink/?linkid=2108834&Channel=Stable&language=vi";
+        private const string EDGE_INSTALL_ARGUMENTS = "/silent /install";
+
+        // ===================================================================
         // TabSystem — PowerISO
+        // TabItem Header: "System"
+        // Checkbox: ChkPowerISO
         // ===================================================================
         private async Task InstallPowerISOAsync()
         {
@@ -65,6 +144,8 @@ namespace GMTPC.Tool
 
         // ===================================================================
         // TabSystem — VPN 1111
+        // TabItem Header: "System"
+        // Checkbox: ChkVPN1111
         // ===================================================================
         private async Task InstallVPN1111Async()
         {
@@ -109,6 +190,8 @@ namespace GMTPC.Tool
 
         // ===================================================================
         // TabSystem — Teracopy
+        // TabItem Header: "System"
+        // Checkbox: ChkTeracopy
         // ===================================================================
         private async Task InstallTeracopyAsync()
         {
@@ -238,6 +321,8 @@ namespace GMTPC.Tool
 
         // ===================================================================
         // TabSystem — Google Drive
+        // TabItem Header: "System"
+        // Checkbox: ChkGoogleDrive
         // ===================================================================
         private async Task InstallGoogleDriveAsync()
         {
@@ -282,6 +367,8 @@ namespace GMTPC.Tool
 
         // ===================================================================
         // TabSystem — FolderSize
+        // TabItem Header: "System"
+        // Checkbox: ChkFolderSize
         // ===================================================================
         private async Task InstallFolderSizeAsync()
         {
@@ -589,7 +676,9 @@ namespace GMTPC.Tool
         }
 
         // ===================================================================
-        // TabSystem — DISM++  (MessageBox + /s)
+        // TabSystem — DISM++
+        // TabItem Header: "System"
+        // Checkbox: ChkDISMPP
         // ===================================================================
         private async Task InstallDISMPPAsync()
         {
@@ -640,7 +729,9 @@ namespace GMTPC.Tool
 
 
         // ===================================================================
-        // TabSystem — NetLimiter  (key dialog sau khi cài)
+        // TabSystem — NetLimiter
+        // TabItem Header: "System"
+        // Checkbox: ChkNetLimiter
         // ===================================================================
         private async Task InstallNetLimiterAsync()
         {
@@ -760,7 +851,9 @@ namespace GMTPC.Tool
 
 
         // ===================================================================
-        // TabSystem — Comfort Clipboard Pro  (MessageBox + /passive)
+        // TabSystem — Comfort Clipboard Pro
+        // TabItem Header: "System"
+        // Checkbox: ChkComfortClipboardPro
         // ===================================================================
         private async Task InstallComfortClipboardProAsync()
         {
@@ -800,7 +893,9 @@ namespace GMTPC.Tool
 
 
         // ===================================================================
-        // TabSystem — MMT Apps  (MessageBox + /passive)
+        // TabSystem — MMT Apps
+        // TabItem Header: "System"
+        // Checkbox: ChkMMTApps
         // ===================================================================
         private async Task InstallMMTAppsAsync()
         {
@@ -840,7 +935,9 @@ namespace GMTPC.Tool
 
 
         // ===================================================================
-        // TabSystem — Defender Control  (MessageBox + VBS + /s -p1111)
+        // TabSystem — Defender Control
+        // TabItem Header: "System"
+        // Button: BtnDefenderControl
         // ===================================================================
         private async void BtnDefenderControl_Click(object sender, RoutedEventArgs e)
         {
@@ -902,7 +999,9 @@ namespace GMTPC.Tool
 
 
         // ===================================================================
-        // TabSystem — Backup Restore Mklink MMT  (tải về Desktop + MessageBox)
+        // TabSystem — Backup Restore Mklink MMT
+        // TabItem Header: "System"
+        // Button: BtnBackupRestoreMklinkMMT
         // ===================================================================
         private async void BtnBackupRestoreMklinkMMT_Click(object sender, RoutedEventArgs e)
         {
@@ -929,7 +1028,9 @@ namespace GMTPC.Tool
 
 
         // ===================================================================
-        // TabPartition — Disk Genius  (MessageBox + /s)
+        // TabPartition — Disk Genius
+        // TabItem Header: "Partition"
+        // Checkbox: ChkDiskGenius
         // ===================================================================
         private async Task InstallDiskGeniusAsync()
         {
@@ -969,7 +1070,9 @@ namespace GMTPC.Tool
 
 
         // ===================================================================
-        // TabPartition — AOMEI Partition Assistant  (MessageBox + /passive)
+        // TabPartition — AOMEI Partition Assistant
+        // TabItem Header: "Partition"
+        // Checkbox: ChkAomeiPartitionAssistant
         // ===================================================================
         private async Task InstallAomeiPartitionAssistantAsync()
         {

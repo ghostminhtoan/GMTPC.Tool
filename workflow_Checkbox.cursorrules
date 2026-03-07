@@ -1,0 +1,106 @@
+<system_context>
+Bạn là một AI Code Agent chuyên nghiệp, làm việc trên dự án "MMT Tools" (WPF, .NET 4.8, C# 7.3).
+Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Classes của dự án và các quy trình làm việc được định nghĩa dưới đây.
+</system_context>
+
+<global_rules>
+1. KHÔNG BAO GIỜ viết code vào `MainWindow.xaml.cs`.
+2. Luôn lưu file ở định dạng UTF-8.
+3. Luôn thêm/cập nhật khối comment "AI Summary" ở đầu MỌI file bạn chỉnh sửa (Ghi rõ ngày cập nhật và tóm tắt thao tác).
+</global_rules>
+
+<workflow_definitions>
+    <!-- ==================== CREATE CHECKBOX ==================== -->
+    <workflow name="Workflow_createcheckbox">
+        <description>
+        Quy trình chuẩn để tạo một checkbox cài đặt phần mềm mới.
+        Khi người dùng gọi lệnh: "Dùng Workflow_createcheckbox: Tab [X], phần mềm [Y], link [URL], argument [ARGS]"
+        Bạn phải coi: X = Tên Tab, Y = Tên Phần Mềm, URL = Link tải về, ARGS = Tham số cài đặt ẩn.
+        </description>
+
+        <execution_steps>
+            <step number="1" target_file="MainWindow.SystemArguments.cs">
+                - Khai báo hằng số link tải: `private const string [Y]_DOWNLOAD_URL = "[URL]";`
+                - Khai báo hằng số tham số cài đặt ẩn: `private const string [Y]_INSTALL_ARGUMENTS = "[ARGS]";`
+            </step>
+
+            <step number="2" target_file="MainWindow.Tab[X].cs">
+                - Khai báo UI Checkbox: `CheckBox ChkInstall[Y] = new CheckBox { Content = "...", Name = "ChkInstall[Y]" };`
+                - Tạo phương thức: `private async Task Install[Y]Async()`
+                - Trong phương thức này:
+                  + Dùng `UpdateStatus("Đang tải [Y]...", "Màu_phù_hợp");` (từ SystemBar)
+                  + Dùng `await DownloadWithProgressAsync(...)`
+                  + Gọi `ProcessStartInfo` với `[Y]_INSTALL_ARGUMENTS` từ Bước 1.
+            </step>
+
+            <step number="3" target_file="MainWindow.SystemButtons.cs">
+                - Trong `UpdateInstallButtonState()`: Thêm điều kiện `ChkInstall[Y].IsChecked == true` để kích hoạt BtnInstall.
+                - Trong các hàm `BtnSelectAll_Click`, `BtnSelectNone_Click`, `BtnSelectNoneAllTabs_Click`: Cập nhật trạng thái check/uncheck tương ứng cho `ChkInstall[Y]`.
+                - Trong `BtnInstall_Click()`: Thêm logic `if (ChkInstall[Y].IsChecked == true) await Install[Y]Async();`
+            </step>
+
+            <step number="4" target_file="All_Modified_Files">
+                - Kiểm tra lại <global_rules> để đảm bảo đã thêm AI Summary Header và lưu file chuẩn UTF-8.
+                - Đảm bảo code không có lỗi logic để Build thành công 100%.
+            </step>
+
+            <step number="5" target_file="Build_Local">
+                - Chạy lệnh build: `dotnet build` hoặc `msbuild` (tùy project).
+                - Xác nhận build thành công 100%, không có lỗi hoặc warning nghiêm trọng.
+            </step>
+
+            <step number="6" target_file="GitHub_Push">
+                - Chạy lần lượt:
+                  + `git add .`
+                  + `git commit -m "[Checkbox] Create [Y] on Tab [X]"`
+                  + `git push`
+                - Nếu có nhiều thay đổi, gom commit theo nhóm hợp lý.
+                - Báo cáo: "✅ Build thành công | ✅ Git commit & push hoàn tất"
+            </step>
+        </execution_steps>
+    </workflow>
+
+    <!-- ==================== EDIT CHECKBOX ==================== -->
+    <workflow name="Workflow_editcheckbox">
+        <description>
+        Quy trình chuẩn để chỉnh sửa một checkbox cài đặt phần mềm đã tồn tại.
+        Khi người dùng gọi lệnh: "Dùng Workflow_editcheckbox: Tab [X], phần mềm [Y], link [URL], argument [ARGS]"
+        Bạn phải coi: X = Tên Tab, Y = Tên Phần Mềm, URL = Link tải về mới, ARGS = Tham số cài đặt mới.
+        </description>
+
+        <execution_steps>
+            <step number="1" target_file="MainWindow.SystemArguments.cs">
+                - Tìm và cập nhật hằng số: `private const string [Y]_DOWNLOAD_URL = "[URL]";`
+                - Tìm và cập nhật hằng số: `private const string [Y]_INSTALL_ARGUMENTS = "[ARGS]";`
+            </step>
+
+            <step number="2" target_file="MainWindow.Tab[X].cs">
+                - Tìm checkbox: `ChkInstall[Y]` và cập nhật Content nếu cần.
+                - Tìm và cập nhật phương thức: `private async Task Install[Y]Async()` với link và argument mới.
+            </step>
+
+            <step number="3" target_file="MainWindow.SystemButtons.cs">
+                - Kiểm tra logic trong `BtnInstall_Click()` đã gọi đúng `Install[Y]Async()` chưa.
+            </step>
+
+            <step number="4" target_file="All_Modified_Files">
+                - Kiểm tra lại <global_rules> để đảm bảo đã thêm AI Summary Header và lưu file chuẩn UTF-8.
+                - Đảm bảo code không có lỗi logic để Build thành công 100%.
+            </step>
+
+            <step number="5" target_file="Build_Local">
+                - Chạy lệnh build: `dotnet build` hoặc `msbuild` (tùy project).
+                - Xác nhận build thành công 100%, không có lỗi hoặc warning nghiêm trọng.
+            </step>
+
+            <step number="6" target_file="GitHub_Push">
+                - Chạy lần lượt:
+                  + `git add .`
+                  + `git commit -m "[Checkbox] Edit [Y] on Tab [X]"`
+                  + `git push`
+                - Nếu có nhiều thay đổi, gom commit theo nhóm hợp lý.
+                - Báo cáo: "✅ Build thành công | ✅ Git commit & push hoàn tất"
+            </step>
+        </execution_steps>
+    </workflow>
+</workflow_definitions>

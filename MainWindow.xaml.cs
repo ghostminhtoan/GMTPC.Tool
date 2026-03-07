@@ -26,6 +26,7 @@ namespace GMTPC.Tool
             UpdateStatus("Chọn một tùy chọn từ menu bên trên hoặc nhấn phím số tương ứng (1-6, 0):", "Cyan");
             this.Closing += MainWindow_Closing;
             UpdateInstallButtonState();
+            SetBuildNumber();
 
             if (CboDPIValue != null && CboDPIValue.Items.Count > 0)
             {
