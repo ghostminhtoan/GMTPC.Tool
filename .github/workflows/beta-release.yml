@@ -20,11 +20,11 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: Restore NuGet packages
-        run: nuget restore "MMT Tools.sln"
+        run: nuget restore "GMTPC.Tool.sln"
 
       - name: Build Release
         run: |
-          msbuild "MMT Tools.sln" /p:Configuration=Release /t:Rebuild /v:minimal
+          msbuild "GMTPC.Tool.sln" /p:Configuration=Release /t:Rebuild /v:minimal
 
       - name: Generate timestamp
         id: meta

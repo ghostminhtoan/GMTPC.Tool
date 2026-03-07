@@ -170,20 +170,67 @@ namespace GMTPC.Tool
 
         private async Task InstallBIDAsync()
         {
-            UpdateStatus("Đang tải Bulk Image Downloader...", "Cyan");
             string bidPath = Path.Combine(GetGMTPCFolder(), "bid_setup_x64.exe");
+            string bidActivatePath = Path.Combine(GetGMTPCFolder(), "Bulk.image.downloader.patch.exe");
+            string bidExePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Bulk Image Downloader", "BID.exe");
             try
             {
-                // Tự động tìm link tải mới nhất từ website
+                // ===== Step 1: Download and Install BID =====
+                UpdateStatus("Đang tải Bulk Image Downloader...", "Cyan");
                 string downloadUrl = await GetBIDDownloadLinkAsync();
-                
+
                 await DownloadWithProgressAsync(downloadUrl, bidPath, "Bulk Image Downloader");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+                
                 UpdateStatus("Đang chạy BID installer ( /silent )...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = bidPath, Arguments = "/silent", UseShellExecute = true };
-                Process process = Process.Start(startInfo);
-                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Cài đặt BID hoàn tất.", "Green"); }
+                ProcessStartInfo installStartInfo = new ProcessStartInfo { FileName = bidPath, Arguments = "/silent", UseShellExecute = true };
+                Process installProcess = Process.Start(installStartInfo);
+                if (installProcess != null)
+                {
+                    await Task.Run(() => installProcess.WaitForExit());
+                    UpdateStatus("Cài đặt BID hoàn tất.", "Green");
+                }
                 if (File.Exists(bidPath)) File.Delete(bidPath);
+
+                // ===== Step 2: Download and Run Activation =====
+                await Task.Delay(1000);
+                UpdateStatus("Đang tải BID patch...", "Cyan");
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/Bulk.image.downloader.patch.exe", bidActivatePath, "BID Patch");
+                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                UpdateStatus("Đang chạy BID patch...", "Yellow");
+                ProcessStartInfo activateStartInfo = new ProcessStartInfo { FileName = bidActivatePath, UseShellExecute = true };
+                Process activateProcess = Process.Start(activateStartInfo);
+                if (activateProcess != null)
+                {
+                    await Task.Run(() => activateProcess.WaitForExit());
+                }
+                if (File.Exists(bidActivatePath)) File.Delete(bidActivatePath);
+
+                // ===== Step 3: Show message =====
+                UpdateStatus("Click vào nút Install rồi tắt", "Yellow");
+                MessageBox.Show("Click vào nút Install rồi tắt", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // ===== Step 4: Wait for BID to close =====
+                UpdateStatus("Đang chờ BID tắt...", "Cyan");
+                while (true)
+                {
+                    Process[] bidProcesses = Process.GetProcessesByName("BID");
+                    if (bidProcesses.Length == 0) break;
+                    await Task.Delay(500);
+                }
+                await Task.Delay(1000);
+
+                // ===== Step 5: Open BID.exe =====
+                if (File.Exists(bidExePath))
+                {
+                    UpdateStatus("Đang mở BID...", "Green");
+                    Process.Start(bidExePath);
+                }
+                else
+                {
+                    UpdateStatus("Không tìm thấy BID.exe", "Yellow");
+                }
             }
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
         }
