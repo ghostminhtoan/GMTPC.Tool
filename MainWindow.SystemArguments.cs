@@ -75,6 +75,10 @@ namespace GMTPC.Tool
         private const string REVO_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/RevoUninstallerPro.exe";
         private const string REVO_INSTALL_ARGUMENTS = "/S";
 
+        // Zalo
+        private const string ZALO_DOWNLOAD_URL = "https://zalo.me/download/zalo-pc?utm=90000";
+        private const string ZALO_INSTALL_ARGUMENTS = "/s";
+
         // ===================================================================
         // TabBrowser — Links (B) and Arguments (C)
         // TabItem Header: "Browser"
@@ -97,6 +101,47 @@ namespace GMTPC.Tool
         // TabItem Header: "System"
         // Checkbox: ChkPowerISO
         // ===================================================================
+        private async Task InstallZaloAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang tải Zalo...", "Cyan");
+                string zaloPath = Path.Combine(GetGMTPCFolder(), "ZaloSetup.exe");
+                await DownloadWithProgressAsync(ZALO_DOWNLOAD_URL, zaloPath, "Zalo");
+
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                UpdateStatus("Đang cài đặt Zalo (silent)...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = zaloPath,
+                    Arguments = ZALO_INSTALL_ARGUMENTS,
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("Cài đặt Zalo hoàn tất!", "Green");
+                }
+
+                if (File.Exists(zaloPath))
+                {
+                    File.Delete(zaloPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài đặt Zalo: {ex.Message}", "Red");
+            }
+        }
+
         private async Task InstallPowerISOAsync()
         {
             try
@@ -565,6 +610,8 @@ namespace GMTPC.Tool
                              // Microsoft Edge
                              ChkEdge.IsChecked == true ||
                              ChkRevoUninstaller.IsChecked == true ||
+                             // Thêm checkbox cho Zalo
+                             ChkInstallZalo.IsChecked == true ||
                              // Thêm checkbox cho MMT Apps
                              ChkMMTApps.IsChecked == true ||
                              // Thêm checkbox cho DISM++
