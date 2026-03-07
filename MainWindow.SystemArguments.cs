@@ -56,7 +56,7 @@ namespace GMTPC.Tool
         private const string DIRECTX_INSTALL_ARGUMENTS = "/passive";
 
         // Java
-        private const string JAVA_DOWNLOAD_URL = "https://www.java.com/en/download/";
+        private const string JAVA_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/java.exe";
         private const string JAVA_INSTALL_ARGUMENTS = "/s";
 
         // OpenAL
