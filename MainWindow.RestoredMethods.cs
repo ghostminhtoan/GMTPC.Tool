@@ -125,6 +125,9 @@ namespace GMTPC.Tool
                 }
                 UpdateStatus("Đã mở cửa sổ kích hoạt Windows", "Green");
                 
+                // Wait 2 seconds before showing message
+                System.Threading.Thread.Sleep(2000);
+                
                 // Show message after activation completes
                 UpdateStatus("Press \"0\" to continue", "Yellow");
                 MessageBox.Show("Press \"0\" to continue", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
