@@ -7,6 +7,7 @@
 //                 SystemArguments.cs theo AI_WORKFLOW.md
 //   - 2026-03-07: Fix Java installer exit code -1 handling, use JAVA_DOWNLOAD_URL
 //   - 2026-03-07: Zalo - Add ResolveZaloUrlAsync to follow redirect to versioned exe
+//   - 2026-03-07: Zalo - Add detailed logging and re-throw exception for debugging
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -508,20 +509,44 @@ namespace GMTPC.Tool
 
         private async Task InstallZaloAsync()
         {
-            UpdateStatus("Đang tải Zalo...", "Cyan");
-            string zaloPath = Path.Combine(GetGMTPCFolder(), "ZaloSetup.exe");
-            try 
+            try
             {
+                UpdateStatus("Đang tải Zalo...", "Cyan");
+                string zaloPath = Path.Combine(GetGMTPCFolder(), "ZaloSetup.exe");
+                
                 // Resolve redirect to get final Zalo download URL
+                UpdateStatus("Đang phân giải link tải Zalo...", "Cyan");
                 string finalUrl = await ResolveZaloUrlAsync();
-                UpdateStatus("Đang tải Zalo (phiên bản mới nhất)...", "Cyan");
+                UpdateStatus($"Đang tải Zalo từ: {finalUrl}", "Cyan");
+                
                 await DownloadWithProgressAsync(finalUrl, zaloPath, "Zalo");
+                
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = zaloPath, Arguments = ZALO_INSTALL_ARGUMENTS, UseShellExecute = true };
+                
+                if (!File.Exists(zaloPath))
+                {
+                    throw new Exception("File tải về không tồn tại: " + zaloPath);
+                }
+                
+                UpdateStatus("Đang cài đặt Zalo (silent)...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo 
+                { 
+                    FileName = zaloPath, 
+                    Arguments = ZALO_INSTALL_ARGUMENTS, 
+                    UseShellExecute = true 
+                };
                 Process process = Process.Start(startInfo);
-                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Zalo hoàn tất.", "Green"); }
+                if (process != null) 
+                { 
+                    await Task.Run(() => process.WaitForExit()); 
+                    UpdateStatus("Zalo hoàn tất.", "Green"); 
+                }
             } 
-            catch(Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
+            catch(Exception ex) 
+            { 
+                UpdateStatus($"Lỗi Zalo: {ex.Message}", "Red"); 
+                throw; // Re-throw to stop the installation process
+            }
         }
 
         /// <summary>
