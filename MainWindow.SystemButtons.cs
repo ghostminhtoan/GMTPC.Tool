@@ -624,6 +624,12 @@ namespace GMTPC.Tool
             if (ChkInstallBID?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://bulkimagedownloader.com/download");
 
+            if (ChkActivateWindows?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/activate/ACTIVATE.WINDOWS.cmd");
+
+            if (ChkPauseWindowsUpdate?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.10.ps1");
+
             if (ChkVcredist?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe");
 
@@ -902,6 +908,12 @@ namespace GMTPC.Tool
                     case "ChkInstallBID":
                         link = "https://bulkimagedownloader.com/download";
                         break;
+                    case "ChkActivateWindows":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/ACTIVATE.WINDOWS.cmd";
+                        break;
+                    case "ChkPauseWindowsUpdate":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.10.ps1";
+                        break;
                     case "ChkVcredist":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe";
                         break;
@@ -1009,12 +1021,6 @@ namespace GMTPC.Tool
                         break;
                     case "ChkWin11_26H1":
                         link = "https://archive.org/download/win-11-26h1";
-                        break;
-                    case "ChkActivateWindows":
-                        link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/activate-windows.bat";
-                        break;
-                    case "ChkPauseWindowsUpdate":
-                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/pause-windows-update.bat";
                         break;
                     case "ChkActivateOffice":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/activate-office.bat";
