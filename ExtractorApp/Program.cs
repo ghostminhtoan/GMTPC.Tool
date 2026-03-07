@@ -24,10 +24,10 @@ namespace ExtractorApp
             // Any method containing the keyword will be moved to the respective Tab.
             var tabMappings = new Dictionary<string, string[]>
             {
-                { "TabPopular", new[] { 
-                    "IDM", "BtnFixIDMExtension", "BtnCrackIDM", "WinRAR", 
-                    "BID", "BtnRunBIDActivation", "ActivateWindows", "PauseWindowsUpdate", 
-                    "Vcredist", "DirectX", "Java", "OpenAL", "3DPChip", "3DPNet", "RevoUninstaller", "Zalo"
+                { "TabPopular", new[] {
+                    "IDM", "BtnFixIDMExtension", "BtnCrackIDM", "WinRAR",
+                    "BID", "BtnRunBIDActivation", "ActivateWindows", "PauseWindowsUpdate",
+                    "Vcredist", "DirectX", "Java", "OpenAL", "3DPChip", "3DPNet", "RevoUninstaller"
                 } },
                 { "TabOffice", new[] { "OfficeToolPlus", "OfficeSoftmaker", "ActivateOffice", "Fonts", "NotepadPP" } },
                 { "TabMultimedia", new[] { "PotPlayer", "FastStone", "Foxit", "Bandiview", "AdvancedCodec" } },

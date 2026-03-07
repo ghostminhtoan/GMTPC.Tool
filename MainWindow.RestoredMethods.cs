@@ -6,8 +6,7 @@
 //   - 2026-03-07: Cập nhật các Install methods sử dụng constants từ
 //                 SystemArguments.cs theo AI_WORKFLOW.md
 //   - 2026-03-07: Fix Java installer exit code -1 handling, use JAVA_DOWNLOAD_URL
-//   - 2026-03-07: Zalo - Add ResolveZaloUrlAsync to follow redirect to versioned exe
-//   - 2026-03-07: Zalo - Add detailed logging and re-throw exception for debugging
+//   - 2026-03-07: Removed Zalo installation support
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -505,81 +504,6 @@ namespace GMTPC.Tool
         {
             BtnOpenAL_Click(null, null);
             return Task.CompletedTask;
-        }
-
-        private async Task InstallZaloAsync()
-        {
-            try
-            {
-                UpdateStatus("Đang tải Zalo...", "Cyan");
-                string zaloPath = Path.Combine(GetGMTPCFolder(), "ZaloSetup.exe");
-                
-                // Resolve redirect to get final Zalo download URL
-                UpdateStatus("Đang phân giải link tải Zalo...", "Cyan");
-                string finalUrl = await ResolveZaloUrlAsync();
-                UpdateStatus($"Đang tải Zalo từ: {finalUrl}", "Cyan");
-                
-                await DownloadWithProgressAsync(finalUrl, zaloPath, "Zalo");
-                
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-                
-                if (!File.Exists(zaloPath))
-                {
-                    throw new Exception("File tải về không tồn tại: " + zaloPath);
-                }
-                
-                UpdateStatus("Đang cài đặt Zalo (silent)...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo 
-                { 
-                    FileName = zaloPath, 
-                    Arguments = ZALO_INSTALL_ARGUMENTS, 
-                    UseShellExecute = true 
-                };
-                Process process = Process.Start(startInfo);
-                if (process != null) 
-                { 
-                    await Task.Run(() => process.WaitForExit()); 
-                    UpdateStatus("Zalo hoàn tất.", "Green"); 
-                }
-            } 
-            catch(Exception ex) 
-            { 
-                UpdateStatus($"Lỗi Zalo: {ex.Message}", "Red"); 
-                throw; // Re-throw to stop the installation process
-            }
-        }
-
-        /// <summary>
-        /// Resolves the Zalo download URL by following redirects to get the final versioned URL.
-        /// </summary>
-        private async Task<string> ResolveZaloUrlAsync()
-        {
-            using (var handler = new HttpClientHandler { AllowAutoRedirect = false })
-            using (var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) })
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
-                
-                string url = ZALO_DOWNLOAD_URL;
-                for (int i = 0; i < 10; i++)
-                {
-                    var req = new HttpRequestMessage(HttpMethod.Head, url);
-                    var response = await client.SendAsync(req);
-                    
-                    int status = (int)response.StatusCode;
-                    if (status >= 300 && status <= 399 && response.Headers.Location != null)
-                    {
-                        url = response.Headers.Location.IsAbsoluteUri
-                            ? response.Headers.Location.AbsoluteUri
-                            : new Uri(new Uri(url), response.Headers.Location).AbsoluteUri;
-                        response.Dispose();
-                        continue;
-                    }
-                    
-                    response.Dispose();
-                    return url;
-                }
-                return url;
-            }
         }
 
         private Task Run3DPChipAsync()

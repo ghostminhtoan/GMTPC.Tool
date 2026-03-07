@@ -208,7 +208,6 @@ namespace GMTPC.Tool
                     Chk3DPChip.IsChecked = true;
                     Chk3DPNet.IsChecked = true;
                     ChkRevoUninstaller.IsChecked = true;
-                    ChkZalo.IsChecked = true;
                 }
                 // Nếu tab là "System"
                 else if (tabHeader == "System")
@@ -315,7 +314,6 @@ namespace GMTPC.Tool
                     Chk3DPChip.IsChecked = false;
                     Chk3DPNet.IsChecked = false;
                     ChkRevoUninstaller.IsChecked = false;
-                    ChkZalo.IsChecked = false;
                 }
                 // Nếu tab là "System"
                 else if (tabHeader == "System")
@@ -422,7 +420,6 @@ namespace GMTPC.Tool
             ChkFoxit.IsChecked = false;
             ChkBandiview.IsChecked = false;
             ChkRevoUninstaller.IsChecked = false;
-            ChkZalo.IsChecked = false;
 
             // Bỏ chọn checkbox trong tab System
             ChkMMTApps.IsChecked = false;
@@ -511,7 +508,6 @@ namespace GMTPC.Tool
             if (ChkFoxit.IsChecked == true) tasks.Add((InstallFoxitAsync, ChkFoxit));
             if (ChkBandiview.IsChecked == true) tasks.Add((InstallBandiviewAsync, ChkBandiview));
             if (ChkRevoUninstaller.IsChecked == true) tasks.Add((InstallHibitUninstallerAsync, ChkRevoUninstaller));
-            if (ChkZalo.IsChecked == true) tasks.Add((InstallZaloAsync, ChkZalo));
             if (Chk3DPChip.IsChecked == true) tasks.Add((Run3DPChipAsync, Chk3DPChip));
             if (Chk3DPNet.IsChecked == true) tasks.Add((Install3DPNetAsync, Chk3DPNet));
             if (ChkMMTApps.IsChecked == true) tasks.Add((InstallMMTAppsAsync, ChkMMTApps));
@@ -653,9 +649,6 @@ namespace GMTPC.Tool
 
             if (ChkRevoUninstaller?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://www.hibitsoft.ir/HiBitUninstaller/RevoUninstaller-setup.exe");
-
-            if (ChkZalo?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://zalo.me/download/zalo-pc?utm=90000");
 
             if (Chk3DPNet?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Net.exe");
@@ -870,7 +863,7 @@ namespace GMTPC.Tool
             {
                 ChkInstallIDM, ChkInstallWinRAR, ChkInstallBID, ChkActivateWindows,
                 ChkPauseWindowsUpdate, ChkVcredist, ChkDirectX, ChkJava, ChkOpenAL,
-                Chk3DPChip, Chk3DPNet, ChkRevoUninstaller, ChkZalo,
+                Chk3DPChip, Chk3DPNet, ChkRevoUninstaller,
                 ChkOfficeToolPlus, ChkOfficeSoftmaker, ChkActivateOffice, ChkFonts,
                 ChkNotepadPP, ChkPotPlayer, ChkFastStone, ChkFoxit, ChkBandiview,
                 ChkAdvancedCodec, ChkMMTApps, ChkDISMPP, ChkComfortClipboardPro,
@@ -934,9 +927,6 @@ namespace GMTPC.Tool
                         break;
                     case "ChkRevoUninstaller":
                         link = "https://www.hibitsoft.ir/HiBitUninstaller/RevoUninstaller-setup.exe";
-                        break;
-                    case "ChkZalo":
-                        link = "https://zalo.me/download/zalo-pc?utm=90000";
                         break;
                     case "ChkOfficeToolPlus":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OfficeToolPlus.exe";

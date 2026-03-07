@@ -200,20 +200,5 @@ namespace GMTPC.Tool
             UpdateInstallButtonState();
         }
 
-
-        private void ChkZalo_Click(object sender, RoutedEventArgs e)
-        {
-            if (ChkZalo.IsChecked == true)
-            {
-                UpdateStatus("Đã chọn: Zalo", "Green");
-            }
-            else
-            {
-                UpdateStatus("Đã hủy chọn: Zalo", "Yellow");
-            }
-
-            UpdateInstallButtonState();
-        }
-
     }
 }

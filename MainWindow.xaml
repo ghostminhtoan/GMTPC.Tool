@@ -354,7 +354,6 @@
                             <CheckBox x:Name="Chk3DPChip" Content="3DP Chip &#10;(all driver trừ internet)" Width="200" Height="34" Click="Chk3DPChip_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="Chk3DPNet" Content="3DP Net - driver internet" Width="200" Height="34" Click="Chk3DPNet_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkRevoUninstaller" Content="Revo Uninstaller" Width="200" Height="34" Click="ChkRevoUninstaller_Click" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="ChkZalo" Content="Zalo" Width="200" Height="34" Click="ChkZalo_Click" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>

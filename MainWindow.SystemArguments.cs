@@ -31,7 +31,7 @@ namespace GMTPC.Tool
         // Checkboxes: ChkInstallIDM, ChkInstallWinRAR, ChkInstallBID,
         //             ChkActivateWindows, ChkPauseWindowsUpdate, ChkVcredist,
         //             ChkDirectX, ChkJava, ChkOpenAL, Chk3DPChip, Chk3DPNet,
-        //             ChkRevoUninstaller, ChkZalo
+        //             ChkRevoUninstaller
         // ===================================================================
         // IDM
         private const string IDM_DOWNLOAD_URL = "https://tinyurl.com/idmhcmvn";
@@ -74,10 +74,6 @@ namespace GMTPC.Tool
         // Revo Uninstaller
         private const string REVO_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/RevoUninstallerPro.exe";
         private const string REVO_INSTALL_ARGUMENTS = "/S";
-
-        // Zalo
-        private const string ZALO_DOWNLOAD_URL = "https://dl.zalo.me/ZaloSetup.exe";
-        private const string ZALO_INSTALL_ARGUMENTS = "/silent";
 
         // ===================================================================
         // TabBrowser — Links (B) and Arguments (C)
@@ -569,7 +565,6 @@ namespace GMTPC.Tool
                              // Microsoft Edge
                              ChkEdge.IsChecked == true ||
                              ChkRevoUninstaller.IsChecked == true ||
-                             ChkZalo.IsChecked == true ||
                              // Thêm checkbox cho MMT Apps
                              ChkMMTApps.IsChecked == true ||
                              // Thêm checkbox cho DISM++
