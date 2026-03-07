@@ -5,6 +5,7 @@
 // Cập nhật gần đây:
 //   - 2026-03-07: Cập nhật các Install methods sử dụng constants từ
 //                 SystemArguments.cs theo AI_WORKFLOW.md
+//   - 2026-03-07: Fix Java installer exit code -1 handling, use JAVA_DOWNLOAD_URL
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -686,11 +687,17 @@ namespace GMTPC.Tool
             string javaInstallerPath = Path.Combine(GetGMTPCFolder(), "java_installer.exe");
             try
             {
-                await DownloadWithProgressAsync("https://javadl.oracle.com/webapps/download/AutoDL?BundleId=252627_99a6cb9582554a09bd4ac60f73f9b8e6", javaInstallerPath, "Java Installer");
-                UpdateStatus("Đang chạy Java installer với lệnh /s...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = javaInstallerPath, Arguments = "/s", UseShellExecute = true };
+                await DownloadWithProgressAsync(JAVA_DOWNLOAD_URL, javaInstallerPath, "Java Installer");
+                UpdateStatus("Đang chạy Java installer...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = javaInstallerPath, Arguments = JAVA_INSTALL_ARGUMENTS, UseShellExecute = true };
                 Process process = Process.Start(startInfo);
-                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "Cài đặt Java thành công!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    // Java web installer thường trả -1 hoặc 16389 khi thành công
+                    bool isSuccess = process.ExitCode == 0 || process.ExitCode == -1 || process.ExitCode == 16389;
+                    UpdateStatus(isSuccess ? "Cài đặt Java thành công!" : $"Mã lỗi: {process.ExitCode}", isSuccess ? "Green" : "Red");
+                }
                 if (File.Exists(javaInstallerPath)) File.Delete(javaInstallerPath);
             }
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
