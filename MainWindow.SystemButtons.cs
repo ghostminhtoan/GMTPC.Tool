@@ -628,7 +628,7 @@ namespace GMTPC.Tool
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/activate/ACTIVATE.WINDOWS.cmd");
 
             if (ChkPauseWindowsUpdate?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.10.ps1");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.11.ps1");
 
             if (ChkVcredist?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe");
@@ -912,7 +912,7 @@ namespace GMTPC.Tool
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/ACTIVATE.WINDOWS.cmd";
                         break;
                     case "ChkPauseWindowsUpdate":
-                        link = "https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.10.ps1";
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.11.ps1";
                         break;
                     case "ChkVcredist":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe";

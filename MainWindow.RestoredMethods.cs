@@ -138,12 +138,12 @@ namespace GMTPC.Tool
         private void PauseWindowsUpdate()
         {
             UpdateStatus("Đang truy cập tính năng Pause Windows Update...", "Cyan");
-            string pauseUpdateScriptPath = Path.Combine(GetGMTPCFolder(), "pause.update.win.10.ps1");
+            string pauseUpdateScriptPath = Path.Combine(GetGMTPCFolder(), "pause.update.win.11.ps1");
             try
             {
                 using (System.Net.WebClient client = new System.Net.WebClient())
                 {
-                     client.DownloadFile("https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.10.ps1", pauseUpdateScriptPath);
+                     client.DownloadFile("https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.11.ps1", pauseUpdateScriptPath);
                 }
                 ProcessStartInfo startInfo = new ProcessStartInfo 
                 { 
