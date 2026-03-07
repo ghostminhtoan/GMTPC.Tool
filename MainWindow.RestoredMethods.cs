@@ -192,7 +192,11 @@ namespace GMTPC.Tool
                 }
                 if (File.Exists(bidPath)) File.Delete(bidPath);
 
-                // ===== Step 2: Download and Run Activation =====
+                // ===== Step 2: Show message BEFORE activation =====
+                UpdateStatus("Click vào nút Install rồi tắt", "Yellow");
+                MessageBox.Show("Click vào nút Install rồi tắt", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // ===== Step 3: Download and Run Activation =====
                 await Task.Delay(1000);
                 UpdateStatus("Đang tải BID patch...", "Cyan");
                 await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/Bulk.image.downloader.patch.exe", bidActivatePath, "BID Patch");
@@ -206,10 +210,6 @@ namespace GMTPC.Tool
                     await Task.Run(() => activateProcess.WaitForExit());
                 }
                 if (File.Exists(bidActivatePath)) File.Delete(bidActivatePath);
-
-                // ===== Step 3: Show message =====
-                UpdateStatus("Click vào nút Install rồi tắt", "Yellow");
-                MessageBox.Show("Click vào nút Install rồi tắt", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // ===== Step 4: Wait for BID to close =====
                 UpdateStatus("Đang chờ BID tắt...", "Cyan");
@@ -568,12 +568,49 @@ namespace GMTPC.Tool
 
         private async void BtnRunBIDActivation_Click(object sender, RoutedEventArgs e)
         {
-            UpdateStatus("Đang tải BID Crack...", "Cyan");
-            string crackPath = Path.Combine(GetGMTPCFolder(), "BID_Crack.exe");
+            string bidActivatePath = Path.Combine(GetGMTPCFolder(), "Bulk.image.downloader.patch.exe");
+            string bidExePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Bulk Image Downloader", "BID.exe");
             try
             {
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Patch.exe", crackPath, "BID Crack");
-                Process.Start(crackPath);
+                // ===== Step 1: Show message =====
+                UpdateStatus("Click vào nút Install rồi tắt", "Yellow");
+                MessageBox.Show("Click vào nút Install rồi tắt", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // ===== Step 2: Download and Run Activation =====
+                await Task.Delay(1000);
+                UpdateStatus("Đang tải BID patch...", "Cyan");
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/Bulk.image.downloader.patch.exe", bidActivatePath, "BID Patch");
+                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                UpdateStatus("Đang chạy BID patch...", "Yellow");
+                ProcessStartInfo activateStartInfo = new ProcessStartInfo { FileName = bidActivatePath, UseShellExecute = true };
+                Process activateProcess = Process.Start(activateStartInfo);
+                if (activateProcess != null)
+                {
+                    await Task.Run(() => activateProcess.WaitForExit());
+                }
+                if (File.Exists(bidActivatePath)) File.Delete(bidActivatePath);
+
+                // ===== Step 3: Wait for BID to close =====
+                UpdateStatus("Đang chờ BID tắt...", "Cyan");
+                while (true)
+                {
+                    Process[] bidProcesses = Process.GetProcessesByName("BID");
+                    if (bidProcesses.Length == 0) break;
+                    await Task.Delay(500);
+                }
+                await Task.Delay(1000);
+
+                // ===== Step 4: Open BID.exe =====
+                if (File.Exists(bidExePath))
+                {
+                    UpdateStatus("Đang mở BID...", "Green");
+                    Process.Start(bidExePath);
+                }
+                else
+                {
+                    UpdateStatus("Không tìm thấy BID.exe", "Yellow");
+                }
             }
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
         }
