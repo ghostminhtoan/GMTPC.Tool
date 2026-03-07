@@ -174,7 +174,7 @@ namespace GMTPC.Tool
 
         private async Task InstallWinRARAsync()
         {
-            string winrarPath = Path.Combine(GetGMTPCFolder(), "winrar-x64-621.exe");
+            string winrarPath = Path.Combine(GetGMTPCFolder(), "WinRAR.7.13.exe");
             string winrarKeyPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WinRAR", "rarreg.key");
             string winrarKeyTempPath = Path.Combine(GetGMTPCFolder(), "rarreg.key");
             try
@@ -203,11 +203,11 @@ namespace GMTPC.Tool
 
                 // ===== Step 4: Download and Install WinRAR =====
                 UpdateStatus("Đang tải WinRAR...", "Cyan");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe", winrarPath, "WinRAR");
+                await DownloadWithRetryAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe", winrarPath, "WinRAR");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-                
-                UpdateStatus("Đang chạy WinRAR installer ( /S )...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = winrarPath, Arguments = "/S", UseShellExecute = true };
+
+                UpdateStatus("Đang chạy WinRAR installer ( /silent )...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = winrarPath, Arguments = "/silent", UseShellExecute = true };
                 Process process = Process.Start(startInfo);
                 if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus("Cài đặt WinRAR hoàn tất.", "Green"); }
                 if (File.Exists(winrarPath)) File.Delete(winrarPath);
