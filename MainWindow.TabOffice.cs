@@ -20,21 +20,12 @@ namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
-
-        private void ChkFonts_Click(object sender, RoutedEventArgs e)
-        {
-            if (ChkFonts.IsChecked == true)
-            {
-                UpdateStatus("Đã chọn: Font SFU, UTM, UVN, VNI", "Green");
-            }
-            else
-            {
-                UpdateStatus("Đã hủy chọn: Font SFU, UTM, UVN, VNI", "Yellow");
-            }
-
-            UpdateInstallButtonState();
-        }
-
+        /*
+         * AI Summary:
+         * Date: 2026-03-08
+         * - Added ChkGouenjiFonts_Click and InstallGouenjiFontsAsync
+         * - Added ChkNotepadPlusPlus_Click and InstallNotepadPlusPlusAsync
+         */
 
         private async void BtnActivateOffice_Click(object sender, RoutedEventArgs e)
         {
@@ -103,38 +94,6 @@ namespace GMTPC.Tool
             }
 
             UpdateInstallButtonState();
-        }
-
-
-        private async Task InstallFontsAsync()
-        {
-            try
-            {
-                UpdateStatus("Đang tải bộ Fonts (SFU, UTM, UVN, VNI)...", "Cyan");
-                string fontsPath = Path.Combine(GetGMTPCFolder(), "Fonts.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Fonts.exe", fontsPath, "Fonts Installer");
-
-                // Reset progress UI
-                Dispatcher.Invoke(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                });
-
-                UpdateStatus("Đang chạy bộ cài Fonts ( /passive )...", "Cyan");
-                var psi = new ProcessStartInfo
-                {
-                    FileName = fontsPath,
-                    Arguments = "/passive",
-                    UseShellExecute = true
-                };
-                Process.Start(psi);
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Lỗi cài fonts: {ex.Message}", "Red");
-            }
         }
 
 
@@ -279,14 +238,30 @@ namespace GMTPC.Tool
             }
         }
 
+        // ===================================================================
+        // TabOffice — Gouenji Fansub Fonts
+        // ===================================================================
+        private void ChkGouenjiFonts_Click(object sender, RoutedEventArgs e)
+        {
+            if (ChkGouenjiFonts.IsChecked == true)
+            {
+                UpdateStatus("Đã chọn: Gouenji Fansub Fonts", "Green");
+            }
+            else
+            {
+                UpdateStatus("Đã hủy chọn: Gouenji Fansub Fonts", "Yellow");
+            }
 
-        private async Task InstallNotepadPPAsync()
+            UpdateInstallButtonState();
+        }
+
+        private async Task InstallGouenjiFontsAsync()
         {
             try
             {
-                UpdateStatus("Đang tải Notepad++...", "Cyan");
-                string npPath = Path.Combine(GetGMTPCFolder(), "npp.8.9.2.Installer.exe");
-                await DownloadWithProgressAsync("https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.exe", npPath, "Notepad++");
+                UpdateStatus("Đang tải Gouenji Fansub Fonts...", "Cyan");
+                string fontsPath = Path.Combine(GetGMTPCFolder(), "Gouenji.Fansub.Fonts.exe");
+                await DownloadWithProgressAsync(GOUENJI_FONTS_DOWNLOAD_URL, fontsPath, "Gouenji Fansub Fonts");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -295,11 +270,11 @@ namespace GMTPC.Tool
                     SpeedTextBlock.Text = "";
                 });
 
-                UpdateStatus("Đang chạy Notepad++ installer (silent)...", "Yellow");
+                UpdateStatus("Đang cài đặt Gouenji Fansub Fonts (passive)...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    FileName = npPath,
-                    Arguments = "/S",
+                    FileName = fontsPath,
+                    Arguments = GOUENJI_FONTS_INSTALL_ARGUMENTS,
                     UseShellExecute = true
                 };
                 Process process = Process.Start(startInfo);
@@ -307,14 +282,75 @@ namespace GMTPC.Tool
                 if (process != null)
                 {
                     await Task.Run(() => process.WaitForExit());
-                    UpdateStatus("Notepad++ đã hoàn tất.", "Green");
+                    UpdateStatus("Cài đặt Gouenji Fansub Fonts hoàn tất!", "Green");
                 }
 
-                if (File.Exists(npPath)) File.Delete(npPath);
+                if (File.Exists(fontsPath))
+                {
+                    File.Delete(fontsPath);
+                }
             }
             catch (Exception ex)
             {
-                UpdateStatus($"Lỗi khi cài Notepad++: {ex.Message}", "Red");
+                UpdateStatus($"Lỗi khi cài đặt Gouenji Fansub Fonts: {ex.Message}", "Red");
+            }
+        }
+
+        // ===================================================================
+        // TabOffice — Notepad++
+        // ===================================================================
+        private void ChkNotepadPlusPlus_Click(object sender, RoutedEventArgs e)
+        {
+            if (ChkNotepadPlusPlus.IsChecked == true)
+            {
+                UpdateStatus("Đã chọn: Notepad++", "Green");
+            }
+            else
+            {
+                UpdateStatus("Đã hủy chọn: Notepad++", "Yellow");
+            }
+
+            UpdateInstallButtonState();
+        }
+
+        private async Task InstallNotepadPlusPlusAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang tải Notepad++...", "Cyan");
+                string notepadPlusPlusPath = Path.Combine(GetGMTPCFolder(), "npp.8.9.2.Installer.exe");
+                await DownloadWithProgressAsync(NOTEPAD_PLUS_PLUS_DOWNLOAD_URL, notepadPlusPlusPath, "Notepad++");
+
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                UpdateStatus("Đang cài đặt Notepad++ (silent)...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = notepadPlusPlusPath,
+                    Arguments = NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS,
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("Cài đặt Notepad++ hoàn tất!", "Green");
+                }
+
+                if (File.Exists(notepadPlusPlusPath))
+                {
+                    File.Delete(notepadPlusPlusPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài đặt Notepad++: {ex.Message}", "Red");
             }
         }
 

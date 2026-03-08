@@ -229,8 +229,8 @@ namespace GMTPC.Tool
                     ChkOfficeToolPlus.IsChecked = true;
                     ChkOfficeSoftmaker.IsChecked = true;
                     ChkActivateOffice.IsChecked = true;
-                    ChkFonts.IsChecked = true;
-                    ChkNotepadPP.IsChecked = true;
+                    ChkGouenjiFonts.IsChecked = true;
+                    ChkNotepadPlusPlus.IsChecked = true;
                 }
                 // Nếu tab là "Partition"
                 else if (tabHeader == "Partition")
@@ -336,8 +336,8 @@ namespace GMTPC.Tool
                     ChkOfficeToolPlus.IsChecked = false;
                     ChkOfficeSoftmaker.IsChecked = false;
                     ChkActivateOffice.IsChecked = false;
-                    ChkFonts.IsChecked = false;
-                    ChkNotepadPP.IsChecked = false;
+                    ChkGouenjiFonts.IsChecked = false;
+                    ChkNotepadPlusPlus.IsChecked = false;
                 }
                 // Nếu tab là "Partition"
                 else if (tabHeader == "Partition")
@@ -457,10 +457,9 @@ namespace GMTPC.Tool
             // Bỏ chọn checkbox trong tab Office
             ChkOfficeToolPlus.IsChecked = false;
             ChkOfficeSoftmaker.IsChecked = false;
-            ChkFonts.IsChecked = false;
-
-            // Bỏ chọn Notepad++
-            ChkNotepadPP.IsChecked = false;
+            ChkActivateOffice.IsChecked = false;
+            ChkGouenjiFonts.IsChecked = false;
+            ChkNotepadPlusPlus.IsChecked = false;
 
             // Bỏ chọn Advanced Codec
             ChkAdvancedCodec.IsChecked = false;
@@ -518,8 +517,8 @@ namespace GMTPC.Tool
             if (ChkDISMPP.IsChecked == true) tasks.Add((InstallDISMPPAsync, ChkDISMPP));
             if (ChkComfortClipboardPro.IsChecked == true) tasks.Add((InstallComfortClipboardProAsync, ChkComfortClipboardPro));
             if (ChkOfficeSoftmaker.IsChecked == true) tasks.Add((InstallOfficeSoftmakerAsync, ChkOfficeSoftmaker));
-            if (ChkNotepadPP.IsChecked == true) tasks.Add((InstallNotepadPPAsync, ChkNotepadPP));
-            if (ChkFonts.IsChecked == true) tasks.Add((InstallFontsAsync, ChkFonts));
+            if (ChkGouenjiFonts.IsChecked == true) tasks.Add((InstallGouenjiFontsAsync, ChkGouenjiFonts));
+            if (ChkNotepadPlusPlus.IsChecked == true) tasks.Add((InstallNotepadPlusPlusAsync, ChkNotepadPlusPlus));
             // Only add once to avoid duplicate install and MessageBox
             if (ChkPowerISO.IsChecked == true) tasks.Add((InstallPowerISOAsync, ChkPowerISO));
             if (ChkVPN1111.IsChecked == true) tasks.Add((InstallVPN1111Async, ChkVPN1111));
@@ -708,9 +707,6 @@ namespace GMTPC.Tool
             if (ChkOfficeSoftmaker?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Office.Softmaker.exe");
 
-            if (ChkNotepadPP?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.exe");
-
             if (ChkPowerISO?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe");
 
@@ -746,9 +742,6 @@ namespace GMTPC.Tool
 
             if (ChkPorofessor?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://download.overwolf.com/installer/prod/339334cdda5e1ea8a3c8a31ba816fb37/Porofessor%20Standalone%20-%20Installer.exe");
-
-            if (ChkFonts?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Gouenji.Fansub.Fonts.exe");
 
             if (ChkWin11_26H1?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso");
@@ -868,8 +861,8 @@ namespace GMTPC.Tool
                 ChkInstallIDM, ChkInstallWinRAR, ChkInstallBID, ChkActivateWindows,
                 ChkPauseWindowsUpdate, ChkVcredist, ChkDirectX, ChkJava, ChkOpenAL,
                 Chk3DPChip, Chk3DPNet, ChkRevoUninstaller,
-                ChkOfficeToolPlus, ChkOfficeSoftmaker, ChkActivateOffice, ChkFonts,
-                ChkNotepadPP, ChkPotPlayer, ChkFastStone, ChkFoxit, ChkBandiview,
+                ChkOfficeToolPlus, ChkOfficeSoftmaker, ChkActivateOffice,
+                ChkPotPlayer, ChkFastStone, ChkFoxit, ChkBandiview,
                 ChkAdvancedCodec, ChkMMTApps, ChkDISMPP, ChkComfortClipboardPro,
                 ChkFolderSize, ChkPowerISO, ChkVPN1111, ChkTeracopy, ChkGoogleDrive,
                 ChkNetLimiter, ChkAomeiPartitionAssistant, ChkDiskGenius, ChkProcessLasso,
@@ -937,9 +930,6 @@ namespace GMTPC.Tool
                         break;
                     case "ChkOfficeSoftmaker":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/SoftMaker.Office.exe";
-                        break;
-                    case "ChkNotepadPP":
-                        link = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.6.2/npp.8.6.2.Installer.x64.exe";
                         break;
                     case "ChkPotPlayer":
                         link = "https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup64.exe";
@@ -1018,9 +1008,6 @@ namespace GMTPC.Tool
                         break;
                     case "ChkActivateOffice":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/activate-office.bat";
-                        break;
-                    case "ChkFonts":
-                        link = "https://github.com/ghostminhtoan/MMT/releases/download/fonts/Fonts.Collection.exe";
                         break;
                     case "ChkAdvancedCodec":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Advanced.Codec.Pack.exe";

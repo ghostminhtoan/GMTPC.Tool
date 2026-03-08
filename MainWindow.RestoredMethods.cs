@@ -644,13 +644,6 @@ namespace GMTPC.Tool
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
         }
 
-        private void ChkNotepadPP_Click(object sender, RoutedEventArgs e)
-        {
-            if (ChkNotepadPP.IsChecked == true) UpdateStatus("Đã chọn: Notepad++", "Green");
-            else UpdateStatus("Đã hủy chọn: Notepad++", "Yellow");
-            UpdateInstallButtonState();
-        }
-
         // ===================== TabPopular — Button Click Handlers =====================
         private async void BtnDirectX_Click(object sender, RoutedEventArgs e)
         {

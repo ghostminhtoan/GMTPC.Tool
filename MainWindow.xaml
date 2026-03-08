@@ -364,8 +364,8 @@
                             <CheckBox x:Name="ChkOfficeToolPlus" Content="Office Tool Plus" Width="200" Height="34" Click="ChkOfficeToolPlus_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkOfficeSoftmaker" Content="Office Softmaker" Width="200" Height="34" Click="ChkOfficeSoftmaker_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkActivateOffice" Content="Tự động kích hoạt Office" Width="200" Height="34" Click="ChkActivateOffice_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="ChkFonts" Content="Font MTO, SFU, UTM, UVN, VNI" Width="200" Height="34" Click="ChkFonts_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="ChkNotepadPP" Content="Notepad++" Width="200" Height="34" Click="ChkNotepadPP_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkGouenjiFonts" Content="Gouenji Fansub Fonts" Width="200" Height="34" Click="ChkGouenjiFonts_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkNotepadPlusPlus" Content="Notepad++" Width="200" Height="34" Click="ChkNotepadPlusPlus_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>

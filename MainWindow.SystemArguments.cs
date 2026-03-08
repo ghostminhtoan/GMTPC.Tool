@@ -11,9 +11,9 @@ namespace GMTPC.Tool
 {
     /*
      * AI Summary:
-     * Date: 2026-03-07
-     * - Updated Java download URL to https://www.java.com/en/download/
-     * - Updated Java install arguments to /s
+     * Date: 2026-03-08
+     * - Added GOUENJI_FONTS_DOWNLOAD_URL and GOUENJI_FONTS_INSTALL_ARGUMENTS
+     * - Added NOTEPAD_PLUS_PLUS_DOWNLOAD_URL and NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS
      */
     // =======================================================================
     // MainWindow.SystemArguments.cs
@@ -78,6 +78,20 @@ namespace GMTPC.Tool
         // Zalo
         private const string ZALO_DOWNLOAD_URL = "https://zalo.me/download/zalo-pc?utm=90000";
         private const string ZALO_INSTALL_ARGUMENTS = "/s";
+
+        // ===================================================================
+        // TabOffice — Links (B) and Arguments (C)
+        // TabItem Header: "Office"
+        // Checkboxes: ChkActivateOffice, ChkOfficeToolPlus, ChkOfficeSoftmaker,
+        //             ChkGouenjiFonts, ChkNotepadPlusPlus
+        // ===================================================================
+        // Gouenji Fansub Fonts (Tab: Office)
+        private const string GOUENJI_FONTS_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Gouenji.Fansub.Fonts.exe";
+        private const string GOUENJI_FONTS_INSTALL_ARGUMENTS = "/passive";
+
+        // Notepad++ (Tab: Office)
+        private const string NOTEPAD_PLUS_PLUS_DOWNLOAD_URL = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.exe";
+        private const string NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS = "/S";
 
         // ===================================================================
         // TabBrowser — Links (B) and Arguments (C)
@@ -620,9 +634,10 @@ namespace GMTPC.Tool
                              ChkComfortClipboardPro.IsChecked == true ||
                              // Thêm checkbox cho Office Softmaker
                              ChkOfficeSoftmaker.IsChecked == true ||
-                             ChkNotepadPP.IsChecked == true ||
-                             // Thêm checkbox cho Fonts SFU/UTM/UVN/VNI
-                             ChkFonts.IsChecked == true ||
+                             // Thêm checkbox cho Gouenji Fonts
+                             ChkGouenjiFonts.IsChecked == true ||
+                             // Thêm checkbox cho Notepad++
+                             ChkNotepadPlusPlus.IsChecked == true ||
                              // Thêm checkbox cho AOMEI Partition Assistant
                              ChkAomeiPartitionAssistant.IsChecked == true ||
                              // Thêm checkbox cho PowerISO
