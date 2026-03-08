@@ -39,10 +39,9 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
                 - Trong `BtnInstall_Click()`: Thêm logic `if (ChkInstall[Y].IsChecked == true) await Install[Y]Async();`
             </step>
 
-            <step number="4" target_file="instruction.md">
-                - Mở file `instruction.md` và thêm thông tin checkbox vào bảng:
+            <step number="4" target_file="CheckboxList.md">
+                - Mở file `CheckboxList.md` và thêm thông tin checkbox vào bảng:
                   + Tên Checkbox: `ChkInstall[Y]`
-                  + Tab: `[X]`
                   + Link: `[URL]`
                   + Argument: `[ARGS]`
             </step>
@@ -91,10 +90,9 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
                 - Kiểm tra logic trong `BtnInstall_Click()` đã gọi đúng `Install[Y]Async()` chưa.
             </step>
 
-            <step number="4" target_file="instruction.md">
-                - Mở file `instruction.md` và thêm thông tin checkbox vào bảng:
+            <step number="4" target_file="CheckboxList.md">
+                - Mở file `CheckboxList.md` và thêm thông tin checkbox vào bảng:
                   + Tên Checkbox: `ChkInstall[Y]`
-                  + Tab: `[X]`
                   + Link: `[URL]`
                   + Argument: `[ARGS]`
             </step>
@@ -206,24 +204,23 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
     <!-- ==================== DOCUMENTATION AFTER CODING ==================== -->
     <rule name="Documentation_After_Coding">
         <description>
-        Sau khi hoàn thành code (trước khi build), PHẢI cập nhật file instruction.md với thông tin checkbox.
+        Sau khi hoàn thành code (trước khi build), PHẢI cập nhật file CheckboxList.md với thông tin checkbox.
         </description>
         <requirements>
-            1. Mở file `instruction.md` trong thư mục gốc của project.
-            2. Thêm một dòng mới vào bảng "Danh sách Checkbox đã cài đặt" với đầy đủ thông tin:
+            1. Mở file `CheckboxList.md` trong thư mục gốc của project.
+            2. Thêm một dòng mới vào bảng với đầy đủ thông tin:
                - Tên Checkbox (ví dụ: ChkInstallIDM)
-               - Tab chứa checkbox (ví dụ: Multimedia, Office, Browser, Gaming, Partition, Info)
                - Link download (giá trị của hằng số [Y]_DOWNLOAD_URL)
                - Argument (giá trị của hằng số [Y]_INSTALL_ARGUMENTS)
             3. Đảm bảo bảng Markdown được căn chỉnh đúng format.
         </requirements>
         <example>
-            // Sau khi tạo checkbox ChkInstallIDM trong Tab Multimedia với:
+            // Sau khi tạo checkbox ChkInstallIDM với:
             // - Link: https://tinyurl.com/idmhcmvn
             // - Argument: /S
-            
-            // Cập nhật instruction.md:
-            | ChkInstallIDM | Multimedia | https://tinyurl.com/idmhcmvn | /S |
+
+            // Cập nhật CheckboxList.md:
+            | ChkInstallIDM | https://tinyurl.com/idmhcmvn | /S |
         </example>
     </rule>
 </implementation_rules>
