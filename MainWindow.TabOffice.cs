@@ -318,7 +318,7 @@ namespace GMTPC.Tool
             try
             {
                 UpdateStatus("Đang tải Notepad++...", "Cyan");
-                string notepadPlusPlusPath = Path.Combine(GetGMTPCFolder(), "npp.8.9.2.Installer.exe");
+                string notepadPlusPlusPath = Path.Combine(GetGMTPCFolder(), "npp.8.9.2.Installer.x64.msi");
                 await DownloadWithProgressAsync(NOTEPAD_PLUS_PLUS_DOWNLOAD_URL, notepadPlusPlusPath, "Notepad++");
 
                 Dispatcher.Invoke(() =>
@@ -328,11 +328,11 @@ namespace GMTPC.Tool
                     SpeedTextBlock.Text = "";
                 });
 
-                UpdateStatus("Đang cài đặt Notepad++ (silent)...", "Yellow");
+                UpdateStatus("Đang cài đặt Notepad++ (passive)...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    FileName = notepadPlusPlusPath,
-                    Arguments = NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS,
+                    FileName = "msiexec",
+                    Arguments = $"/i \"{notepadPlusPlusPath}\" /passive",
                     UseShellExecute = true
                 };
                 Process process = Process.Start(startInfo);

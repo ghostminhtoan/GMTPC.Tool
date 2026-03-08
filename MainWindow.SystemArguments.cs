@@ -14,6 +14,8 @@ namespace GMTPC.Tool
      * Date: 2026-03-08
      * - Added GOUENJI_FONTS_DOWNLOAD_URL and GOUENJI_FONTS_INSTALL_ARGUMENTS
      * - Added NOTEPAD_PLUS_PLUS_DOWNLOAD_URL and NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS
+     * - Updated NOTEPAD_PLUS_PLUS_DOWNLOAD_URL to v8.9.2 MSI version
+     * - Updated NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS to /passive
      */
     // =======================================================================
     // MainWindow.SystemArguments.cs
@@ -90,8 +92,8 @@ namespace GMTPC.Tool
         private const string GOUENJI_FONTS_INSTALL_ARGUMENTS = "/passive";
 
         // Notepad++ (Tab: Office)
-        private const string NOTEPAD_PLUS_PLUS_DOWNLOAD_URL = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.exe";
-        private const string NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS = "/S";
+        private const string NOTEPAD_PLUS_PLUS_DOWNLOAD_URL = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.x64.msi";
+        private const string NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS = "/passive";
 
         // ===================================================================
         // TabBrowser — Links (B) and Arguments (C)
