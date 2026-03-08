@@ -104,3 +104,86 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
         </execution_steps>
     </workflow>
 </workflow_definitions>
+
+<implementation_rules>
+    <!-- ==================== CHECKBOX HOVER SHOW LINK ==================== -->
+    <rule name="Checkbox_Hover_ShowLink">
+        <description>
+        Khi tạo checkbox mới, phải thêm sự kiện MouseEnter để hiển thị link download khi hover.
+        </description>
+        <requirements>
+            1. Trong file XAML (MainWindow.xaml), thêm thuộc tính `MouseEnter="Checkbox_MouseEnter"` vào mỗi CheckBox.
+            2. Trong file MainWindow.SystemButtons.cs, đảm bảo phương thức `Checkbox_MouseEnter` đã xử lý tất cả các checkbox.
+            3. Khi thêm checkbox mới, phải cập nhật switch-case trong `Checkbox_MouseEnter` để hiển thị link tương ứng.
+        </requirements>
+        <example>
+            // Trong MainWindow.xaml
+            <CheckBox x:Name="ChkInstall[Y]" Content="[Y]" MouseEnter="Checkbox_MouseEnter"/>
+            
+            // Trong MainWindow.SystemButtons.cs
+            private void Checkbox_MouseEnter(object sender, MouseEventArgs e)
+            {
+                if (sender is CheckBox checkBox)
+                {
+                    string link = null;
+                    switch (checkBox.Name)
+                    {
+                        case "ChkInstall[Y]":
+                            link = [Y]_DOWNLOAD_URL;
+                            break;
+                        // ... các case khác
+                    }
+                    
+                    if (!string.IsNullOrEmpty(link))
+                    {
+                        checkBox.ToolTip = new ToolTip
+                        {
+                            Content = link,
+                            Placement = PlacementMode.Mouse
+                        };
+                    }
+                }
+            }
+        </example>
+    </rule>
+
+    <!-- ==================== BTNDOWNLOADPAGE RIGHT-CLICK COPY LINK ==================== -->
+    <rule name="BtnDownloadPage_RightClick_CopyLink">
+        <description>
+        Thêm chuột phải vào BtnDownloadPage để có option "Copy Link" - cho phép copy tất cả các link đã chọn.
+        </description>
+        <requirements>
+            1. Trong file XAML (MainWindow.xaml), thêm sự kiện `ContextMenuOpening="BtnDownloadPage_ContextMenuOpening"` hoặc `MouseRightButtonUp="BtnDownloadPage_MouseRightButtonUp"` vào Button.
+            2. Tạo ContextMenu với MenuItem "Copy Link" trong code-behind hoặc XAML.
+            3. Khi click "Copy Link", copy tất cả các link trong `_cachedDownloadLinks` vào clipboard.
+            4. Hiển thị thông báo status sau khi copy thành công.
+        </requirements>
+        <example>
+            // Trong MainWindow.xaml
+            <Button x:Name="BtnDownloadPage" ... MouseRightButtonUp="BtnDownloadPage_MouseRightButtonUp"/>
+            
+            // Trong MainWindow.SystemButtons.cs
+            private void BtnDownloadPage_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+            {
+                var contextMenu = new ContextMenu();
+                var copyItem = new MenuItem { Header = "Copy Link" };
+                copyItem.Click += (s, args) =>
+                {
+                    if (_cachedDownloadLinks.Count > 0)
+                    {
+                        string allLinks = string.Join("\n", _cachedDownloadLinks);
+                        Clipboard.SetText(allLinks);
+                        UpdateStatus($"Đã copy {_cachedDownloadLinks.Count} link vào clipboard", "Green");
+                    }
+                    else
+                    {
+                        UpdateStatus("Không có link nào để copy", "Orange");
+                    }
+                };
+                contextMenu.Items.Add(copyItem);
+                contextMenu.IsOpen = true;
+                e.Handled = true;
+            }
+        </example>
+    </rule>
+</implementation_rules>

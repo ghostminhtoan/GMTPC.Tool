@@ -477,7 +477,7 @@
                     <Button x:Name="BtnStop" Content="Stop" Width="50" Height="28" Background="#FFB80000" BorderBrush="#FFB80000" Click="BtnStop_Click" IsEnabled="False"/>
                     <Button x:Name="BtnRefreshColor" Content="Refresh Color" Width="90" Height="28" Background="DarkMagenta" BorderBrush="DarkCyan" Click="BtnRefreshColor_Click"/>
                 </WrapPanel>
-                <Button x:Name="BtnDownloadPage" Content="Mạng chậm thì chọn nút rồi click vào đây để đến trang download gốc" Width="363" Height="50" Background="DarkGreen" BorderBrush="black" Click="BtnDownloadPage_Click" MouseEnter="BtnDownloadPage_MouseEnter"/>
+                <Button x:Name="BtnDownloadPage" Content="Mạng chậm thì chọn nút rồi click vào đây để đến trang download gốc" Width="363" Height="50" Background="DarkGreen" BorderBrush="black" Click="BtnDownloadPage_Click" MouseEnter="BtnDownloadPage_MouseEnter" MouseRightButtonUp="BtnDownloadPage_MouseRightButtonUp"/>
             </StackPanel>
         </Border>
 

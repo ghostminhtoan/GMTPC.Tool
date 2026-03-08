@@ -6,6 +6,7 @@
 // Cập nhật gần đây:
 //   - 2026-03-05: Thêm currentDPIScale, DPI_STEPS, ApplyDPIScale từ xaml.cs
 //                 theo AI_WORKFLOW.md
+//   - 2026-03-08: Thêm MouseRightButtonUp cho BtnDownloadPage để copy link
 // =======================================================================
 using System;
 using System.Collections.Generic;
@@ -798,6 +799,28 @@ namespace GMTPC.Tool
             {
                 UpdateStatus($"Lỗi khi mở trang download: {ex.Message}", "Red");
             }
+        }
+
+        private void BtnDownloadPage_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var contextMenu = new ContextMenu();
+            var copyItem = new MenuItem { Header = "Copy Link" };
+            copyItem.Click += (s, args) =>
+            {
+                if (_cachedDownloadLinks.Count > 0)
+                {
+                    string allLinks = string.Join("\n", _cachedDownloadLinks);
+                    Clipboard.SetText(allLinks);
+                    UpdateStatus($"Đã copy {_cachedDownloadLinks.Count} link vào clipboard", "Green");
+                }
+                else
+                {
+                    UpdateStatus("Không có link nào để copy", "Orange");
+                }
+            };
+            contextMenu.Items.Add(copyItem);
+            contextMenu.IsOpen = true;
+            e.Handled = true;
         }
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
