@@ -7,6 +7,9 @@
 //   - 2026-03-05: Thêm currentDPIScale, DPI_STEPS, ApplyDPIScale từ xaml.cs
 //                 theo AI_WORKFLOW.md
 //   - 2026-03-08: Thêm MouseRightButtonUp cho BtnDownloadPage để copy link
+//   - 2026-03-09: Thêm ChkInstallAdvancedCodecPack vào UpdateInstallButtonState,
+//                 BtnInstall_Click, BtnSelectAll_Click, BtnSelectNone_Click,
+//                 BtnSelectNoneAllTabs_Click, Checkbox_MouseEnter
 // =======================================================================
 using System;
 using System.Collections.Generic;

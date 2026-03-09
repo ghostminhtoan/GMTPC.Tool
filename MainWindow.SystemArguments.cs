@@ -10,21 +10,21 @@ using System.Windows.Media;
 namespace GMTPC.Tool
 {
     /*
-     * AI Summary:
-     * Date: 2026-03-08
-     * - Added GOUENJI_FONTS_DOWNLOAD_URL and GOUENJI_FONTS_INSTALL_ARGUMENTS
-     * - Added NOTEPAD_PLUS_PLUS_DOWNLOAD_URL and NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS
-     * - Updated NOTEPAD_PLUS_PLUS_DOWNLOAD_URL to v8.9.2 MSI version
-     * - Updated NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS to /passive
-     */
-    // =======================================================================
-    // MainWindow.SystemArguments.cs
-    // Chứa toàn bộ code phức tạp liên quan đến:
-    //   - InstallXxxAsync() có MessageBox, nhiều nhánh argument, key dialog
-    //   - BtnXxx_Click dành riêng cho một app cụ thể
-    //   - ShowXxxKeyDialog() và các helper dialog
-    //   - Logic activate / crack
-    // =======================================================================
+ * AI Summary:
+ * Date: 2026-03-09
+ * - Added POWERISO_DOWNLOAD_URL and POWERISO_INSTALL_ARGUMENTS
+ * - Added TERACOPY_DOWNLOAD_URL and TERACOPY_INSTALL_ARGUMENTS
+ * - Added VPN1111_DOWNLOAD_URL and VPN1111_INSTALL_ARGUMENTS
+ * - Updated InstallPowerISOAsync, InstallVPN1111Async, InstallTeracopyAsync with constants
+ */
+// =======================================================================
+// MainWindow.SystemArguments.cs
+// Chứa toàn bộ code phức tạp liên quan đến:
+//   - InstallXxxAsync() có MessageBox, nhiều nhánh argument, key dialog
+//   - BtnXxx_Click dành riêng cho một app cụ thể
+//   - ShowXxxKeyDialog() và các helper dialog
+//   - Logic activate / crack
+// =======================================================================
     public partial class MainWindow
     {
         // ===================================================================
@@ -89,11 +89,11 @@ namespace GMTPC.Tool
         // ===================================================================
         // Gouenji Fansub Fonts (Tab: Office)
         private const string GOUENJI_FONTS_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Gouenji.Fansub.Fonts.exe";
-        private const string GOUENJI_FONTS_INSTALL_ARGUMENTS = "/passive";
+        private const string GOUENJI_FONTS_INSTALL_ARGUMENTS = "/passive /norestart";
 
         // Notepad++ (Tab: Office)
         private const string NOTEPAD_PLUS_PLUS_DOWNLOAD_URL = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.x64.msi";
-        private const string NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS = "/passive";
+        private const string NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS = "/passive /norestart";
 
         // ===================================================================
         // TabBrowser — Links (B) and Arguments (C)
@@ -113,10 +113,19 @@ namespace GMTPC.Tool
         private const string EDGE_INSTALL_ARGUMENTS = "/silent /install";
 
         // ===================================================================
-        // TabSystem — PowerISO
+        // TabSystem — PowerISO, TeraCopy, VPN 1111
         // TabItem Header: "System"
-        // Checkbox: ChkPowerISO
+        // Checkboxes: ChkPowerISO, ChkTeracopy, ChkVPN1111
         // ===================================================================
+        private const string POWERISO_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe";
+        private const string POWERISO_INSTALL_ARGUMENTS = "/S";
+
+        private const string TERACOPY_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe";
+        private const string TERACOPY_INSTALL_ARGUMENTS = "/S";
+
+        private const string VPN1111_DOWNLOAD_URL = "https://1111-releases.cloudflareclient.com/win/latest";
+        private const string VPN1111_INSTALL_ARGUMENTS = "passive";
+
         private async Task InstallZaloAsync()
         {
             try
@@ -163,8 +172,8 @@ namespace GMTPC.Tool
             try
             {
                 UpdateStatus("Đang tải PowerISO...", "Cyan");
-                string powerISOPath = Path.Combine(GetGMTPCFolder(), "PowerISO8.exe");
-                await DownloadWithProgressAsync("https://www.poweriso.com/PowerISO8-x64.exe", powerISOPath, "PowerISO");
+                string powerISOPath = Path.Combine(GetGMTPCFolder(), "PowerISO.exe");
+                await DownloadWithProgressAsync(POWERISO_DOWNLOAD_URL, powerISOPath, "PowerISO");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -177,7 +186,7 @@ namespace GMTPC.Tool
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = powerISOPath,
-                    Arguments = "/S",
+                    Arguments = POWERISO_INSTALL_ARGUMENTS,
                     UseShellExecute = true
                 };
                 Process process = Process.Start(startInfo);
@@ -210,7 +219,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải vpn 1111...", "Cyan");
                 string vpn1111Path = Path.Combine(GetGMTPCFolder(), "Cloudflare_1.1.1.1_Release-x64.msi");
-                await DownloadWithProgressAsync("https://developers.cloudflare.com/warp-client/Cloudflare_1.1.1.1_Release-x64.msi", vpn1111Path, "vpn 1111");
+                await DownloadWithProgressAsync(VPN1111_DOWNLOAD_URL, vpn1111Path, "vpn 1111");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -222,8 +231,8 @@ namespace GMTPC.Tool
                 UpdateStatus("Đang cài đặt vpn 1111 (yêu cầu quyền)...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    FileName = "msiexec",
-                    Arguments = $"/i \"{vpn1111Path}\" /passive",
+                    FileName = vpn1111Path,
+                    Arguments = VPN1111_INSTALL_ARGUMENTS,
                     UseShellExecute = true
                 };
 
@@ -259,7 +268,7 @@ namespace GMTPC.Tool
                 string teraCopyPath = Path.Combine(GetGMTPCFolder(), "teracopy.exe");
 
                 // Download file với tên teracopy.exe
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/teracopy.exe", teraCopyPath, "Teracopy Installer");
+                await DownloadWithProgressAsync(TERACOPY_DOWNLOAD_URL, teraCopyPath, "Teracopy Installer");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -296,7 +305,7 @@ namespace GMTPC.Tool
                 ProcessStartInfo installInfo = new ProcessStartInfo
                 {
                     FileName = teraCopyPath,
-                    Arguments = "/s", // Silent mode
+                    Arguments = TERACOPY_INSTALL_ARGUMENTS, // Silent mode
                     UseShellExecute = true
                 };
 

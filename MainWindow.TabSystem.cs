@@ -16,6 +16,12 @@ using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
 
+/*
+ * AI Summary:
+ * Date: 2026-03-09
+ * - Note: ChkPowerISO_Click, ChkTeracopy_Click, ChkVPN1111_Click are in SystemArguments.cs
+ */
+
 namespace GMTPC.Tool
 {
     public partial class MainWindow

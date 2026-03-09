@@ -39,8 +39,8 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
                 - Trong `BtnInstall_Click()`: Thêm logic `if (ChkInstall[Y].IsChecked == true) await Install[Y]Async();`
             </step>
 
-            <step number="4" target_file="CheckboxList.md">
-                - Mở file `CheckboxList.md` và thêm thông tin checkbox vào bảng:
+            <step number="4" target_file="CheckboxList.cursorrules">
+                - Mở file `CheckboxList.cursorrules` và thêm thông tin checkbox vào bảng theo đúng Tab:
                   + Tên Checkbox: `ChkInstall[Y]`
                   + Link: `[URL]`
                   + Argument: `[ARGS]`
@@ -90,11 +90,11 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
                 - Kiểm tra logic trong `BtnInstall_Click()` đã gọi đúng `Install[Y]Async()` chưa.
             </step>
 
-            <step number="4" target_file="CheckboxList.md">
-                - Mở file `CheckboxList.md` và thêm thông tin checkbox vào bảng:
+            <step number="4" target_file="CheckboxList.cursorrules">
+                - Mở file `CheckboxList.cursorrules` và cập nhật thông tin checkbox trong bảng theo đúng Tab:
                   + Tên Checkbox: `ChkInstall[Y]`
-                  + Link: `[URL]`
-                  + Argument: `[ARGS]`
+                  + Link: `[URL]` (mới)
+                  + Argument: `[ARGS]` (mới)
             </step>
 
             <step number="5" target_file="All_Modified_Files">
@@ -132,8 +132,8 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
         </requirements>
         <example>
             // Trong MainWindow.xaml
-            <CheckBox x:Name="ChkInstall[Y]" Content="[Y]" MouseEnter="Checkbox_MouseEnter"/>
-            
+            &lt;CheckBox x:Name="ChkInstall[Y]" Content="[Y]" MouseEnter="Checkbox_MouseEnter"/&gt;
+
             // Trong MainWindow.SystemButtons.cs
             private void Checkbox_MouseEnter(object sender, MouseEventArgs e)
             {
@@ -147,7 +147,7 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
                             break;
                         // ... các case khác
                     }
-                    
+
                     if (!string.IsNullOrEmpty(link))
                     {
                         checkBox.ToolTip = new ToolTip
@@ -174,7 +174,7 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
         </requirements>
         <example>
             // Trong MainWindow.xaml
-            <Button x:Name="BtnDownloadPage" ... MouseRightButtonUp="BtnDownloadPage_MouseRightButtonUp"/>
+            &lt;Button x:Name="BtnDownloadPage" ... MouseRightButtonUp="BtnDownloadPage_MouseRightButtonUp"/&gt;
 
             // Trong MainWindow.SystemButtons.cs
             private void BtnDownloadPage_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -183,7 +183,7 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
                 var copyItem = new MenuItem { Header = "Copy Link" };
                 copyItem.Click += (s, args) =>
                 {
-                    if (_cachedDownloadLinks.Count > 0)
+                    if (_cachedDownloadLinks.Count &gt; 0)
                     {
                         string allLinks = string.Join("\n", _cachedDownloadLinks);
                         Clipboard.SetText(allLinks);
@@ -204,10 +204,10 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
     <!-- ==================== DOCUMENTATION AFTER CODING ==================== -->
     <rule name="Documentation_After_Coding">
         <description>
-        Sau khi hoàn thành code (trước khi build), PHẢI cập nhật file CheckboxList.md với thông tin checkbox.
+        Sau khi hoàn thành code (trước khi build), PHẢI cập nhật file CheckboxList.cursorrules với thông tin checkbox.
         </description>
         <requirements>
-            1. Mở file `CheckboxList.md` trong thư mục gốc của project.
+            1. Mở file `CheckboxList.cursorrules` trong thư mục gốc của project.
             2. Thêm một dòng mới vào bảng với đầy đủ thông tin:
                - Tên Checkbox (ví dụ: ChkInstallIDM)
                - Link download (giá trị của hằng số [Y]_DOWNLOAD_URL)
@@ -219,8 +219,110 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
             // - Link: https://tinyurl.com/idmhcmvn
             // - Argument: /S
 
-            // Cập nhật CheckboxList.md:
+            // Cập nhật CheckboxList.cursorrules:
             | ChkInstallIDM | https://tinyurl.com/idmhcmvn | /S |
         </example>
     </rule>
 </implementation_rules>
+
+<current_checkboxes>
+    <!-- Danh sách checkbox hiện tại (tham khảo từ CheckboxList.cursorrules) -->
+    
+    <!-- Tab Popular -->
+    <checkbox name="ChkInstallIDM" tab="Popular" url="https://tinyurl.com/idmhcmvn" args="/s /a /u /o /quiet /skipdlgst"/>
+    <checkbox name="ChkInstallWinRAR" tab="Popular" url="https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.exe" args="/silent /I /EN"/>
+    <checkbox name="ChkInstallBID" tab="Popular" url="https://bulkimagedownloader.com/files/bid_6_62_setup_x64.exe" args=""/>
+    
+    <!-- Tab Office -->
+    <checkbox name="ChkInstallGouenjiFonts" tab="Office" url="https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Gouenji.Fansub.Fonts.exe" args="/passive /norestart"/>
+    <checkbox name="ChkInstallNotepadPlusPlus" tab="Office" url="https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.x64.msi" args="/passive /norestart"/>
+    
+    <!-- Tab Browser -->
+    <checkbox name="ChkInstallChrome" tab="Browser" url="https://dl.google.com/chrome/install/latest/chrome_installer.exe" args="/silent /install"/>
+    <checkbox name="ChkInstallCocCoc" tab="Browser" url="https://coccoc.com/download/win32" args="/silent"/>
+    <checkbox name="ChkInstallEdge" tab="Browser" url="https://go.microsoft.com/fwlink/?linkid=2108834&amp;Channel=Stable&amp;language=vi" args="/silent /install"/>
+    
+    <!-- Tab Multimedia -->
+    <checkbox name="ChkInstallVcredist" tab="Multimedia" url="https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe" args="/passive"/>
+    <checkbox name="ChkInstallDirectX" tab="Multimedia" url="https://github.com/ghostminhtoan/MMT/releases/download/v1.0/DirectX.exe" args="/passive"/>
+    <checkbox name="ChkInstallJava" tab="Multimedia" url="https://github.com/ghostminhtoan/MMT/releases/download/v1.0/java.exe" args="/s"/>
+    <checkbox name="ChkInstallOpenAL" tab="Multimedia" url="https://github.com/ghostminhtoan/MMT/releases/download/v1.0/oalinst.exe" args="/S"/>
+    
+    <!-- Tab Gaming -->
+    <checkbox name="ChkInstallDPChip" tab="Gaming" url="https://www.3dpchip.com/3dp/chip.exe" args="/S"/>
+    <checkbox name="ChkInstallDPNet" tab="Gaming" url="https://www.3dpchip.com/3dp/net.exe" args="/S"/>
+    <checkbox name="ChkInstallRevo" tab="Gaming" url="https://github.com/ghostminhtoan/MMT/releases/download/v1.0/RevoUninstallerPro.exe" args="/S"/>
+    
+    <!-- Tab Info -->
+    <checkbox name="ChkInstallZalo" tab="Info" url="https://zalo.me/download/zalo-pc?utm=90000" args="/s"/>
+    
+    <!-- Tab System -->
+    <checkbox name="ChkActivateWindows" tab="System" url="(Built-in)" args="slmgr /ipk ..."/>
+</current_checkboxes>
+
+<file_structure_reference>
+    <!-- Kiến trúc Partial Classes của dự án -->
+    
+    <file name="MainWindow.xaml">
+        - Định nghĩa giao diện UI
+        - Khai báo các control: Button, CheckBox, StatusBar, TabControl
+    </file>
+    
+    <file name="MainWindow.xaml.cs">
+        - Constructor và InitializeComponent()
+        - KHÔNG thêm code logic vào file này
+    </file>
+    
+    <file name="MainWindow.SystemArguments.cs">
+        - Khai báo tất cả hằng số DOWNLOAD_URL và INSTALL_ARGUMENTS
+        - Phương thức DownloadWithProgressAsync, DownloadWithRetryAsync
+        - Phương thức InstallZaloAsync (nếu thuộc về System)
+    </file>
+    
+    <file name="MainWindow.SystemBar.cs">
+        - Phương thức UpdateStatus() để hiển thị trạng thái
+        - Phương thức UpdateProgress() để cập nhật progress bar
+    </file>
+    
+    <file name="MainWindow.SystemButtons.cs">
+        - Xử lý sự kiện các Button: BtnInstall, BtnSelectAll, BtnSelectNone
+        - Phương thức UpdateInstallButtonState()
+        - Phương thức Checkbox_MouseEnter()
+        - Phương thức BtnDownloadPage_MouseRightButtonUp()
+    </file>
+    
+    <file name="MainWindow.TabPopular.cs">
+        - Khai báo và xử lý checkbox cho Tab Popular
+        - Phương thức InstallIDMAsync, InstallWinRARAsync, InstallBIDAsync
+    </file>
+    
+    <file name="MainWindow.TabOffice.cs">
+        - Khai báo và xử lý checkbox cho Tab Office
+        - Phương thức InstallGouenjiFontsAsync, InstallNotepadPlusPlusAsync
+    </file>
+    
+    <file name="MainWindow.TabBrowser.cs">
+        - Khai báo và xử lý checkbox cho Tab Browser
+        - Phương thức InstallChromeAsync, InstallCocCocAsync, InstallEdgeAsync
+    </file>
+    
+    <file name="MainWindow.TabMultimedia.cs">
+        - Khai báo và xử lý checkbox cho Tab Multimedia
+        - Phương thức InstallVcredistAsync, InstallDirectXAsync, InstallJavaAsync, InstallOpenALAsync
+    </file>
+    
+    <file name="MainWindow.TabGaming.cs">
+        - Khai báo và xử lý checkbox cho Tab Gaming
+        - Phương thức InstallDPChipAsync, InstallDPNetAsync, InstallRevoAsync
+    </file>
+    
+    <file name="MainWindow.TabInfo.cs">
+        - Khai báo và xử lý checkbox cho Tab Info
+        - Hiển thị thông tin hệ thống
+    </file>
+    
+    <file name="CheckboxList.cursorrules">
+        - Tài liệu danh sách tất cả checkbox
+        - Cập nhật sau mỗi lần tạo/sửa checkbox
+    </file>
+</file_structure_reference>

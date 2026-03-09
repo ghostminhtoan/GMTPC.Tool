@@ -16,6 +16,12 @@ using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
 
+/*
+ * AI Summary:
+ * Date: 2026-03-09
+ * - Updated ChkAdvancedCodec with new link and argument
+ */
+
 namespace GMTPC.Tool
 {
     public partial class MainWindow
