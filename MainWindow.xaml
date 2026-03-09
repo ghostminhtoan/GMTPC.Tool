@@ -372,11 +372,11 @@
                 <TabItem Header="Multimedia">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="MultimediaPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
+                            <CheckBox x:Name="ChkAdvancedCodecPack" Content="Advanced Codec Pack" Width="200" Height="34" Click="ChkAdvancedCodecPack_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkPotPlayer" Content="PotPlayer" Width="200" Height="34" Click="ChkPotPlayer_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkFastStone" Content="FastStone Capture" Width="200" Height="34" Click="ChkFastStone_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkFoxit" Content="Foxit PDF Reader" Width="200" Height="34" Click="ChkFoxit_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkBandiview" Content="Bandiview (Picture viewer)" Width="200" Height="34" Click="ChkBandiview_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="ChkAdvancedCodec" Content="Advanced Codec Pack &#10; (Video Music codec)" Width="182" Height="34" Click="ChkAdvancedCodec_Click" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -395,8 +395,8 @@
                                 </StackPanel>
                             </Border>
                             <CheckBox x:Name="ChkPowerISO" Content="PowerISO" Width="200" Height="34" Click="ChkPowerISO_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="ChkVPN1111" Content="vpn 1111" Width="200" Height="34" Click="ChkVPN1111_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="ChkTeracopy" Content="Teracopy" Width="200" Height="34" Click="ChkTeracopy_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkTeraCopy" Content="TeraCopy" Width="200" Height="34" Click="ChkTeraCopy_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkVPN1111" Content="VPN 1111 (Cloudflare)" Width="200" Height="34" Click="ChkVPN1111_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkGoogleDrive" Content="Google Drive" Width="200" Height="34" Click="ChkGoogleDrive_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205" Margin="2">
                                 <StackPanel>

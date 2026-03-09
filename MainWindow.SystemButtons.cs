@@ -7,9 +7,7 @@
 //   - 2026-03-05: Thêm currentDPIScale, DPI_STEPS, ApplyDPIScale từ xaml.cs
 //                 theo AI_WORKFLOW.md
 //   - 2026-03-08: Thêm MouseRightButtonUp cho BtnDownloadPage để copy link
-//   - 2026-03-09: Thêm ChkInstallAdvancedCodecPack vào UpdateInstallButtonState,
-//                 BtnInstall_Click, BtnSelectAll_Click, BtnSelectNone_Click,
-//                 BtnSelectNoneAllTabs_Click, Checkbox_MouseEnter
+//   - 2026-03-09: Removed ChkAdvancedCodec, ChkTeracopy, ChkVPN1111 references
 // =======================================================================
 using System;
 using System.Collections.Generic;
@@ -223,8 +221,8 @@ namespace GMTPC.Tool
                     ChkComfortClipboardPro.IsChecked = true;
                     ChkFolderSize.IsChecked = true;
                     ChkPowerISO.IsChecked = true;
+                    ChkTeraCopy.IsChecked = true;
                     ChkVPN1111.IsChecked = true;
-                    ChkTeracopy.IsChecked = true;
                     ChkGoogleDrive.IsChecked = true;
                     ChkNetLimiter.IsChecked = true;
                 }
@@ -264,11 +262,11 @@ namespace GMTPC.Tool
                 else if (tabHeader == "Multimedia")
                 {
                     // Chọn checkbox trong tab Multimedia
+                    ChkAdvancedCodecPack.IsChecked = true;
                     ChkPotPlayer.IsChecked = true;
                     ChkFastStone.IsChecked = true;
                     ChkFoxit.IsChecked = true;
                     ChkBandiview.IsChecked = true;
-                    ChkAdvancedCodec.IsChecked = true;
                 }
                 // Nếu tab là "Remote Desktop"
                 else if (tabHeader == "Remote Desktop")
@@ -330,8 +328,8 @@ namespace GMTPC.Tool
                     ChkComfortClipboardPro.IsChecked = false;
                     ChkFolderSize.IsChecked = false;
                     ChkPowerISO.IsChecked = false;
+                    ChkTeraCopy.IsChecked = false;
                     ChkVPN1111.IsChecked = false;
-                    ChkTeracopy.IsChecked = false;
                     ChkGoogleDrive.IsChecked = false;
                     ChkNetLimiter.IsChecked = false;
                 }
@@ -371,11 +369,11 @@ namespace GMTPC.Tool
                 else if (tabHeader == "Multimedia")
                 {
                     // Bỏ chọn checkbox trong tab Multimedia
+                    ChkAdvancedCodecPack.IsChecked = false;
                     ChkPotPlayer.IsChecked = false;
                     ChkFastStone.IsChecked = false;
                     ChkFoxit.IsChecked = false;
                     ChkBandiview.IsChecked = false;
-                    ChkAdvancedCodec.IsChecked = false;
                 }
                 // Nếu tab là "Remote Desktop"
                 else if (tabHeader == "Remote Desktop")
@@ -425,6 +423,7 @@ namespace GMTPC.Tool
             ChkFastStone.IsChecked = false;
             ChkFoxit.IsChecked = false;
             ChkBandiview.IsChecked = false;
+            ChkAdvancedCodecPack.IsChecked = false;
             ChkRevoUninstaller.IsChecked = false;
             ChkInstallZalo.IsChecked = false;
 
@@ -434,8 +433,8 @@ namespace GMTPC.Tool
             ChkComfortClipboardPro.IsChecked = false;
             ChkFolderSize.IsChecked = false;
             ChkPowerISO.IsChecked = false;
+            ChkTeraCopy.IsChecked = false;
             ChkVPN1111.IsChecked = false;
-            ChkTeracopy.IsChecked = false;
             ChkGoogleDrive.IsChecked = false;
             ChkNetLimiter.IsChecked = false;
 
@@ -464,9 +463,6 @@ namespace GMTPC.Tool
             ChkActivateOffice.IsChecked = false;
             ChkGouenjiFonts.IsChecked = false;
             ChkNotepadPlusPlus.IsChecked = false;
-
-            // Bỏ chọn Advanced Codec
-            ChkAdvancedCodec.IsChecked = false;
 
             // Bỏ chọn Win 11
             ChkWin11_26H1.IsChecked = false;
@@ -513,6 +509,7 @@ namespace GMTPC.Tool
             if (ChkFastStone.IsChecked == true) tasks.Add((InstallFastStoneAsync, ChkFastStone));
             if (ChkFoxit.IsChecked == true) tasks.Add((InstallFoxitAsync, ChkFoxit));
             if (ChkBandiview.IsChecked == true) tasks.Add((InstallBandiviewAsync, ChkBandiview));
+            if (ChkAdvancedCodecPack.IsChecked == true) tasks.Add((InstallAdvancedCodecPackAsync, ChkAdvancedCodecPack));
             if (ChkRevoUninstaller.IsChecked == true) tasks.Add((InstallHibitUninstallerAsync, ChkRevoUninstaller));
             if (ChkInstallZalo.IsChecked == true) tasks.Add((InstallZaloAsync, ChkInstallZalo));
             if (Chk3DPChip.IsChecked == true) tasks.Add((Run3DPChipAsync, Chk3DPChip));
@@ -525,8 +522,8 @@ namespace GMTPC.Tool
             if (ChkNotepadPlusPlus.IsChecked == true) tasks.Add((InstallNotepadPlusPlusAsync, ChkNotepadPlusPlus));
             // Only add once to avoid duplicate install and MessageBox
             if (ChkPowerISO.IsChecked == true) tasks.Add((InstallPowerISOAsync, ChkPowerISO));
+            if (ChkTeraCopy.IsChecked == true) tasks.Add((InstallTeraCopyAsync, ChkTeraCopy));
             if (ChkVPN1111.IsChecked == true) tasks.Add((InstallVPN1111Async, ChkVPN1111));
-            if (ChkTeracopy.IsChecked == true) tasks.Add((InstallTeraCopyAsync, ChkTeracopy));
             if (ChkGoogleDrive.IsChecked == true) tasks.Add((InstallGoogleDriveAsync, ChkGoogleDrive));
             if (ChkNetLimiter.IsChecked == true) tasks.Add((InstallNetLimiterAsync, ChkNetLimiter));
             if (ChkFolderSize.IsChecked == true) tasks.Add((InstallFolderSizeAsync, ChkFolderSize));
@@ -543,7 +540,6 @@ namespace GMTPC.Tool
             if (ChkTeamViewerFull.IsChecked == true) tasks.Add((InstallTeamViewerFullAsync, ChkTeamViewerFull));
             if (ChkAnyDesk.IsChecked == true) tasks.Add((InstallAnyDeskAsync, ChkAnyDesk));
             if (ChkVMWare162Lite.IsChecked == true) tasks.Add((InstallVMWare162LiteAsync, ChkVMWare162Lite));
-            if (ChkAdvancedCodec.IsChecked == true) tasks.Add((InstallAdvancedCodecAsync, ChkAdvancedCodec));
             if (ChkWin11_26H1.IsChecked == true) tasks.Add((InstallWin11_26H1Async, ChkWin11_26H1));
             if (ChkWin10_20H2_2022April.IsChecked == true) tasks.Add((InstallWin10_20H2_2022AprilAsync, ChkWin10_20H2_2022April));
             if (ChkWin10LtscIot21H2.IsChecked == true) tasks.Add((InstallWin10LtscIot21H2Async, ChkWin10LtscIot21H2));
@@ -690,8 +686,14 @@ namespace GMTPC.Tool
             if (ChkBandiview?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Bandiview.exe");
 
-            if (ChkAdvancedCodec?.IsChecked == true)
+            if (ChkAdvancedCodecPack?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/ADVANCED_Codec_Pack.exe");
+
+            if (ChkTeraCopy?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe");
+
+            if (ChkVPN1111?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://1111-releases.cloudflareclient.com/win/latest");
 
             if (ChkTeamViewerQS?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://dl.teamviewer.com/download/TeamViewerQS_x64.exe");
@@ -713,12 +715,6 @@ namespace GMTPC.Tool
 
             if (ChkPowerISO?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe");
-
-            if (ChkVPN1111?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://1111-releases.cloudflareclient.com/win/latest");
-
-            if (ChkTeracopy?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe");
 
             if (ChkGoogleDrive?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://dl.google.com/drive-file-stream/GoogleDriveSetup.exe");
@@ -888,9 +884,9 @@ namespace GMTPC.Tool
                 ChkPauseWindowsUpdate, ChkVcredist, ChkDirectX, ChkJava, ChkOpenAL,
                 Chk3DPChip, Chk3DPNet, ChkRevoUninstaller,
                 ChkOfficeToolPlus, ChkOfficeSoftmaker, ChkActivateOffice,
-                ChkPotPlayer, ChkFastStone, ChkFoxit, ChkBandiview,
-                ChkAdvancedCodec, ChkMMTApps, ChkDISMPP, ChkComfortClipboardPro,
-                ChkFolderSize, ChkPowerISO, ChkVPN1111, ChkTeracopy, ChkGoogleDrive,
+                ChkPotPlayer, ChkFastStone, ChkFoxit, ChkBandiview, ChkAdvancedCodecPack,
+                ChkMMTApps, ChkDISMPP, ChkComfortClipboardPro,
+                ChkFolderSize, ChkPowerISO, ChkTeraCopy, ChkVPN1111, ChkGoogleDrive,
                 ChkNetLimiter, ChkAomeiPartitionAssistant, ChkDiskGenius, ChkProcessLasso,
                 ChkThrottlestop, ChkMSIAfterburner, ChkLeagueOfLegends, ChkPorofessor,
                 ChkSamuraiMaiden, ChkChrome, ChkCocCoc, ChkEdge,
@@ -969,6 +965,15 @@ namespace GMTPC.Tool
                     case "ChkBandiview":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Bandiview.exe";
                         break;
+                    case "ChkAdvancedCodecPack":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/ADVANCED_Codec_Pack.exe";
+                        break;
+                    case "ChkTeraCopy":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe";
+                        break;
+                    case "ChkVPN1111":
+                        link = "https://1111-releases.cloudflareclient.com/win/latest";
+                        break;
                     case "ChkMMTApps":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/MMT.Apps.exe";
                         break;
@@ -980,9 +985,6 @@ namespace GMTPC.Tool
                         break;
                     case "ChkPowerISO":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe";
-                        break;
-                    case "ChkTeracopy":
-                        link = "https://www.codesector.com/files/teracopy.exe";
                         break;
                     case "ChkGoogleDrive":
                         link = "https://dl.google.com/drive-file-stream/GoogleDriveSetup.exe";
@@ -1035,14 +1037,8 @@ namespace GMTPC.Tool
                     case "ChkActivateOffice":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/activate-office.bat";
                         break;
-                    case "ChkAdvancedCodec":
-                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Advanced.Codec.Pack.exe";
-                        break;
                     case "ChkFolderSize":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FolderSize.exe";
-                        break;
-                    case "ChkVPN1111":
-                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.1.1.1/1.1.1.1-setup.exe";
                         break;
                     case "ChkLeagueOfLegends":
                         link = "https://lol.qq.com/download/";

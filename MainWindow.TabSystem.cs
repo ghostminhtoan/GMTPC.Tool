@@ -19,13 +19,39 @@ using System.Windows.Data;
 /*
  * AI Summary:
  * Date: 2026-03-09
- * - Note: ChkPowerISO_Click, ChkTeracopy_Click, ChkVPN1111_Click are in SystemArguments.cs
+ * - Added ChkTeraCopy and ChkVPN1111 references
  */
 
 namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
-        // Install methods and checkbox handlers have been moved to MainWindow.SystemArguments.cs
+        private void ChkTeraCopy_Click(object sender, RoutedEventArgs e)
+        {
+            if (ChkTeraCopy.IsChecked == true)
+            {
+                UpdateStatus("Đã chọn: TeraCopy", "Green");
+            }
+            else
+            {
+                UpdateStatus("Đã hủy chọn: TeraCopy", "Yellow");
+            }
+
+            UpdateInstallButtonState();
+        }
+
+        private void ChkVPN1111_Click(object sender, RoutedEventArgs e)
+        {
+            if (ChkVPN1111.IsChecked == true)
+            {
+                UpdateStatus("Đã chọn: VPN 1111 (Cloudflare)", "Green");
+            }
+            else
+            {
+                UpdateStatus("Đã hủy chọn: VPN 1111 (Cloudflare)", "Yellow");
+            }
+
+            UpdateInstallButtonState();
+        }
     }
 }

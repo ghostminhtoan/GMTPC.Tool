@@ -199,46 +199,6 @@ namespace GMTPC.Tool
             }
         }
 
-
-        private async Task InstallTeraCopyAsync()
-        {
-            try
-            {
-                UpdateStatus("Đang tải TeraCopy...", "Cyan");
-                string teracopyPath = Path.Combine(GetGMTPCFolder(), "teracopy.exe");
-                await DownloadWithProgressAsync("https://www.codesector.com/files/teracopy.exe", teracopyPath, "TeraCopy");
-
-                Dispatcher.Invoke(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                });
-
-                UpdateStatus("Đang chạy TeraCopy (silent)...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = teracopyPath,
-                    Arguments = "/S",
-                    UseShellExecute = true
-                };
-                Process process = Process.Start(startInfo);
-
-                if (process != null)
-                {
-                    await Task.Run(() => process.WaitForExit());
-                    UpdateStatus("TeraCopy đã hoàn tất.", "Green");
-                }
-
-                if (File.Exists(teracopyPath)) File.Delete(teracopyPath);
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Lỗi khi cài TeraCopy: {ex.Message}", "Red");
-            }
-        }
-
-
         private async Task InstallAnyDeskAsync()
         {
             try

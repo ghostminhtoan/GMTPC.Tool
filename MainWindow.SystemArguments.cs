@@ -12,10 +12,7 @@ namespace GMTPC.Tool
     /*
  * AI Summary:
  * Date: 2026-03-09
- * - Added POWERISO_DOWNLOAD_URL and POWERISO_INSTALL_ARGUMENTS
- * - Added TERACOPY_DOWNLOAD_URL and TERACOPY_INSTALL_ARGUMENTS
- * - Added VPN1111_DOWNLOAD_URL and VPN1111_INSTALL_ARGUMENTS
- * - Updated InstallPowerISOAsync, InstallVPN1111Async, InstallTeracopyAsync with constants
+ * - Added ChkAdvancedCodecPack, ChkTeraCopy, ChkVPN1111 constants and methods
  */
 // =======================================================================
 // MainWindow.SystemArguments.cs
@@ -113,16 +110,26 @@ namespace GMTPC.Tool
         private const string EDGE_INSTALL_ARGUMENTS = "/silent /install";
 
         // ===================================================================
-        // TabSystem — PowerISO, TeraCopy, VPN 1111
+        // TabMultimedia — Advanced Codec Pack
+        // TabItem Header: "Multimedia"
+        // Checkboxes: ChkAdvancedCodecPack
+        // ===================================================================
+        private const string ADVANCEDCODECPACK_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/ADVANCED_Codec_Pack.exe";
+        private const string ADVANCEDCODECPACK_INSTALL_ARGUMENTS = "/S /V/qn";
+
+        // ===================================================================
+        // TabSystem — PowerISO
         // TabItem Header: "System"
-        // Checkboxes: ChkPowerISO, ChkTeracopy, ChkVPN1111
+        // Checkboxes: ChkPowerISO, ChkTeraCopy, ChkVPN1111
         // ===================================================================
         private const string POWERISO_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe";
         private const string POWERISO_INSTALL_ARGUMENTS = "/S";
 
+        // TeraCopy
         private const string TERACOPY_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe";
         private const string TERACOPY_INSTALL_ARGUMENTS = "/S";
 
+        // VPN 1111 (Cloudflare)
         private const string VPN1111_DOWNLOAD_URL = "https://1111-releases.cloudflareclient.com/win/latest";
         private const string VPN1111_INSTALL_ARGUMENTS = "passive";
 
@@ -205,196 +212,6 @@ namespace GMTPC.Tool
             catch (Exception ex)
             {
                 UpdateStatus($"Lỗi khi cài đặt PowerISO: {ex.Message}", "Red");
-            }
-        }
-
-        // ===================================================================
-        // TabSystem — VPN 1111
-        // TabItem Header: "System"
-        // Checkbox: ChkVPN1111
-        // ===================================================================
-        private async Task InstallVPN1111Async()
-        {
-            try
-            {
-                UpdateStatus("Đang tải vpn 1111...", "Cyan");
-                string vpn1111Path = Path.Combine(GetGMTPCFolder(), "Cloudflare_1.1.1.1_Release-x64.msi");
-                await DownloadWithProgressAsync(VPN1111_DOWNLOAD_URL, vpn1111Path, "vpn 1111");
-
-                Dispatcher.Invoke(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                });
-
-                UpdateStatus("Đang cài đặt vpn 1111 (yêu cầu quyền)...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = vpn1111Path,
-                    Arguments = VPN1111_INSTALL_ARGUMENTS,
-                    UseShellExecute = true
-                };
-
-                Process process = Process.Start(startInfo);
-                if (process != null)
-                {
-                    await Task.Run(() => process.WaitForExit());
-                    UpdateStatus("Cài đặt vpn 1111 hoàn tất!", "Green");
-                }
-
-                if (File.Exists(vpn1111Path))
-                {
-                    File.Delete(vpn1111Path);
-                }
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Lỗi khi cài đặt vpn 1111: {ex.Message}", "Red");
-            }
-        }
-
-        // ===================================================================
-        // TabSystem — Teracopy
-        // TabItem Header: "System"
-        // Checkbox: ChkTeracopy
-        // ===================================================================
-        private async Task InstallTeracopyAsync()
-        {
-            try
-            {
-                // Teracopy installer thương bi antivirus chặn or cnh báo, nhng ng dng yu cầu cài dặt
-                UpdateStatus("Đang tải bô cài Teracopy...", "Cyan");
-                string teraCopyPath = Path.Combine(GetGMTPCFolder(), "teracopy.exe");
-
-                // Download file với tên teracopy.exe
-                await DownloadWithProgressAsync(TERACOPY_DOWNLOAD_URL, teraCopyPath, "Teracopy Installer");
-
-                Dispatcher.Invoke(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                });
-
-                // Unblock file (remove Zone.Identifier alternate data stream)
-                try
-                {
-                    string zoneIdentifierPath = teraCopyPath + ":Zone.Identifier";
-                    if (File.Exists(zoneIdentifierPath))
-                    {
-                        File.Delete(zoneIdentifierPath);
-                        UpdateStatus("Đã unblock file Teracopy installer", "Cyan");
-                    }
-                }
-                catch { }
-
-                // Thêm Windows Defender exclusion tạm thời cho %temp%
-                string tempPath = Path.GetTempPath();
-                try
-                {
-                    ProcessStartInfo addExclusionInfo = new ProcessStartInfo
-                    {
-                        FileName = "powershell.exe",
-                        Arguments = $"-Command \"Add-MpPreference -ExclusionPath '{tempPath}' -Force\"",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    };
-                    Process addExclusionProcess = Process.Start(addExclusionInfo);
-                    if (addExclusionProcess != null)
-                    {
-                        await Task.Run(() => addExclusionProcess.WaitForExit());
-                        UpdateStatus("Đã thêm exclusion tạm thời cho %temp% để cài Teracopy", "Yellow");
-                    }
-                }
-                catch (Exception exEx)
-                {
-                    UpdateStatus($"Cảnh báo: Không thể thêm exclusion: {exEx.Message}", "Yellow");
-                }
-
-                UpdateStatus("Đang cài đặt Teracopy (silent)...", "Yellow");
-                ProcessStartInfo installInfo = new ProcessStartInfo
-                {
-                    FileName = teraCopyPath,
-                    Arguments = TERACOPY_INSTALL_ARGUMENTS, // Silent mode: /S
-                    UseShellExecute = true,
-                    WorkingDirectory = Path.GetDirectoryName(teraCopyPath)
-                };
-
-                Process installProcess = Process.Start(installInfo);
-                if (installProcess != null)
-                {
-                    await Task.Run(() => installProcess.WaitForExit());
-                    if (installProcess.ExitCode == 0 || installProcess.ExitCode == 3010)
-                    {
-                        UpdateStatus("Cài đặt Teracopy hoàn tất!", "Green");
-                    }
-                    else
-                    {
-                        UpdateStatus($"Cài đặt Teracopy hoàn tất với mã: {installProcess.ExitCode}", "Yellow");
-                    }
-                }
-
-                // Xóa Windows Defender exclusion tạm thời cho %temp% sau khi cài xong
-                try
-                {
-                    ProcessStartInfo removeExclusionInfo = new ProcessStartInfo
-                    {
-                        FileName = "powershell.exe",
-                        Arguments = $"-Command \"Remove-MpPreference -ExclusionPath '{tempPath}' -Force\"",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    };
-                    Process removeExclusionProcess = Process.Start(removeExclusionInfo);
-                    if (removeExclusionProcess != null)
-                    {
-                        await Task.Run(() => removeExclusionProcess.WaitForExit());
-                        UpdateStatus("Đã xóa exclusion tạm thời cho %temp%", "Yellow");
-                    }
-                }
-                catch (Exception exEx)
-                {
-                    UpdateStatus($"Cảnh báo: Không thể xóa exclusion: {exEx.Message}", "Yellow");
-                }
-
-                // Tạo Windows Defender exclusion vĩnh viễn cho %programfiles%\Teracopy
-                try
-                {
-                    string programFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                    string teraCopyExclusionPath = Path.Combine(programFilesPath, "Teracopy");
-
-                    ProcessStartInfo addPermanentExclusionInfo = new ProcessStartInfo
-                    {
-                        FileName = "powershell.exe",
-                        Arguments = $"-Command \"Add-MpPreference -ExclusionPath '{teraCopyExclusionPath}' -Force\"",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    };
-                    Process permanentExclusionProcess = Process.Start(addPermanentExclusionInfo);
-                    if (permanentExclusionProcess != null)
-                    {
-                        await Task.Run(() => permanentExclusionProcess.WaitForExit());
-                        UpdateStatus("Đã tạo Windows Defender exclusion vĩnh viễn cho Teracopy", "Yellow");
-                    }
-                }
-                catch (Exception exEx)
-                {
-                    UpdateStatus($"Cảnh báo: Không thể tạo exclusion vĩnh viễn: {exEx.Message}", "Yellow");
-                }
-
-                // Xóa file installer sau khi chạy xong
-                if (File.Exists(teraCopyPath))
-                {
-                    File.Delete(teraCopyPath);
-                    UpdateStatus("Đã xóa file Teracopy installer tạm thời", "Cyan");
-                }
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Lỗi khi tải hoặc cài đặt Teracopy: {ex.Message}", "Red");
             }
         }
 
@@ -563,34 +380,6 @@ namespace GMTPC.Tool
             UpdateInstallButtonState();
         }
 
-        private void ChkVPN1111_Click(object sender, RoutedEventArgs e)
-        {
-            if (ChkVPN1111.IsChecked == true)
-            {
-                UpdateStatus("Đã chọn: vpn 1111", "Green");
-            }
-            else
-            {
-                UpdateStatus("Đã hủy chọn: vpn 1111", "Yellow");
-            }
-
-            UpdateInstallButtonState();
-        }
-
-        private void ChkTeracopy_Click(object sender, RoutedEventArgs e)
-        {
-            if (ChkTeracopy.IsChecked == true)
-            {
-                UpdateStatus("Đã chọn: Teracopy", "Green");
-            }
-            else
-            {
-                UpdateStatus("Đã hủy chọn: Teracopy", "Yellow");
-            }
-
-            UpdateInstallButtonState();
-        }
-
         private void ChkGoogleDrive_Click(object sender, RoutedEventArgs e)
         {
             if (ChkGoogleDrive.IsChecked == true)
@@ -666,10 +455,6 @@ namespace GMTPC.Tool
                              ChkAomeiPartitionAssistant.IsChecked == true ||
                              // Thêm checkbox cho PowerISO
                              ChkPowerISO.IsChecked == true ||
-                             // Thêm checkbox cho VPN 1111
-                             ChkVPN1111.IsChecked == true ||
-                             // Thêm checkbox cho Teracopy
-                             ChkTeracopy.IsChecked == true ||
                              // Thêm checkbox cho Google Drive
                              ChkGoogleDrive.IsChecked == true ||
                              // Thêm checkbox cho NetLimiter
@@ -690,14 +475,18 @@ namespace GMTPC.Tool
                              ChkFastStone.IsChecked == true ||
                              ChkFoxit.IsChecked == true ||
                              ChkBandiview.IsChecked == true ||
-                             ChkAdvancedCodec.IsChecked == true ||
                              ChkTeamViewerQS.IsChecked == true ||
                              ChkTeamViewerFull.IsChecked == true ||
                              ChkAnyDesk.IsChecked == true ||
                              ChkVMWare162Lite.IsChecked == true ||
                              ChkWin11_26H1.IsChecked == true ||
                              ChkWin10_20H2_2022April.IsChecked == true ||
-                             ChkWin10LtscIot21H2.IsChecked == true;
+                             ChkWin10LtscIot21H2.IsChecked == true ||
+                             // Multimedia - Advanced Codec Pack
+                             ChkAdvancedCodecPack.IsChecked == true ||
+                             // System - TeraCopy and VPN 1111
+                             ChkTeraCopy.IsChecked == true ||
+                             ChkVPN1111.IsChecked == true;
 
             // Bao gồm checkbox cho Tạo WinRE và WinPE
 
@@ -1188,6 +977,135 @@ namespace GMTPC.Tool
             catch (Exception ex)
             {
                 UpdateStatus($"Lỗi khi cài đặt AOMEI Partition Assistant: {ex.Message}", "Red");
+            }
+        }
+
+        // ===================================================================
+        // TabMultimedia — Advanced Codec Pack
+        // TabItem Header: "Multimedia"
+        // Checkbox: ChkAdvancedCodecPack
+        // ===================================================================
+        private async Task InstallAdvancedCodecPackAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang tải Advanced Codec Pack...", "Cyan");
+                string codecPath = Path.Combine(GetGMTPCFolder(), "ADVANCED_Codec_Pack.exe");
+                await DownloadWithProgressAsync(ADVANCEDCODECPACK_DOWNLOAD_URL, codecPath, "Advanced Codec Pack");
+
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                UpdateStatus("Đang cài đặt Advanced Codec Pack (silent)...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = codecPath,
+                    Arguments = ADVANCEDCODECPACK_INSTALL_ARGUMENTS,
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("Advanced Codec Pack đã hoàn tất.", "Green");
+                }
+
+                if (File.Exists(codecPath)) File.Delete(codecPath);
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài Advanced Codec Pack: {ex.Message}", "Red");
+            }
+        }
+
+        // ===================================================================
+        // TabSystem — TeraCopy
+        // TabItem Header: "System"
+        // Checkbox: ChkTeraCopy
+        // ===================================================================
+        private async Task InstallTeraCopyAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang tải TeraCopy...", "Cyan");
+                string teraPath = Path.Combine(GetGMTPCFolder(), "TeraCopy.Pro.v3.17.0.0.exe");
+                await DownloadWithProgressAsync(TERACOPY_DOWNLOAD_URL, teraPath, "TeraCopy");
+
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                UpdateStatus("Đang cài đặt TeraCopy (silent)...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = teraPath,
+                    Arguments = TERACOPY_INSTALL_ARGUMENTS,
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("TeraCopy đã hoàn tất.", "Green");
+                }
+
+                if (File.Exists(teraPath)) File.Delete(teraPath);
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài TeraCopy: {ex.Message}", "Red");
+            }
+        }
+
+        // ===================================================================
+        // TabSystem — VPN 1111 (Cloudflare)
+        // TabItem Header: "System"
+        // Checkbox: ChkVPN1111
+        // ===================================================================
+        private async Task InstallVPN1111Async()
+        {
+            try
+            {
+                UpdateStatus("Đang tải VPN 1111...", "Cyan");
+                string vpnPath = Path.Combine(GetGMTPCFolder(), "VPN1111.exe");
+                await DownloadWithProgressAsync(VPN1111_DOWNLOAD_URL, vpnPath, "VPN 1111");
+
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                UpdateStatus("Đang cài đặt VPN 1111 (passive)...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = vpnPath,
+                    Arguments = VPN1111_INSTALL_ARGUMENTS,
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("VPN 1111 đã hoàn tất.", "Green");
+                }
+
+                if (File.Exists(vpnPath)) File.Delete(vpnPath);
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài VPN 1111: {ex.Message}", "Red");
             }
         }
 
