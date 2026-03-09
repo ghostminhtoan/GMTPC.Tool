@@ -277,6 +277,18 @@ namespace GMTPC.Tool
                     SpeedTextBlock.Text = "";
                 });
 
+                // Unblock file (remove Zone.Identifier alternate data stream)
+                try
+                {
+                    string zoneIdentifierPath = teraCopyPath + ":Zone.Identifier";
+                    if (File.Exists(zoneIdentifierPath))
+                    {
+                        File.Delete(zoneIdentifierPath);
+                        UpdateStatus("Đã unblock file Teracopy installer", "Cyan");
+                    }
+                }
+                catch { }
+
                 // Thêm Windows Defender exclusion tạm thời cho %temp%
                 string tempPath = Path.GetTempPath();
                 try
@@ -305,21 +317,22 @@ namespace GMTPC.Tool
                 ProcessStartInfo installInfo = new ProcessStartInfo
                 {
                     FileName = teraCopyPath,
-                    Arguments = TERACOPY_INSTALL_ARGUMENTS, // Silent mode
-                    UseShellExecute = true
+                    Arguments = TERACOPY_INSTALL_ARGUMENTS, // Silent mode: /S
+                    UseShellExecute = true,
+                    WorkingDirectory = Path.GetDirectoryName(teraCopyPath)
                 };
 
                 Process installProcess = Process.Start(installInfo);
                 if (installProcess != null)
                 {
                     await Task.Run(() => installProcess.WaitForExit());
-                    if (installProcess.ExitCode == 0)
+                    if (installProcess.ExitCode == 0 || installProcess.ExitCode == 3010)
                     {
                         UpdateStatus("Cài đặt Teracopy hoàn tất!", "Green");
                     }
                     else
                     {
-                        UpdateStatus($"Cài đặt Teracopy hoàn tất với mã: {installProcess.ExitCode}", "Green");
+                        UpdateStatus($"Cài đặt Teracopy hoàn tất với mã: {installProcess.ExitCode}", "Yellow");
                     }
                 }
 
