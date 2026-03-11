@@ -11,6 +11,8 @@ namespace GMTPC.Tool
 {
     /*
  * AI Summary:
+ * Date: 2026-03-11
+ * - Added GHOST_OF_TSUSHIMA_PART01_URL to PART29_URL constants for Ghost of Tsushima
  * Date: 2026-03-09
  * - Added ChkAdvancedCodecPack, ChkTeraCopy, ChkVPN1111 constants and methods
  */
@@ -68,6 +70,42 @@ namespace GMTPC.Tool
         // Zalo
         private const string ZALO_DOWNLOAD_URL = "https://zalo.me/download/zalo-pc?utm=90000";
         private const string ZALO_INSTALL_ARGUMENTS = "/s";
+
+        // ===================================================================
+        // TabGaming — Ghost of Tsushima
+        // TabItem Header: "Gaming"
+        // Checkbox: ChkGhostOfTsushima
+        // ===================================================================
+        // Ghost of Tsushima (29 parts)
+        private const string GHOST_OF_TSUSHIMA_PART01_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe";
+        private const string GHOST_OF_TSUSHIMA_PART02_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part02.rar";
+        private const string GHOST_OF_TSUSHIMA_PART03_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part03.rar";
+        private const string GHOST_OF_TSUSHIMA_PART04_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part04.rar";
+        private const string GHOST_OF_TSUSHIMA_PART05_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part05.rar";
+        private const string GHOST_OF_TSUSHIMA_PART06_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part06.rar";
+        private const string GHOST_OF_TSUSHIMA_PART07_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part07.rar";
+        private const string GHOST_OF_TSUSHIMA_PART08_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part08.rar";
+        private const string GHOST_OF_TSUSHIMA_PART09_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part09.rar";
+        private const string GHOST_OF_TSUSHIMA_PART10_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part10.rar";
+        private const string GHOST_OF_TSUSHIMA_PART11_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part11.rar";
+        private const string GHOST_OF_TSUSHIMA_PART12_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part12.rar";
+        private const string GHOST_OF_TSUSHIMA_PART13_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part13.rar";
+        private const string GHOST_OF_TSUSHIMA_PART14_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part14.rar";
+        private const string GHOST_OF_TSUSHIMA_PART15_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part15.rar";
+        private const string GHOST_OF_TSUSHIMA_PART16_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part16.rar";
+        private const string GHOST_OF_TSUSHIMA_PART17_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part17.rar";
+        private const string GHOST_OF_TSUSHIMA_PART18_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part18.rar";
+        private const string GHOST_OF_TSUSHIMA_PART19_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part19.rar";
+        private const string GHOST_OF_TSUSHIMA_PART20_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part20.rar";
+        private const string GHOST_OF_TSUSHIMA_PART21_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part21.rar";
+        private const string GHOST_OF_TSUSHIMA_PART22_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part22.rar";
+        private const string GHOST_OF_TSUSHIMA_PART23_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part23.rar";
+        private const string GHOST_OF_TSUSHIMA_PART24_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part24.rar";
+        private const string GHOST_OF_TSUSHIMA_PART25_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part25.rar";
+        private const string GHOST_OF_TSUSHIMA_PART26_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part26.rar";
+        private const string GHOST_OF_TSUSHIMA_PART27_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part27.rar";
+        private const string GHOST_OF_TSUSHIMA_PART28_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part28.rar";
+        private const string GHOST_OF_TSUSHIMA_PART29_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part29.rar";
 
         // ===================================================================
         // TabOffice — Links (B) and Arguments (C)
@@ -473,6 +511,7 @@ namespace GMTPC.Tool
                              ChkLeagueOfLegends.IsChecked == true ||
                              ChkPorofessor.IsChecked == true ||
                              ChkSamuraiMaiden.IsChecked == true ||
+                             ChkGhostOfTsushima.IsChecked == true ||
                              ChkUltraviewer.IsChecked == true ||
                              // Multimedia
                              ChkPotPlayer.IsChecked == true ||

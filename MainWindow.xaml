@@ -422,6 +422,7 @@
                             <CheckBox x:Name="ChkLeagueOfLegends" Content="League of Legends VN" Width="200" Height="34" Click="ChkLeagueOfLegends_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkPorofessor" Content="Porofessor" Width="200" Height="34" Click="ChkPorofessor_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkSamuraiMaiden" Content="Samurai Maiden" Width="200" Height="34" Click="ChkSamuraiMaiden_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkGhostOfTsushima" Content="Ghost of Tsushima" Width="200" Height="34" Click="ChkGhostOfTsushima_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>

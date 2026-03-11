@@ -4,6 +4,8 @@
 //            SelectNoneAllTabs, Install, Pause, Resume, Refresh Color,
 //            BtnDownloadPage, DPI controls
 // Cập nhật gần đây:
+//   - 2026-03-11: Added ChkGhostOfTsushima to BtnSelectAll, BtnSelectNone,
+//                 BtnSelectNoneAllTabs, UpdateInstallButtonState, BtnInstall_Click
 //   - 2026-03-05: Thêm currentDPIScale, DPI_STEPS, ApplyDPIScale từ xaml.cs
 //                 theo AI_WORKFLOW.md
 //   - 2026-03-08: Thêm MouseRightButtonUp cho BtnDownloadPage để copy link
@@ -251,6 +253,7 @@ namespace GMTPC.Tool
                     ChkLeagueOfLegends.IsChecked = true;
                     ChkPorofessor.IsChecked = true;
                     ChkSamuraiMaiden.IsChecked = true;
+                    ChkGhostOfTsushima.IsChecked = true;
                 }
                 // Nếu tab là "Browser"
                 else if (tabHeader == "Browser")
@@ -362,6 +365,7 @@ namespace GMTPC.Tool
                     ChkLeagueOfLegends.IsChecked = false;
                     ChkPorofessor.IsChecked = false;
                     ChkSamuraiMaiden.IsChecked = false;
+                    ChkGhostOfTsushima.IsChecked = false;
                 }
                 // Nếu tab là "Browser"
                 else if (tabHeader == "Browser")
@@ -457,6 +461,7 @@ namespace GMTPC.Tool
             ChkLeagueOfLegends.IsChecked = false;
             ChkPorofessor.IsChecked = false;
             ChkSamuraiMaiden.IsChecked = false;
+            ChkGhostOfTsushima.IsChecked = false;
 
             // Bỏ chọn checkbox trong tab Remote Desktop
             ChkUltraviewer.IsChecked = false;
@@ -546,6 +551,7 @@ namespace GMTPC.Tool
             if (ChkLeagueOfLegends.IsChecked == true) tasks.Add((InstallLeagueOfLegendsVNAsync, ChkLeagueOfLegends));
             if (ChkPorofessor.IsChecked == true) tasks.Add((InstallPorofessorAsync, ChkPorofessor));
             if (ChkSamuraiMaiden.IsChecked == true) tasks.Add((InstallSamuraiMaidenAsync, ChkSamuraiMaiden));
+            if (ChkGhostOfTsushima.IsChecked == true) tasks.Add((InstallGhostOfTsushimaAsync, ChkGhostOfTsushima));
             if (ChkAomeiPartitionAssistant.IsChecked == true) tasks.Add((InstallAomeiPartitionAssistantAsync, ChkAomeiPartitionAssistant));
             if (ChkUltraviewer.IsChecked == true) tasks.Add((InstallUltraviewerAsync, ChkUltraviewer));
             if (ChkTeamViewerQS.IsChecked == true) tasks.Add((InstallTeamViewerQuickSupportAsync, ChkTeamViewerQS));
@@ -1055,6 +1061,9 @@ namespace GMTPC.Tool
                         break;
                     case "ChkSamuraiMaiden":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN.LinkNeverDie.Com.part1.exe";
+                        break;
+                    case "ChkGhostOfTsushima":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe (29 parts)";
                         break;
                     case "ChkWin11_26H1":
                         link = "https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso";

@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-10 - Updated VPN 1111 (.msi), CocCoc, restored Windows tabs -->
+<!-- AI Summary: 2026-03-11 - Added ChkGhostOfTsushima (29 parts) to Tab Gaming -->
 
 # Danh sách Checkbox
 
@@ -78,6 +78,7 @@
 | ChkLeagueOfLegends | *(League of Legends VN)* | *(tool riêng)* |
 | ChkPorofessor | *(Porofessor)* | *(tool riêng)* |
 | ChkSamuraiMaiden | *(Samurai Maiden)* | *(tool riêng)* |
+| ChkGhostOfTsushima | https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe (29 parts) | *(multi-part installer)* |
 
 ## Tab Browser
 
@@ -118,7 +119,7 @@
 
 ---
 
-**Tổng số:** 47 checkboxes
+**Tổng số:** 48 checkboxes
 
 **Ghi chú:**
 - Các checkbox được phân loại theo Tab tương ứng trong giao diện (MainWindow.xaml)
