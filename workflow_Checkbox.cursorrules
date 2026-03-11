@@ -1,3 +1,5 @@
+<!-- AI Summary: 2026-03-11 - Added Workflow_createcheckbox_multipart for multi-part games with folder selection -->
+
 <system_context>
 Bạn là một AI Code Agent chuyên nghiệp, làm việc trên dự án "MMT Tools" (WPF, .NET 4.8, C# 7.3).
 Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Classes của dự án và các quy trình làm việc được định nghĩa dưới đây.
@@ -65,6 +67,53 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
                 - Báo cáo: "✅ Build thành công | ✅ Git commit & push hoàn tất"
             </step>
         </execution_steps>
+    </workflow>
+
+    <!-- ==================== SPECIAL CASE: MULTI-PART GAMES ==================== -->
+    <workflow name="Workflow_createcheckbox_multipart">
+        <description>
+        Quy trình đặc biệt cho game nhiều parts (như Ghost of Tsushima, Samurai Maiden).
+        Khi người dùng gọi lệnh: "Dùng Workflow_createcheckbox_multipart: Tab [X], phần mềm [Y], link [URLs], folder_selection=true"
+        Đặc điểm: Hiển thị dialog chọn folder TRƯỚC khi tải về.
+        </description>
+
+        <special_requirements>
+            1. **MainWindow.SystemBar.cs**: Thêm field `_gameNameTempFolder` để lưu path folder đã chọn.
+            
+            2. **MainWindow.SystemButtons.cs** - Trong `BtnInstall_Click()`:
+               - Hiển thị dialog chọn folder Ở ĐẦU TIÊN (trước SetInstallingState)
+               - Nếu user hủy → uncheck checkbox và thoát
+               - Tạo folder tạm với timestamp: `GameName_Temp_yyyyMMdd_HHmmss`
+            
+            3. **MainWindow.Tab[X].cs** - Method `Install[Y]Async()`:
+               - Sử dụng `_gameNameTempFolder` thay vì hiển thị dialog
+               - Tải tất cả parts vào folder đã chọn
+               - Xóa folder tạm sau khi hoàn tất
+            
+            4. **CheckboxList.cursorrules**:
+               - Thêm ghi chú "(multi-part installer)" và "(folder selection)"
+        </special_requirements>
+
+        <example>
+            // MainWindow.SystemBar.cs
+            private string _ghostOfTsushimaTempFolder = null;
+
+            // MainWindow.SystemButtons.cs - BtnInstall_Click
+            if (ChkGhostOfTsushima.IsChecked == true)
+            {
+                using (var folderDialog = new System.Windows.Forms.FolderBrowserDialog())
+                {
+                    folderDialog.Description = "Chọn nơi lưu file tạm thời (đề phòng ổ C đầy)";
+                    // ... hiển thị dialog
+                    _ghostOfTsushimaTempFolder = Path.Combine(selectedPath, tempFolderName);
+                }
+            }
+
+            // MainWindow.TabGaming.cs - InstallGhostOfTsushimaAsync
+            string tempFolder = _ghostOfTsushimaTempFolder;
+            // Tải 29 parts vào tempFolder
+            // Xóa folder sau khi xong
+        </example>
     </workflow>
 
     <!-- ==================== EDIT CHECKBOX ==================== -->
