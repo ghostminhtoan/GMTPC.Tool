@@ -492,40 +492,6 @@ namespace GMTPC.Tool
 
         private async void BtnInstall_Click(object sender, RoutedEventArgs e)
         {
-            // Nếu checkbox Ghost of Tsushima được chọn, hiển thị dialog chọn folder TRƯỚC TIÊN
-            if (ChkGhostOfTsushima.IsChecked == true)
-            {
-                using (var folderDialog = new System.Windows.Forms.FolderBrowserDialog())
-                {
-                    folderDialog.Description = "Chọn nơi lưu file tạm thời cho Ghost of Tsushima (đề phòng ổ C đầy)";
-                    folderDialog.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    folderDialog.ShowNewFolderButton = true;
-
-                    System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
-
-                    if (result != System.Windows.Forms.DialogResult.OK)
-                    {
-                        UpdateStatus("Đã hủy chọn folder cho Ghost of Tsushima", "Yellow");
-                        ChkGhostOfTsushima.IsChecked = false;
-                        UpdateInstallButtonState();
-                        return;
-                    }
-
-                    string selectedPath = folderDialog.SelectedPath;
-
-                    // Create temp folder in selected location
-                    string tempFolderName = "GMTPC_GhostOfTsushima_Temp_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                    _ghostOfTsushimaTempFolder = Path.Combine(selectedPath, tempFolderName);
-
-                    if (!Directory.Exists(_ghostOfTsushimaTempFolder))
-                    {
-                        Directory.CreateDirectory(_ghostOfTsushimaTempFolder);
-                    }
-
-                    UpdateStatus($"Đã chọn folder: {_ghostOfTsushimaTempFolder}", "Green");
-                }
-            }
-
             // Đặt trạng thái đang cài đặt
             SetInstallingState(true);
 
