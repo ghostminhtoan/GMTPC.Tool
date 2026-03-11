@@ -492,13 +492,7 @@ namespace GMTPC.Tool
 
         private async void BtnInstall_Click(object sender, RoutedEventArgs e)
         {
-            // Đặt trạng thái đang cài đặt
-            SetInstallingState(true);
-
-            UpdateStatus("Đang chờ...", "Yellow"); // Thêm phản hồi tức thì
-            await Task.Delay(1); // Cho phép UI cập nhật ngay lập tức
-
-            // Nếu checkbox Ghost of Tsushima được chọn, hiển thị dialog chọn folder
+            // Nếu checkbox Ghost of Tsushima được chọn, hiển thị dialog chọn folder TRƯỚC TIÊN
             if (ChkGhostOfTsushima.IsChecked == true)
             {
                 using (var folderDialog = new System.Windows.Forms.FolderBrowserDialog())
@@ -514,16 +508,15 @@ namespace GMTPC.Tool
                         UpdateStatus("Đã hủy chọn folder cho Ghost of Tsushima", "Yellow");
                         ChkGhostOfTsushima.IsChecked = false;
                         UpdateInstallButtonState();
-                        SetInstallingState(false);
                         return;
                     }
 
                     string selectedPath = folderDialog.SelectedPath;
-                    
+
                     // Create temp folder in selected location
                     string tempFolderName = "GMTPC_GhostOfTsushima_Temp_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
                     _ghostOfTsushimaTempFolder = Path.Combine(selectedPath, tempFolderName);
-                    
+
                     if (!Directory.Exists(_ghostOfTsushimaTempFolder))
                     {
                         Directory.CreateDirectory(_ghostOfTsushimaTempFolder);
@@ -532,6 +525,12 @@ namespace GMTPC.Tool
                     UpdateStatus($"Đã chọn folder: {_ghostOfTsushimaTempFolder}", "Green");
                 }
             }
+
+            // Đặt trạng thái đang cài đặt
+            SetInstallingState(true);
+
+            UpdateStatus("Đang chờ...", "Yellow"); // Thêm phản hồi tức thì
+            await Task.Delay(1); // Cho phép UI cập nhật ngay lập tức
 
             _cancellationTokenSource = new CancellationTokenSource();
             _pauseCts = new CancellationTokenSource();
