@@ -34,6 +34,9 @@ namespace GMTPC.Tool
         private string _installationStatus = "";
         private double originalWidth;
         private double originalHeight;
+        
+        // Folder selection for Ghost of Tsushima
+        private string _ghostOfTsushimaTempFolder = null;
 
         // ===================== Build Number Display =====================
         private void SetBuildNumber()
