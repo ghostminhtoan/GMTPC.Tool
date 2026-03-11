@@ -7,6 +7,8 @@
 //                 SystemArguments.cs theo AI_WORKFLOW.md
 //   - 2026-03-07: Fix Java installer exit code -1 handling, use JAVA_DOWNLOAD_URL
 //   - 2026-03-07: Removed Zalo installation support
+//   - 2026-03-10: Fix IDM download - use DownloadWithProgressAsync (multi-segment)
+//                 instead of DownloadSingleConnectionAsync
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -321,7 +323,7 @@ namespace GMTPC.Tool
 
                 // ===== Step 3: Download and install IDM =====
                 UpdateStatus("Đang tải Internet Download Manager...", "Cyan");
-                await DownloadSingleConnectionAsync(IDM_DOWNLOAD_URL, idmPath, "Internet Download Manager");
+                await DownloadWithProgressAsync(IDM_DOWNLOAD_URL, idmPath, "Internet Download Manager");
 
                 // Reset progress bar
                 Dispatcher.Invoke(() =>
@@ -506,18 +508,6 @@ namespace GMTPC.Tool
             return Task.CompletedTask;
         }
 
-        private Task Run3DPChipAsync()
-        {
-            Btn3DPChip_Click(null, null);
-            return Task.CompletedTask;
-        }
-
-        private Task Install3DPNetAsync()
-        {
-            Btn3DPNet_Click(null, null);
-            return Task.CompletedTask;
-        }
-
         private async Task WaitForIDM2TmpFileToDisappear()
         {
             string tempFolder = Path.Combine(Path.GetTempPath(), "IDM");
@@ -589,7 +579,7 @@ namespace GMTPC.Tool
             string idmCrackPath = Path.Combine(GetGMTPCFolder(), "IDM_6.4x_Crack.exe");
             try
             {
-                await DownloadSingleConnectionAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_Crack.exe", idmCrackPath, "IDM Crack");
+                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_Crack.exe", idmCrackPath, "IDM Crack");
                 Process.Start(idmCrackPath);
             }
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
@@ -696,39 +686,6 @@ namespace GMTPC.Tool
                 Process process = Process.Start(startInfo);
                 if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "Cài đặt OpenAL thành công!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
                 if (File.Exists(openALInstallerPath)) File.Delete(openALInstallerPath);
-            }
-            catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
-        }
-
-        private async void Btn3DPChip_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateStatus("Đang chạy 3DP Chip - all driver trừ internet...", "Cyan");
-            string driverChipPath = Path.Combine(@"R:\HDD R\ZC SYMLINK\USERS\Downloads\Programs", "3DP_Chip_v2510.exe");
-            if (File.Exists(driverChipPath))
-            {
-                try
-                {
-                    ProcessStartInfo startInfo = new ProcessStartInfo { FileName = driverChipPath, UseShellExecute = true };
-                    Process process = Process.Start(startInfo);
-                    if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "3DP Chip hoàn tất!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
-                }
-                catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
-            }
-            else { UpdateStatus("Không tìm thấy file 3DP_Chip_v2510.exe", "Red"); }
-        }
-
-        private async void Btn3DPNet_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateStatus("Đang tải 3DP Net - driver internet...", "Cyan");
-            string driverNetPath = Path.Combine(GetGMTPCFolder(), "3DP_Net_v2101.exe");
-            try
-            {
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Net.exe", driverNetPath, "3DP Net Driver Installer");
-                UpdateStatus("Đang chạy 3DP Net với lệnh /y...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo { FileName = driverNetPath, Arguments = "/y", UseShellExecute = true };
-                Process process = Process.Start(startInfo);
-                if (process != null) { await Task.Run(() => process.WaitForExit()); UpdateStatus(process.ExitCode == 0 ? "3DP Net hoàn tất!" : $"Mã lỗi: {process.ExitCode}", process.ExitCode == 0 ? "Green" : "Red"); }
-                if (File.Exists(driverNetPath)) File.Delete(driverNetPath);
             }
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
         }

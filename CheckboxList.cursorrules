@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-09 - Added ChkAdvancedCodecPack, ChkTeraCopy, ChkVPN1111 -->
+<!-- AI Summary: 2026-03-10 - Updated VPN 1111 (.msi), CocCoc, restored Windows tabs -->
 
 # Danh sách Checkbox
 
@@ -24,8 +24,6 @@
 | ChkDirectX | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/DirectX.exe | `/passive` |
 | ChkJava | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/java.exe | `/s` |
 | ChkOpenAL | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/oalinst.exe | `/S` |
-| Chk3DPChip | https://www.3dpchip.com/3dp/chip.exe | `/S` |
-| Chk3DPNet | https://www.3dpchip.com/3dp/net.exe | `/S` |
 | ChkRevoUninstaller | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/RevoUninstallerPro.exe | `/S` |
 | ChkInstallZalo | https://zalo.me/download/zalo-pc?utm=90000 | `/s` |
 
@@ -59,7 +57,7 @@
 | ChkFolderSize | *(FolderSize)* | *(tool riêng)* |
 | ChkPowerISO | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe | `/S` |
 | ChkTeraCopy | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe | `/S` |
-| ChkVPN1111 | https://1111-releases.cloudflareclient.com/win/latest | `passive` |
+| ChkVPN1111 | https://1111-releases.cloudflareclient.com/win/latest | `/passive` |
 | ChkGoogleDrive | *(Google Drive)* | *(tool riêng)* |
 | ChkNetLimiter | *(NetLimiter)* | *(tool riêng)* |
 
@@ -86,7 +84,7 @@
 | Tên Checkbox | Link Download | Argument |
 |-------------|---------------|----------|
 | ChkChrome | https://dl.google.com/chrome/install/latest/chrome_installer.exe | `/silent /install` |
-| ChkCocCoc | https://coccoc.com/download/win32 | `/silent` |
+| ChkCocCoc | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/CocCoc.exe | `/silent /install` |
 | ChkEdge | https://go.microsoft.com/fwlink/?linkid=2108834&Channel=Stable&language=vi | `/silent /install` |
 
 ## Tab Remote Desktop
@@ -99,18 +97,24 @@
 | ChkAnyDesk | *(AnyDesk)* | *(tool riêng)* |
 | ChkVMWare162Lite | *(VMWare 16.2 lite)* | *(tool riêng)* |
 
+## Tab Driver
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| Chk3DPChip | https://www.3dpchip.com/3dp/chip.exe | `/S` |
+| Chk3DPNet | https://www.3dpchip.com/3dp/net.exe | `/S` |
+
 ## Tab Windows - Microsoft
 
 | Tên Checkbox | Link Download | Argument |
 |-------------|---------------|----------|
-| ChkWin11_26H1 | *(Windows 11 26H1)* | *(ISO image)* |
-| ChkWin10_20H2_2022April | *(Windows 10 20H2)* | *(ISO image)* |
+| ChkWin11_26H1 | https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso | *(ISO image)* |
 
 ## Tab Windows Mod MMT
 
 | Tên Checkbox | Link Download | Argument |
 |-------------|---------------|----------|
-| ChkWin10LtscIot21H2 | *(Win 10 LTSC IoT 21H2 Mod)* | *(ISO image)* |
+| ChkWin10LtscIot21H2 | https://www.mediafire.com/file/b54r3aup07dddhe/win_10_LTSC_IOT_21H2_-_2021%25E2%2580%259510_-_No_Defender_Office_-_MMTPC_3.0.iso/file | *(ISO image)* |
 
 ---
 

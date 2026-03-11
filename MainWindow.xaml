@@ -351,8 +351,6 @@
                             <CheckBox x:Name="ChkDirectX" Content="Directx" Width="200" Height="34" Click="ChkDirectX_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkJava" Content="Java" Width="200" Height="34" Click="ChkJava_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkOpenAL" Content="OpenAL" Width="200" Height="34" Click="ChkOpenAL_Click" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="Chk3DPChip" Content="3DP Chip &#10;(all driver trừ internet)" Width="200" Height="34" Click="Chk3DPChip_Click" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="Chk3DPNet" Content="3DP Net - driver internet" Width="200" Height="34" Click="Chk3DPNet_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkRevoUninstaller" Content="Revo Uninstaller" Width="200" Height="34" Click="ChkRevoUninstaller_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkInstallZalo" Content="Zalo" Width="200" Height="34" Click="ChkInstallZalo_Click" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
@@ -427,6 +425,14 @@
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
+                <TabItem Header="Driver">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
+                        <WrapPanel x:Name="DriverPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
+                            <CheckBox x:Name="Chk3DPChip" Content="3DP Chip &#10;(all driver trừ internet)" Width="200" Height="34" Click="Chk3DPChip_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="Chk3DPNet" Content="3DP Net - driver internet" Width="200" Height="34" Click="Chk3DPNet_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                        </WrapPanel>
+                    </ScrollViewer>
+                </TabItem>
                 <TabItem Header="Browser">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="BrowserPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
@@ -451,7 +457,6 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="WindowsPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
                             <CheckBox x:Name="ChkWin11_26H1" Content="Win 11 - 26H1 - 2026 Feb - server archive.org" Width="300" Height="34" Click="ChkWin11_26H1_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="ChkWin10_20H2_2022April" Content="Win 10 20H2 2022 April - onedrive" Width="300" Height="34" Click="ChkWin10_20H2_2022April_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>

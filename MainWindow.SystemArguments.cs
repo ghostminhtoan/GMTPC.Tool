@@ -29,8 +29,7 @@ namespace GMTPC.Tool
         // TabItem Header: "Popular"
         // Checkboxes: ChkInstallIDM, ChkInstallWinRAR, ChkInstallBID,
         //             ChkActivateWindows, ChkPauseWindowsUpdate, ChkVcredist,
-        //             ChkDirectX, ChkJava, ChkOpenAL, Chk3DPChip, Chk3DPNet,
-        //             ChkRevoUninstaller
+        //             ChkDirectX, ChkJava, ChkOpenAL, ChkRevoUninstaller
         // ===================================================================
         // IDM
         private const string IDM_DOWNLOAD_URL = "https://tinyurl.com/idmhcmvn";
@@ -62,14 +61,6 @@ namespace GMTPC.Tool
         private const string OPENAL_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/oalinst.exe";
         private const string OPENAL_INSTALL_ARGUMENTS = "/S";
 
-        // 3DP Chip
-        private const string DPCHIP_DOWNLOAD_URL = "https://www.3dpchip.com/3dp/chip.exe";
-        private const string DPCHIP_INSTALL_ARGUMENTS = "/S";
-
-        // 3DP Net
-        private const string DPNET_DOWNLOAD_URL = "https://www.3dpchip.com/3dp/net.exe";
-        private const string DPNET_INSTALL_ARGUMENTS = "/S";
-
         // Revo Uninstaller
         private const string REVO_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/RevoUninstallerPro.exe";
         private const string REVO_INSTALL_ARGUMENTS = "/S";
@@ -93,6 +84,19 @@ namespace GMTPC.Tool
         private const string NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS = "/passive /norestart";
 
         // ===================================================================
+        // TabDriver — Links (B) and Arguments (C)
+        // TabItem Header: "Driver"
+        // Checkboxes: Chk3DPChip, Chk3DPNet
+        // ===================================================================
+        // 3DP Chip (Tab: Driver)
+        private const string DPCHIP_DOWNLOAD_URL = "https://www.3dpchip.com/3dp/chip.exe";
+        private const string DPCHIP_INSTALL_ARGUMENTS = "/S";
+
+        // 3DP Net (Tab: Driver)
+        private const string DPNET_DOWNLOAD_URL = "https://www.3dpchip.com/3dp/net.exe";
+        private const string DPNET_INSTALL_ARGUMENTS = "/S";
+
+        // ===================================================================
         // TabBrowser — Links (B) and Arguments (C)
         // TabItem Header: "Browser"
         // Checkboxes: ChkChrome, ChkCocCoc, ChkEdge
@@ -102,8 +106,8 @@ namespace GMTPC.Tool
         private const string CHROME_INSTALL_ARGUMENTS = "/silent /install";
 
         // CocCoc (Tab: Browser)
-        private const string COCCOC_DOWNLOAD_URL = "https://coccoc.com/download/win32";
-        private const string COCCOC_INSTALL_ARGUMENTS = "/silent";
+        private const string COCCOC_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/CocCoc.exe";
+        private const string COCCOC_INSTALL_ARGUMENTS = "/silent /install";
 
         // Edge (Tab: Browser)
         private const string EDGE_DOWNLOAD_URL = "https://go.microsoft.com/fwlink/?linkid=2108834&Channel=Stable&language=vi";
@@ -131,7 +135,7 @@ namespace GMTPC.Tool
 
         // VPN 1111 (Cloudflare)
         private const string VPN1111_DOWNLOAD_URL = "https://1111-releases.cloudflareclient.com/win/latest";
-        private const string VPN1111_INSTALL_ARGUMENTS = "passive";
+        private const string VPN1111_INSTALL_ARGUMENTS = "/passive";
 
         private async Task InstallZaloAsync()
         {
@@ -479,8 +483,8 @@ namespace GMTPC.Tool
                              ChkTeamViewerFull.IsChecked == true ||
                              ChkAnyDesk.IsChecked == true ||
                              ChkVMWare162Lite.IsChecked == true ||
+                             // Windows - Microsoft
                              ChkWin11_26H1.IsChecked == true ||
-                             ChkWin10_20H2_2022April.IsChecked == true ||
                              ChkWin10LtscIot21H2.IsChecked == true ||
                              // Multimedia - Advanced Codec Pack
                              ChkAdvancedCodecPack.IsChecked == true ||
@@ -1076,7 +1080,7 @@ namespace GMTPC.Tool
             try
             {
                 UpdateStatus("Đang tải VPN 1111...", "Cyan");
-                string vpnPath = Path.Combine(GetGMTPCFolder(), "VPN1111.exe");
+                string vpnPath = Path.Combine(GetGMTPCFolder(), "VPN1111.msi");
                 await DownloadWithProgressAsync(VPN1111_DOWNLOAD_URL, vpnPath, "VPN 1111");
 
                 Dispatcher.Invoke(() =>
@@ -1089,8 +1093,8 @@ namespace GMTPC.Tool
                 UpdateStatus("Đang cài đặt VPN 1111 (passive)...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    FileName = vpnPath,
-                    Arguments = VPN1111_INSTALL_ARGUMENTS,
+                    FileName = "msiexec.exe",
+                    Arguments = $"/i \"{vpnPath}\" /passive",
                     UseShellExecute = true
                 };
                 Process process = Process.Start(startInfo);

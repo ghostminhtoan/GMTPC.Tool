@@ -278,10 +278,14 @@ namespace GMTPC.Tool
                     ChkAnyDesk.IsChecked = true;
                     ChkVMWare162Lite.IsChecked = true;
                 }
+                else if (tabHeader == "Driver")
+                {
+                    Chk3DPChip.IsChecked = true;
+                    Chk3DPNet.IsChecked = true;
+                }
                 else if (tabHeader == "Windows - Microsoft")
                 {
                     ChkWin11_26H1.IsChecked = true;
-                    ChkWin10_20H2_2022April.IsChecked = true;
                 }
                 else if (tabHeader == "Windows Mod MMT")
                 {
@@ -385,10 +389,14 @@ namespace GMTPC.Tool
                     ChkAnyDesk.IsChecked = false;
                     ChkVMWare162Lite.IsChecked = false;
                 }
+                else if (tabHeader == "Driver")
+                {
+                    Chk3DPChip.IsChecked = false;
+                    Chk3DPNet.IsChecked = false;
+                }
                 else if (tabHeader == "Windows - Microsoft")
                 {
                     ChkWin11_26H1.IsChecked = false;
-                    ChkWin10_20H2_2022April.IsChecked = false;
                 }
                 else if (tabHeader == "Windows Mod MMT")
                 {
@@ -457,6 +465,10 @@ namespace GMTPC.Tool
             ChkAnyDesk.IsChecked = false;
             ChkVMWare162Lite.IsChecked = false;
 
+            // Bỏ chọn checkbox trong tab Driver
+            Chk3DPChip.IsChecked = false;
+            Chk3DPNet.IsChecked = false;
+
             // Bỏ chọn checkbox trong tab Office
             ChkOfficeToolPlus.IsChecked = false;
             ChkOfficeSoftmaker.IsChecked = false;
@@ -464,11 +476,11 @@ namespace GMTPC.Tool
             ChkGouenjiFonts.IsChecked = false;
             ChkNotepadPlusPlus.IsChecked = false;
 
-            // Bỏ chọn Win 11
+            // Bỏ chọn checkbox trong tab Windows - Microsoft
             ChkWin11_26H1.IsChecked = false;
 
-            // Bỏ chọn Win 10 20H2 April 2022
-            ChkWin10_20H2_2022April.IsChecked = false;
+            // Bỏ chọn checkbox trong tab Windows Mod MMT
+            ChkWin10LtscIot21H2.IsChecked = false;
 
             UpdateInstallButtonState();
         }
@@ -541,7 +553,6 @@ namespace GMTPC.Tool
             if (ChkAnyDesk.IsChecked == true) tasks.Add((InstallAnyDeskAsync, ChkAnyDesk));
             if (ChkVMWare162Lite.IsChecked == true) tasks.Add((InstallVMWare162LiteAsync, ChkVMWare162Lite));
             if (ChkWin11_26H1.IsChecked == true) tasks.Add((InstallWin11_26H1Async, ChkWin11_26H1));
-            if (ChkWin10_20H2_2022April.IsChecked == true) tasks.Add((InstallWin10_20H2_2022AprilAsync, ChkWin10_20H2_2022April));
             if (ChkWin10LtscIot21H2.IsChecked == true) tasks.Add((InstallWin10LtscIot21H2Async, ChkWin10LtscIot21H2));
 
             CheckBox currentTaskCheckBox = null;
@@ -743,12 +754,6 @@ namespace GMTPC.Tool
             if (ChkPorofessor?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://download.overwolf.com/installer/prod/339334cdda5e1ea8a3c8a31ba816fb37/Porofessor%20Standalone%20-%20Installer.exe");
 
-            if (ChkWin11_26H1?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso");
-
-            if (ChkWin10_20H2_2022April?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://glennsferryschools-my.sharepoint.com/:u:/g/personal/billgates_glennsferryschools_onmicrosoft_com/Ed8HqTyoPFxLktIGaRFqDOYBQP5hWqV8d69Qq9TJ-k9L0A?download=1");
-
             if (ChkSamuraiMaiden?.IsChecked == true)
             {
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part1.exe");
@@ -756,6 +761,12 @@ namespace GMTPC.Tool
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part3.rar");
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part4.rar");
             }
+
+            if (ChkWin11_26H1?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso");
+
+            if (ChkWin10LtscIot21H2?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://www.mediafire.com/file/b54r3aup07dddhe/win_10_LTSC_IOT_21H2_-_2021%25E2%2580%259510_-_No_Defender_Office_-_MMTPC_3.0.iso/file");
 
             // Hiển thị tooltip với danh sách link
             string tooltipText;
@@ -891,8 +902,7 @@ namespace GMTPC.Tool
                 ChkThrottlestop, ChkMSIAfterburner, ChkLeagueOfLegends, ChkPorofessor,
                 ChkSamuraiMaiden, ChkChrome, ChkCocCoc, ChkEdge,
                 ChkUltraviewer, ChkTeamViewerQS, ChkTeamViewerFull, ChkAnyDesk, ChkVMWare162Lite,
-                ChkWin11_26H1,
-                ChkWin10_20H2_2022April, ChkWin10LtscIot21H2,
+                ChkWin11_26H1, ChkWin10LtscIot21H2,
                 // ChkWin10ProWorkstations22H2 removed
             };
 
@@ -1031,9 +1041,6 @@ namespace GMTPC.Tool
                     case "ChkVMWare162Lite":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/VMware.Workstation.Pro.16.2.Lite.exe";
                         break;
-                    case "ChkWin11_26H1":
-                        link = "https://archive.org/download/win-11-26h1";
-                        break;
                     case "ChkActivateOffice":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/activate-office.bat";
                         break;
@@ -1049,11 +1056,11 @@ namespace GMTPC.Tool
                     case "ChkSamuraiMaiden":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN.LinkNeverDie.Com.part1.exe";
                         break;
-                    case "ChkWin10_20H2_2022April":
-                        link = "https://www.mediafire.com/file/your_file_id/Win10_20H2_2022_April.iso/file";
+                    case "ChkWin11_26H1":
+                        link = "https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso";
                         break;
                     case "ChkWin10LtscIot21H2":
-                        link = "https://www.mediafire.com/file/your_file_id/Win10_LTSC_IoT_21H2_NoDefender_Office_MMTPC3.iso/file";
+                        link = "https://www.mediafire.com/file/b54r3aup07dddhe/win_10_LTSC_IOT_21H2_-_2021%25E2%2580%259510_-_No_Defender_Office_-_MMTPC_3.0.iso/file";
                         break;
                 }
 

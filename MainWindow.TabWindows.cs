@@ -1,92 +1,63 @@
+// =======================================================================
+// MainWindow.TabWindows.cs
+// Chức năng: Xử lý checkbox và cài đặt cho Tab Windows - Microsoft
+// Cập nhật: 2026-03-10 - Xóa Win 10 20H2 2022 April - onedrive
+// =======================================================================
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
-using System.Threading;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
+        // ===================================================================
+        // TabWindows — Checkbox Click Handlers
+        // TabItem Header: "Windows - Microsoft"
+        // Checkboxes: ChkWin11_26H1
+        // ===================================================================
         private void ChkWin11_26H1_Click(object sender, RoutedEventArgs e)
         {
+            if (ChkWin11_26H1.IsChecked == true)
+            {
+                UpdateStatus("Đã chọn: Win 11 - 26H1 - 2026 Feb - server archive.org", "Green");
+            }
+            else
+            {
+                UpdateStatus("Đã hủy chọn: Win 11 - 26H1 - 2026 Feb - server archive.org", "Yellow");
+            }
+
             UpdateInstallButtonState();
         }
 
-        private void ChkWin10_20H2_2022April_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateInstallButtonState();
-        }
-
-        private async Task InstallWin10_20H2_2022AprilAsync()
-        {
-            // Link chia sẻ từ OneDrive/SharePoint — cần resolve thành direct binary URL
-            string shareUrl = "https://glennsferryschools-my.sharepoint.com/:u:/g/personal/billgates_glennsferryschools_onmicrosoft_com/Ed8HqTyoPFxLktIGaRFqDOYBQP5hWqV8d69Qq9TJ-k9L0A?download=1";
-            string fileName = "en-us_windows_10_consumer_editions_version_20h2_updated_april_2022_x64.iso";
-            string destinationPath = Path.Combine("C:\\", fileName);
-
-            UpdateStatus("Đang resolve link OneDrive/SharePoint...", "Cyan");
-
-            try
-            {
-                // Bước 1: Resolve SharePoint share URL → direct binary download URL
-                string directUrl = await ResolveOneDriveDirectUrlAsync(shareUrl);
-
-                UpdateStatus("Đang kết nối tới server và bắt đầu tải...", "Cyan");
-
-                // Bước 2: Feed direct URL vào engine 16-segment (tự động fallback 1-thread nếu server không hỗ trợ Range)
-                await DownloadWithProgressAsync(directUrl, destinationPath, "Đang tải về ổ C - Win 10 - 20H2 April 2022");
-
-                UpdateStatus("Tải xong! Đang mở ổ C và file ISO...", "Green");
-                Process.Start("explorer.exe", "C:\\");
-                Process.Start(new ProcessStartInfo { FileName = destinationPath, UseShellExecute = true });
-            }
-            catch (OperationCanceledException)
-            {
-                UpdateStatus("Đã hủy tải Win 10 20H2.", "Yellow");
-                if (File.Exists(destinationPath))
-                    try { File.Delete(destinationPath); } catch { }
-                throw;
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Lỗi tải Win 10 20H2: {ex.Message}", "Red");
-                throw;
-            }
-        }
-
+        // ===================================================================
+        // TabWindows — Install Methods
+        // ===================================================================
         private async Task InstallWin11_26H1Async()
         {
-            string url = "https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso";
-            string fileName = "en-us_windows_11_26h1_x64.iso";
-            string destinationPath = Path.Combine("C:\\", fileName);
-
-            UpdateStatus("Đang kết nối tới server archive.org...", "Cyan");
-
             try
             {
-                // archive.org hỗ trợ Range requests → engine 16-segment chạy tốt
-                await DownloadWithProgressAsync(url, destinationPath, "Đang tải về ổ C - Win 11 - 26H1");
+                UpdateStatus("Đang tải Win 11 - 26H1 - 2026 Feb...", "Cyan");
+                string win11Path = Path.Combine(GetGMTPCFolder(), "Win11_26H1.iso");
+                await DownloadWithProgressAsync("https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso", win11Path, "Win 11 26H1");
 
-                UpdateStatus("Tải xong! Đang mở ổ C và file ISO...", "Green");
-                Process.Start("explorer.exe", "C:\\");
-                Process.Start(new ProcessStartInfo { FileName = destinationPath, UseShellExecute = true });
-            }
-            catch (OperationCanceledException)
-            {
-                UpdateStatus("Đã hủy tải Win 11.", "Yellow");
-                if (File.Exists(destinationPath))
-                    try { File.Delete(destinationPath); } catch { }
-                throw;
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                UpdateStatus("Tải Win 11 26H1 hoàn tất! File ISO đã được lưu tại: " + win11Path, "Green");
             }
             catch (Exception ex)
             {
-                UpdateStatus($"Lỗi tải Win 11: {ex.Message}", "Red");
-                throw;
+                UpdateStatus($"Lỗi khi tải Win 11 26H1: {ex.Message}", "Red");
             }
         }
     }

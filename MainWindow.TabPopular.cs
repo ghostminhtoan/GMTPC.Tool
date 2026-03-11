@@ -155,37 +155,6 @@ namespace GMTPC.Tool
             UpdateInstallButtonState();
         }
 
-
-        private void Chk3DPChip_Click(object sender, RoutedEventArgs e)
-        {
-            if (Chk3DPChip.IsChecked == true)
-            {
-                UpdateStatus("Đã chọn: 3DP Chip", "Green");
-            }
-            else
-            {
-                UpdateStatus("Đã hủy chọn: 3DP Chip", "Yellow");
-            }
-
-            UpdateInstallButtonState();
-        }
-
-
-        private void Chk3DPNet_Click(object sender, RoutedEventArgs e)
-        {
-            if (Chk3DPNet.IsChecked == true)
-            {
-                UpdateStatus("Đã chọn: 3DP Net", "Green");
-            }
-            else
-            {
-                UpdateStatus("Đã hủy chọn: 3DP Net", "Yellow");
-            }
-
-            UpdateInstallButtonState();
-        }
-
-
         private void ChkRevoUninstaller_Click(object sender, RoutedEventArgs e)
         {
             if (ChkRevoUninstaller.IsChecked == true)
