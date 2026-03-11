@@ -2,6 +2,7 @@
 // AI Summary:
 // Date: 2026-03-11
 // - Added InstallGhostOfTsushimaAsync() method for Ghost of Tsushima (29 parts)
+// - Added FolderBrowserDialog for selecting temp download location
 // =======================================================================
 using System;
 using System.Collections.Generic;
@@ -513,200 +514,214 @@ namespace GMTPC.Tool
         {
             try
             {
-                string gmtFolder = GetGMTPCFolder();
-                string part01Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe");
-                string part02Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part02.rar");
-                string part03Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part03.rar");
-                string part04Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part04.rar");
-                string part05Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part05.rar");
-                string part06Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part06.rar");
-                string part07Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part07.rar");
-                string part08Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part08.rar");
-                string part09Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part09.rar");
-                string part10Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part10.rar");
-                string part11Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part11.rar");
-                string part12Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part12.rar");
-                string part13Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part13.rar");
-                string part14Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part14.rar");
-                string part15Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part15.rar");
-                string part16Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part16.rar");
-                string part17Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part17.rar");
-                string part18Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part18.rar");
-                string part19Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part19.rar");
-                string part20Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part20.rar");
-                string part21Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part21.rar");
-                string part22Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part22.rar");
-                string part23Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part23.rar");
-                string part24Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part24.rar");
-                string part25Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part25.rar");
-                string part26Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part26.rar");
-                string part27Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part27.rar");
-                string part28Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part28.rar");
-                string part29Path = Path.Combine(gmtFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part29.rar");
-
-                // Download all 29 parts
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 1/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART01_URL, part01Path, "Ghost of Tsushima - Part 1");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 2/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART02_URL, part02Path, "Ghost of Tsushima - Part 2");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 3/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART03_URL, part03Path, "Ghost of Tsushima - Part 3");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 4/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART04_URL, part04Path, "Ghost of Tsushima - Part 4");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 5/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART05_URL, part05Path, "Ghost of Tsushima - Part 5");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 6/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART06_URL, part06Path, "Ghost of Tsushima - Part 6");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 7/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART07_URL, part07Path, "Ghost of Tsushima - Part 7");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 8/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART08_URL, part08Path, "Ghost of Tsushima - Part 8");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 9/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART09_URL, part09Path, "Ghost of Tsushima - Part 9");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 10/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART10_URL, part10Path, "Ghost of Tsushima - Part 10");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 11/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART11_URL, part11Path, "Ghost of Tsushima - Part 11");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 12/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART12_URL, part12Path, "Ghost of Tsushima - Part 12");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 13/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART13_URL, part13Path, "Ghost of Tsushima - Part 13");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 14/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART14_URL, part14Path, "Ghost of Tsushima - Part 14");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 15/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART15_URL, part15Path, "Ghost of Tsushima - Part 15");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 16/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART16_URL, part16Path, "Ghost of Tsushima - Part 16");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 17/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART17_URL, part17Path, "Ghost of Tsushima - Part 17");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 18/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART18_URL, part18Path, "Ghost of Tsushima - Part 18");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 19/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART19_URL, part19Path, "Ghost of Tsushima - Part 19");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 20/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART20_URL, part20Path, "Ghost of Tsushima - Part 20");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 21/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART21_URL, part21Path, "Ghost of Tsushima - Part 21");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 22/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART22_URL, part22Path, "Ghost of Tsushima - Part 22");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 23/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART23_URL, part23Path, "Ghost of Tsushima - Part 23");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 24/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART24_URL, part24Path, "Ghost of Tsushima - Part 24");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 25/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART25_URL, part25Path, "Ghost of Tsushima - Part 25");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 26/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART26_URL, part26Path, "Ghost of Tsushima - Part 26");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 27/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART27_URL, part27Path, "Ghost of Tsushima - Part 27");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 28/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART28_URL, part28Path, "Ghost of Tsushima - Part 28");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                UpdateStatus("Đang tải Ghost of Tsushima - Part 29/29...", "Cyan");
-                await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART29_URL, part29Path, "Ghost of Tsushima - Part 29");
-                Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
-
-                // Run part01.exe
-                UpdateStatus("Đang chạy Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo
+                // Show folder browser dialog to choose temp location
+                UpdateStatus("Đang chọn nơi lưu file tạm thời...", "Cyan");
+                
+                using (var folderDialog = new System.Windows.Forms.FolderBrowserDialog())
                 {
-                    FileName = part01Path,
-                    UseShellExecute = true,
-                    WorkingDirectory = gmtFolder
-                };
-                Process process = Process.Start(startInfo);
+                    folderDialog.Description = "Chọn nơi lưu file tạm thời (đề phòng ổ C đầy)";
+                    folderDialog.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    folderDialog.ShowNewFolderButton = true;
 
-                if (process != null)
-                {
-                    await Task.Run(() => process.WaitForExit());
-                    UpdateStatus("Ghost of Tsushima đã hoàn tất!", "Green");
+                    System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
+
+                    if (result != System.Windows.Forms.DialogResult.OK)
+                    {
+                        UpdateStatus("Đã hủy chọn folder", "Yellow");
+                        return;
+                    }
+
+                    string selectedPath = folderDialog.SelectedPath;
+                    
+                    // Create temp folder in selected location
+                    string tempFolderName = "GMTPC_GhostOfTsushima_Temp_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    string tempFolder = Path.Combine(selectedPath, tempFolderName);
+                    
+                    if (!Directory.Exists(tempFolder))
+                    {
+                        Directory.CreateDirectory(tempFolder);
+                    }
+
+                    UpdateStatus($"Đã chọn folder: {tempFolder}", "Green");
+
+                    string part01Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe");
+                    string part02Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part02.rar");
+                    string part03Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part03.rar");
+                    string part04Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part04.rar");
+                    string part05Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part05.rar");
+                    string part06Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part06.rar");
+                    string part07Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part07.rar");
+                    string part08Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part08.rar");
+                    string part09Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part09.rar");
+                    string part10Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part10.rar");
+                    string part11Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part11.rar");
+                    string part12Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part12.rar");
+                    string part13Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part13.rar");
+                    string part14Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part14.rar");
+                    string part15Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part15.rar");
+                    string part16Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part16.rar");
+                    string part17Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part17.rar");
+                    string part18Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part18.rar");
+                    string part19Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part19.rar");
+                    string part20Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part20.rar");
+                    string part21Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part21.rar");
+                    string part22Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part22.rar");
+                    string part23Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part23.rar");
+                    string part24Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part24.rar");
+                    string part25Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part25.rar");
+                    string part26Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part26.rar");
+                    string part27Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part27.rar");
+                    string part28Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part28.rar");
+                    string part29Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part29.rar");
+
+                    // Download all 29 parts
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 1/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART01_URL, part01Path, "Ghost of Tsushima - Part 1");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 2/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART02_URL, part02Path, "Ghost of Tsushima - Part 2");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 3/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART03_URL, part03Path, "Ghost of Tsushima - Part 3");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 4/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART04_URL, part04Path, "Ghost of Tsushima - Part 4");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 5/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART05_URL, part05Path, "Ghost of Tsushima - Part 5");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 6/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART06_URL, part06Path, "Ghost of Tsushima - Part 6");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 7/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART07_URL, part07Path, "Ghost of Tsushima - Part 7");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 8/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART08_URL, part08Path, "Ghost of Tsushima - Part 8");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 9/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART09_URL, part09Path, "Ghost of Tsushima - Part 9");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 10/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART10_URL, part10Path, "Ghost of Tsushima - Part 10");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 11/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART11_URL, part11Path, "Ghost of Tsushima - Part 11");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 12/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART12_URL, part12Path, "Ghost of Tsushima - Part 12");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 13/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART13_URL, part13Path, "Ghost of Tsushima - Part 13");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 14/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART14_URL, part14Path, "Ghost of Tsushima - Part 14");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 15/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART15_URL, part15Path, "Ghost of Tsushima - Part 15");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 16/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART16_URL, part16Path, "Ghost of Tsushima - Part 16");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 17/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART17_URL, part17Path, "Ghost of Tsushima - Part 17");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 18/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART18_URL, part18Path, "Ghost of Tsushima - Part 18");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 19/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART19_URL, part19Path, "Ghost of Tsushima - Part 19");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 20/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART20_URL, part20Path, "Ghost of Tsushima - Part 20");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 21/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART21_URL, part21Path, "Ghost of Tsushima - Part 21");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 22/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART22_URL, part22Path, "Ghost of Tsushima - Part 22");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 23/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART23_URL, part23Path, "Ghost of Tsushima - Part 23");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 24/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART24_URL, part24Path, "Ghost of Tsushima - Part 24");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 25/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART25_URL, part25Path, "Ghost of Tsushima - Part 25");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 26/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART26_URL, part26Path, "Ghost of Tsushima - Part 26");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 27/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART27_URL, part27Path, "Ghost of Tsushima - Part 27");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 28/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART28_URL, part28Path, "Ghost of Tsushima - Part 28");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    UpdateStatus("Đang tải Ghost of Tsushima - Part 29/29...", "Cyan");
+                    await DownloadWithProgressAsync(GHOST_OF_TSUSHIMA_PART29_URL, part29Path, "Ghost of Tsushima - Part 29");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+
+                    // Run part01.exe
+                    UpdateStatus("Đang chạy Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe...", "Yellow");
+                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    {
+                        FileName = part01Path,
+                        UseShellExecute = true,
+                        WorkingDirectory = tempFolder
+                    };
+                    Process process = Process.Start(startInfo);
+
+                    if (process != null)
+                    {
+                        await Task.Run(() => process.WaitForExit());
+                        UpdateStatus("Ghost of Tsushima đã hoàn tất!", "Green");
+                    }
+
+                    // Delete temp folder after installation
+                    UpdateStatus("Đang xóa file tạm thời...", "Cyan");
+                    try
+                    {
+                        if (Directory.Exists(tempFolder))
+                        {
+                            Directory.Delete(tempFolder, true);
+                            UpdateStatus($"Đã xóa folder tạm: {tempFolder}", "Green");
+                        }
+                    }
+                    catch (Exception exDelete)
+                    {
+                        UpdateStatus($"Không thể xóa folder tạm: {exDelete.Message}", "Yellow");
+                    }
                 }
-
-                // Delete all parts after installation
-                if (File.Exists(part01Path)) File.Delete(part01Path);
-                if (File.Exists(part02Path)) File.Delete(part02Path);
-                if (File.Exists(part03Path)) File.Delete(part03Path);
-                if (File.Exists(part04Path)) File.Delete(part04Path);
-                if (File.Exists(part05Path)) File.Delete(part05Path);
-                if (File.Exists(part06Path)) File.Delete(part06Path);
-                if (File.Exists(part07Path)) File.Delete(part07Path);
-                if (File.Exists(part08Path)) File.Delete(part08Path);
-                if (File.Exists(part09Path)) File.Delete(part09Path);
-                if (File.Exists(part10Path)) File.Delete(part10Path);
-                if (File.Exists(part11Path)) File.Delete(part11Path);
-                if (File.Exists(part12Path)) File.Delete(part12Path);
-                if (File.Exists(part13Path)) File.Delete(part13Path);
-                if (File.Exists(part14Path)) File.Delete(part14Path);
-                if (File.Exists(part15Path)) File.Delete(part15Path);
-                if (File.Exists(part16Path)) File.Delete(part16Path);
-                if (File.Exists(part17Path)) File.Delete(part17Path);
-                if (File.Exists(part18Path)) File.Delete(part18Path);
-                if (File.Exists(part19Path)) File.Delete(part19Path);
-                if (File.Exists(part20Path)) File.Delete(part20Path);
-                if (File.Exists(part21Path)) File.Delete(part21Path);
-                if (File.Exists(part22Path)) File.Delete(part22Path);
-                if (File.Exists(part23Path)) File.Delete(part23Path);
-                if (File.Exists(part24Path)) File.Delete(part24Path);
-                if (File.Exists(part25Path)) File.Delete(part25Path);
-                if (File.Exists(part26Path)) File.Delete(part26Path);
-                if (File.Exists(part27Path)) File.Delete(part27Path);
-                if (File.Exists(part28Path)) File.Delete(part28Path);
-                if (File.Exists(part29Path)) File.Delete(part29Path);
             }
             catch (Exception ex)
             {
