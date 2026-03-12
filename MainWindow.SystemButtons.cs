@@ -753,22 +753,23 @@ namespace GMTPC.Tool
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
+            // Global Stop - affects ALL active downloads regardless of UI checkbox state
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 _cancellationTokenSource.Cancel();
-                UpdateStatus("Đang dừng quá trình cài đặt...", "Yellow");
+                UpdateStatus("Stopping all downloads...", "Yellow");
                 BtnStop.IsEnabled = false;
                 BtnPause.IsEnabled = false;
                 BtnInstall.IsEnabled = true;
 
-                // Resume event if cancelled while paused
+                // Resume pause event to unblock any waiting threads
                 if (!_pauseEvent.IsSet)
                 {
                     _pauseEvent.Set();
                     BtnPause.Content = "Pause";
                 }
 
-                // Đặt lại tiến độ khi bị hủy
+                // Reset progress UI
                 Dispatcher.Invoke(() =>
                 {
                     DownloadProgressBar.Value = 0;
@@ -776,32 +777,35 @@ namespace GMTPC.Tool
                     ProgressTextBlock.Text = "";
                     SpeedTextBlock.Text = "";
                 });
+
+                // Clear active task tracking
+                _activeDownloadTasks.Clear();
             }
         }
 
         private void BtnPause_Click(object sender, RoutedEventArgs e)
         {
-            // Only allow pause during download
+            // Global Pause - affects ALL active downloads regardless of UI checkbox state
             if (_pauseEvent == null || !BtnPause.IsEnabled)
                 return;
 
             if (_pauseEvent.IsSet)
             {
-                // Đang chạy -> Tạm dừng
+                // Running -> Pause: Signal all threads to pause
                 _pauseEvent.Reset();
                 if (_pauseCts != null && !_pauseCts.IsCancellationRequested)
-                    _pauseCts.Cancel(); // Ngắt ngay lập tức mạng
+                    _pauseCts.Cancel();
                 BtnPause.Content = "Resume";
-                UpdateStatus("Đã tạm dừng quá trình tải xuống (Đang ngắt kết nối...)", "Yellow");
+                UpdateStatus("Paused all downloads", "Yellow");
             }
             else
             {
-                // Đang tạm dừng -> Chạy tiếp
+                // Paused -> Resume: Create new cancellation token and resume
                 if (_pauseCts == null || _pauseCts.IsCancellationRequested)
                     _pauseCts = new CancellationTokenSource();
                 _pauseEvent.Set();
                 BtnPause.Content = "Pause";
-                UpdateStatus("Đang tiếp tục quá trình tải xuống...", "Cyan");
+                UpdateStatus("Resuming all downloads...", "Cyan");
             }
         }
 

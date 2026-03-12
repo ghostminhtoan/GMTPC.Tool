@@ -64,25 +64,41 @@ namespace GMTPC.Tool.Services
 
         /// <summary>
         /// Downloads file using optimized multi-segment approach
+        /// On cancellation, partial file is automatically deleted
         /// </summary>
-        public async Task DownloadAsync(string url, string destinationPath, int segments, 
+        public async Task DownloadAsync(string url, string destinationPath, int segments,
             IProgress<DownloadProgressInfo> progress, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(url)) throw new ArgumentNullException(nameof(url));
             if (string.IsNullOrWhiteSpace(destinationPath)) throw new ArgumentNullException(nameof(destinationPath));
             segments = Math.Max(1, Math.Min(segments, 32)); // Cap at 32 segments
 
-            // Probe for file info
-            var probe = await ProbeAsync(url, ct);
-            
-            // Choose strategy based on file size and server support
-            if (!probe.SupportsRange || probe.FileSize < MinSizeForSegmented)
+            try
             {
-                await DownloadSingleOptimizedAsync(probe.FinalUrl, destinationPath, progress, ct);
-                return;
-            }
+                // Probe for file info
+                var probe = await ProbeAsync(url, ct);
 
-            await DownloadSegmentedOptimizedAsync(probe.FinalUrl, destinationPath, probe.FileSize, segments, progress, ct);
+                // Choose strategy based on file size and server support
+                if (!probe.SupportsRange || probe.FileSize < MinSizeForSegmented)
+                {
+                    await DownloadSingleOptimizedAsync(probe.FinalUrl, destinationPath, progress, ct);
+                    return;
+                }
+
+                await DownloadSegmentedOptimizedAsync(probe.FinalUrl, destinationPath, probe.FileSize, segments, progress, ct);
+            }
+            catch (OperationCanceledException)
+            {
+                // On cancellation, clean up partial download
+                CleanupPartialDownload(destinationPath);
+                throw; // Re-throw to propagate cancellation
+            }
+            catch (Exception)
+            {
+                // On any error, clean up partial download
+                CleanupPartialDownload(destinationPath);
+                throw;
+            }
         }
 
         // ── Probe Result ─────────────────────────────────────────────────────
@@ -294,6 +310,10 @@ namespace GMTPC.Tool.Services
         }
 
         // ── Optimized Segmented Download ─────────────────────────────────────
+        /// <summary>
+        /// Downloads file using parallel segments with simultaneous connection firing
+        /// All 16 segments start at the same time via Task.WhenAll (no sequential ramp-up)
+        /// </summary>
         private async Task DownloadSegmentedOptimizedAsync(string url, string destinationPath,
             long fileSize, int segments, IProgress<DownloadProgressInfo> progress, CancellationToken ct)
         {
@@ -389,19 +409,20 @@ namespace GMTPC.Tool.Services
 
                 try
                 {
-                    // Start worker tasks - each writes to its own offset (NO global file lock)
-                    var workers = new List<Task>();
+                    // CRITICAL: Fire ALL 16 segments SIMULTANEOUSLY with Task.WhenAll
+                    // No sequential ramp-up - all HTTP GET requests start at once
+                    var workers = new Task[segments];
                     for (int i = 0; i < segments; i++)
                     {
                         int workerIndex = i;
-                        workers.Add(Task.Run(async () =>
+                        workers[i] = Task.Run(async () =>
                         {
                             await ProcessChunksAsync(url, destinationPath, chunkQueue, retryQueue,
                                 workerIndex, regionProgress, progressState, ct);
-                        }, ct));
+                        }, ct);
                     }
 
-                    // Wait for all workers
+                    // Wait for ALL workers to complete (or cancel) simultaneously
                     await Task.WhenAll(workers);
                 }
                 finally
@@ -586,6 +607,25 @@ namespace GMTPC.Tool.Services
         {
             if (buffer?.Length == NetworkBufferSize)
                 _bufferPool.Enqueue(buffer);
+        }
+
+        // ── Cleanup Helper ───────────────────────────────────────────────────
+        /// <summary>
+        /// Safely deletes a partial download file after cancellation/failure
+        /// Swallows exceptions if file is still locked by OS
+        /// </summary>
+        private static void CleanupPartialDownload(string destinationPath)
+        {
+            try
+            {
+                if (File.Exists(destinationPath))
+                {
+                    try { File.Delete(destinationPath); }
+                    catch (IOException) { /* File still locked - swallow */ }
+                    catch (UnauthorizedAccessException) { /* No permission - swallow */ }
+                }
+            }
+            catch { /* Ignore cleanup errors */ }
         }
 
         // ── Chunk Range Helper ───────────────────────────────────────────────

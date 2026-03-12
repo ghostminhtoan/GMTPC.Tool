@@ -19,16 +19,22 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using GMTPC.Tool.Services;
 
 namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
         // ===================== Shared State Fields =====================
+        // Global pause/cancellation management
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationTokenSource _pauseCts;
         private System.Threading.ManualResetEventSlim _pauseEvent = new System.Threading.ManualResetEventSlim(true);
         private List<DownloadRange> _remainingRanges = new List<DownloadRange>();
+
+        // Global task tracking for pause/resume (separate from UI checkbox state)
+        private ConcurrentDictionary<string, DownloadTaskState> _activeDownloadTasks 
+            = new ConcurrentDictionary<string, DownloadTaskState>();
 
         private bool _isInstalling = false;
         private string _installationStatus = "";
