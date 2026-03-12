@@ -21,6 +21,7 @@ using System.Windows.Input;
 using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
+using GMTPC.Tool.Services;
 
 namespace GMTPC.Tool
 {
@@ -423,11 +424,15 @@ namespace GMTPC.Tool
         {
             try
             {
-                string gmtFolder = GetGMTPCFolder();
-                string part1Path = Path.Combine(gmtFolder, "SAMURAI.MAIDEN_LinkNeverDie.Com.part1.exe");
-                string part2Path = Path.Combine(gmtFolder, "SAMURAI.MAIDEN_LinkNeverDie.Com.part2.rar");
-                string part3Path = Path.Combine(gmtFolder, "SAMURAI.MAIDEN_LinkNeverDie.Com.part3.rar");
-                string part4Path = Path.Combine(gmtFolder, "SAMURAI.MAIDEN_LinkNeverDie.Com.part4.rar");
+                // Get isolated download folder: {Drive}:\temp\SamuraiMaiden\
+                string taskFolder = DownloadConfiguration.GetTaskDownloadFolder("SamuraiMaiden");
+                
+                UpdateStatus($"Downloading to: {taskFolder}", "Cyan");
+                
+                string part1Path = Path.Combine(taskFolder, "SAMURAI.MAIDEN_LinkNeverDie.Com.part1.exe");
+                string part2Path = Path.Combine(taskFolder, "SAMURAI.MAIDEN_LinkNeverDie.Com.part2.rar");
+                string part3Path = Path.Combine(taskFolder, "SAMURAI.MAIDEN_LinkNeverDie.Com.part3.rar");
+                string part4Path = Path.Combine(taskFolder, "SAMURAI.MAIDEN_LinkNeverDie.Com.part4.rar");
 
                 // Download part 1
                 UpdateStatus("Đang tải Samurai Maiden - Part 1...", "Cyan");
@@ -487,7 +492,7 @@ namespace GMTPC.Tool
                 {
                     FileName = part1Path,
                     UseShellExecute = true,
-                    WorkingDirectory = gmtFolder
+                    WorkingDirectory = taskFolder
                 };
                 Process process = Process.Start(startInfo);
 
@@ -513,54 +518,41 @@ namespace GMTPC.Tool
         {
             try
             {
-                // Use the auto-selected temp path from drive ComboBox
-                // Format: {DriveLetter}:\temp (e.g., K:\temp)
-                string tempFolder = GetSelectedTempPath();
+                // Get isolated download folder: {Drive}:\temp\GhostOfTsushima\
+                string taskFolder = DownloadConfiguration.GetTaskDownloadFolder("GhostOfTsushima");
                 
-                if (string.IsNullOrEmpty(tempFolder))
-                {
-                    UpdateStatus("Error: Cannot create temp folder. Select different drive.", "Red");
-                    return;
-                }
+                UpdateStatus($"Downloading to: {taskFolder}", "Cyan");
 
-                UpdateStatus($"Downloading to: {tempFolder}", "Cyan");
-
-                // Create Ghost of Tsushima subfolder in temp
-                string gotFolder = Path.Combine(tempFolder, "GhostOfTsushima");
-                if (!Directory.Exists(gotFolder))
-                {
-                    Directory.CreateDirectory(gotFolder);
-                }
-
-                string part01Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe");
-                string part02Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part02.rar");
-                string part03Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part03.rar");
-                string part04Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part04.rar");
-                string part05Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part05.rar");
-                string part06Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part06.rar");
-                string part07Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part07.rar");
-                string part08Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part08.rar");
-                string part09Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part09.rar");
-                string part10Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part10.rar");
-                string part11Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part11.rar");
-                string part12Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part12.rar");
-                string part13Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part13.rar");
-                string part14Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part14.rar");
-                string part15Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part15.rar");
-                string part16Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part16.rar");
-                string part17Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part17.rar");
-                string part18Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part18.rar");
-                string part19Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part19.rar");
-                string part20Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part20.rar");
-                string part21Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part21.rar");
-                string part22Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part22.rar");
-                string part23Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part23.rar");
-                string part24Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part24.rar");
-                string part25Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part25.rar");
-                string part26Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part26.rar");
-                string part27Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part27.rar");
-                string part28Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part28.rar");
-                string part29Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part29.rar");
+                // All 29 parts will be saved in the isolated folder
+                string part01Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe");
+                string part02Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part02.rar");
+                string part03Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part03.rar");
+                string part04Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part04.rar");
+                string part05Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part05.rar");
+                string part06Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part06.rar");
+                string part07Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part07.rar");
+                string part08Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part08.rar");
+                string part09Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part09.rar");
+                string part10Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part10.rar");
+                string part11Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part11.rar");
+                string part12Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part12.rar");
+                string part13Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part13.rar");
+                string part14Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part14.rar");
+                string part15Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part15.rar");
+                string part16Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part16.rar");
+                string part17Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part17.rar");
+                string part18Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part18.rar");
+                string part19Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part19.rar");
+                string part20Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part20.rar");
+                string part21Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part21.rar");
+                string part22Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part22.rar");
+                string part23Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part23.rar");
+                string part24Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part24.rar");
+                string part25Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part25.rar");
+                string part26Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part26.rar");
+                string part27Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part27.rar");
+                string part28Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part28.rar");
+                string part29Path = Path.Combine(taskFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part29.rar");
 
                 // Download all 29 parts
                 UpdateStatus("Đang tải Ghost of Tsushima - Part 1/29...", "Cyan");
@@ -685,7 +677,7 @@ namespace GMTPC.Tool
                 {
                     FileName = part01Path,
                     UseShellExecute = true,
-                    WorkingDirectory = tempFolder
+                    WorkingDirectory = taskFolder
                 };
                 Process process = Process.Start(startInfo);
 
@@ -696,7 +688,7 @@ namespace GMTPC.Tool
                 }
 
                 // Note: Not deleting temp folder - user may want to keep files
-                UpdateStatus("Installation complete. Files remain in \\temp.", "Green");
+                UpdateStatus("Installation complete. Files remain in isolated folder.", "Green");
             }
             catch (Exception ex)
             {

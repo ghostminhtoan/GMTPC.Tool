@@ -21,7 +21,6 @@ namespace GMTPC.Tool
     {
         // Drive scanner fields
         private List<DriveInfoEx> _detectedDrives;
-        private string _selectedTempPath;
         private bool _isScanningDrives;
 
         /// <summary>
@@ -115,7 +114,7 @@ namespace GMTPC.Tool
 
         /// <summary>
         /// Handle drive selection change - Auto path routing
-        /// Hardcoded pattern: {DriveLetter}:\temp
+        /// Sets global temp base path: {DriveLetter}:\temp
         /// </summary>
         private void CboDriveSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -123,26 +122,26 @@ namespace GMTPC.Tool
             {
                 try
                 {
-                    // Auto-create temp folder using HARDCODED pattern
-                    _selectedTempPath = DriveScannerService.EnsureTempFolder(selectedDrive.DriveLetter);
+                    // Set global temp base path using DownloadConfiguration
+                    string tempBasePath = DownloadConfiguration.SetTempBasePath(selectedDrive.DriveLetter);
 
-                    UpdateSecondaryStatus($"Temp: {_selectedTempPath}", "Cyan");
-                    UpdateStatus($"Selected: {selectedDrive.DriveLetter} - \\temp ready", "Green");
+                    UpdateSecondaryStatus($"Temp: {tempBasePath}", "Cyan");
+                    UpdateStatus($"Global temp set: {selectedDrive.DriveLetter}:\temp", "Green");
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     UpdateStatus($"Permission denied: {ex.Message}", "Red");
-                    _selectedTempPath = null;
+                    DownloadConfiguration.TempBasePath = null;
                 }
                 catch (IOException ex)
                 {
                     UpdateStatus($"IO Error: {ex.Message}", "Red");
-                    _selectedTempPath = null;
+                    DownloadConfiguration.TempBasePath = null;
                 }
                 catch (Exception ex)
                 {
                     UpdateStatus($"Error: {ex.Message}", "Red");
-                    _selectedTempPath = null;
+                    DownloadConfiguration.TempBasePath = null;
                 }
             }
         }
@@ -158,17 +157,12 @@ namespace GMTPC.Tool
 
         /// <summary>
         /// Get the currently selected temp path
-        /// Returns hardcoded {DriveLetter}:\temp - NEVER uses Path.GetTempPath()
+        /// Returns global temp base path from DownloadConfiguration
+        /// Format: {DriveLetter}:\temp
         /// </summary>
         private string GetSelectedTempPath()
         {
-            if (!string.IsNullOrEmpty(_selectedTempPath))
-            {
-                return _selectedTempPath;
-            }
-
-            // Fallback to default GMTPC folder
-            return GetGMTPCFolder();
+            return DownloadConfiguration.TempBasePath ?? GetGMTPCFolder();
         }
 
         // ===================================================================
