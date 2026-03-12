@@ -43,6 +43,9 @@ namespace GMTPC.Tool
             SetupInitialOrientation();
             SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
             try { PopulateSystemInfo(); } catch { }
+            
+            // Initialize drive scanner asynchronously
+            InitializeDriveScanner();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

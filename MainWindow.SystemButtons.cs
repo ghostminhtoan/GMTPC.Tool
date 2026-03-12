@@ -492,120 +492,34 @@ namespace GMTPC.Tool
 
         private async void BtnInstall_Click(object sender, RoutedEventArgs e)
         {
-            // Đặt trạng thái đang cài đặt
+            // Collect all selected tasks using the new multi-task queue system
+            var selectedTasks = CollectSelectedTasks();
+            
+            if (selectedTasks.Count == 0)
+            {
+                UpdateStatus("Vui lòng chọn ít nhất một phần mềm để cài đặt", "Orange");
+                return;
+            }
+
+            // Set installing state
             SetInstallingState(true);
 
-            UpdateStatus("Đang chờ...", "Yellow"); // Thêm phản hồi tức thì
-            await Task.Delay(1); // Cho phép UI cập nhật ngay lập tức
+            UpdateStatus("Đang chờ...", "Yellow");
+            await Task.Delay(1);
 
+            // Initialize cancellation tokens
             _cancellationTokenSource = new CancellationTokenSource();
             _pauseCts = new CancellationTokenSource();
-            _pauseEvent.Set(); // Mặc định là không pause
+            _pauseEvent.Set();
             BtnPause.Content = "Pause";
             BtnStop.IsEnabled = true;
             BtnPause.IsEnabled = true;
             BtnInstall.IsEnabled = false;
 
-            var tasks = new List<(Func<Task> Action, CheckBox CheckBox)>();
-
-            if (ChkInstallIDM.IsChecked == true) tasks.Add((() => RunAutomatedProcessAsync(), ChkInstallIDM));
-            if (ChkActivateWindows.IsChecked == true) tasks.Add((() => Task.Run(() => ActivateWindows()), ChkActivateWindows));
-            if (ChkActivateOffice.IsChecked == true) tasks.Add((() => Task.Run(() => ActivateOffice()), ChkActivateOffice));
-            if (ChkOfficeToolPlus.IsChecked == true) tasks.Add((InstallOfficeToolPlusAsync, ChkOfficeToolPlus)); // Thêm task cho Office Tool Plus
-            if (ChkPauseWindowsUpdate.IsChecked == true) tasks.Add((() => Task.Run(() => PauseWindowsUpdate()), ChkPauseWindowsUpdate));
-            if (ChkInstallWinRAR.IsChecked == true) tasks.Add((InstallAndActivateWinRARAsync, ChkInstallWinRAR));
-            if (ChkInstallBID.IsChecked == true) tasks.Add((InstallAndActivateBIDAsync, ChkInstallBID));
-            if (ChkVcredist.IsChecked == true) tasks.Add((InstallVcredistAsync, ChkVcredist));
-            if (ChkDirectX.IsChecked == true) tasks.Add((InstallDirectXAsync, ChkDirectX));
-            if (ChkJava.IsChecked == true) tasks.Add((InstallJavaAsync, ChkJava));
-            if (ChkOpenAL.IsChecked == true) tasks.Add((InstallOpenALAsync, ChkOpenAL));
-            if (ChkChrome.IsChecked == true) tasks.Add((InstallChromeAsync, ChkChrome));
-            if (ChkCocCoc.IsChecked == true) tasks.Add((InstallCocCocAsync, ChkCocCoc));
-            if (ChkEdge.IsChecked == true) tasks.Add((InstallEdgeAsync, ChkEdge));
-            if (ChkPotPlayer.IsChecked == true) tasks.Add((InstallPotPlayerAsync, ChkPotPlayer));
-            if (ChkFastStone.IsChecked == true) tasks.Add((InstallFastStoneAsync, ChkFastStone));
-            if (ChkFoxit.IsChecked == true) tasks.Add((InstallFoxitAsync, ChkFoxit));
-            if (ChkBandiview.IsChecked == true) tasks.Add((InstallBandiviewAsync, ChkBandiview));
-            if (ChkAdvancedCodecPack.IsChecked == true) tasks.Add((InstallAdvancedCodecPackAsync, ChkAdvancedCodecPack));
-            if (ChkRevoUninstaller.IsChecked == true) tasks.Add((InstallHibitUninstallerAsync, ChkRevoUninstaller));
-            if (ChkInstallZalo.IsChecked == true) tasks.Add((InstallZaloAsync, ChkInstallZalo));
-            if (Chk3DPChip.IsChecked == true) tasks.Add((Run3DPChipAsync, Chk3DPChip));
-            if (Chk3DPNet.IsChecked == true) tasks.Add((Install3DPNetAsync, Chk3DPNet));
-            if (ChkMMTApps.IsChecked == true) tasks.Add((InstallMMTAppsAsync, ChkMMTApps));
-            if (ChkDISMPP.IsChecked == true) tasks.Add((InstallDISMPPAsync, ChkDISMPP));
-            if (ChkComfortClipboardPro.IsChecked == true) tasks.Add((InstallComfortClipboardProAsync, ChkComfortClipboardPro));
-            if (ChkOfficeSoftmaker.IsChecked == true) tasks.Add((InstallOfficeSoftmakerAsync, ChkOfficeSoftmaker));
-            if (ChkGouenjiFonts.IsChecked == true) tasks.Add((InstallGouenjiFontsAsync, ChkGouenjiFonts));
-            if (ChkNotepadPlusPlus.IsChecked == true) tasks.Add((InstallNotepadPlusPlusAsync, ChkNotepadPlusPlus));
-            // Only add once to avoid duplicate install and MessageBox
-            if (ChkPowerISO.IsChecked == true) tasks.Add((InstallPowerISOAsync, ChkPowerISO));
-            if (ChkTeraCopy.IsChecked == true) tasks.Add((InstallTeraCopyAsync, ChkTeraCopy));
-            if (ChkVPN1111.IsChecked == true) tasks.Add((InstallVPN1111Async, ChkVPN1111));
-            if (ChkGoogleDrive.IsChecked == true) tasks.Add((InstallGoogleDriveAsync, ChkGoogleDrive));
-            if (ChkNetLimiter.IsChecked == true) tasks.Add((InstallNetLimiterAsync, ChkNetLimiter));
-            if (ChkFolderSize.IsChecked == true) tasks.Add((InstallFolderSizeAsync, ChkFolderSize));
-            if (ChkDiskGenius.IsChecked == true) tasks.Add((InstallDiskGeniusAsync, ChkDiskGenius));
-            if (ChkProcessLasso.IsChecked == true) tasks.Add((InstallProcessLassoAsync, ChkProcessLasso));
-            if (ChkThrottlestop.IsChecked == true) tasks.Add((InstallThrottlestopAsync, ChkThrottlestop));
-            if (ChkMSIAfterburner.IsChecked == true) tasks.Add((InstallMSIAfterburnerAsync, ChkMSIAfterburner));
-            if (ChkLeagueOfLegends.IsChecked == true) tasks.Add((InstallLeagueOfLegendsVNAsync, ChkLeagueOfLegends));
-            if (ChkPorofessor.IsChecked == true) tasks.Add((InstallPorofessorAsync, ChkPorofessor));
-            if (ChkSamuraiMaiden.IsChecked == true) tasks.Add((InstallSamuraiMaidenAsync, ChkSamuraiMaiden));
-            if (ChkGhostOfTsushima.IsChecked == true) tasks.Add((InstallGhostOfTsushimaAsync, ChkGhostOfTsushima));
-            if (ChkAomeiPartitionAssistant.IsChecked == true) tasks.Add((InstallAomeiPartitionAssistantAsync, ChkAomeiPartitionAssistant));
-            if (ChkUltraviewer.IsChecked == true) tasks.Add((InstallUltraviewerAsync, ChkUltraviewer));
-            if (ChkTeamViewerQS.IsChecked == true) tasks.Add((InstallTeamViewerQuickSupportAsync, ChkTeamViewerQS));
-            if (ChkTeamViewerFull.IsChecked == true) tasks.Add((InstallTeamViewerFullAsync, ChkTeamViewerFull));
-            if (ChkAnyDesk.IsChecked == true) tasks.Add((InstallAnyDeskAsync, ChkAnyDesk));
-            if (ChkVMWare162Lite.IsChecked == true) tasks.Add((InstallVMWare162LiteAsync, ChkVMWare162Lite));
-            if (ChkWin11_26H1.IsChecked == true) tasks.Add((InstallWin11_26H1Async, ChkWin11_26H1));
-            if (ChkWin10LtscIot21H2.IsChecked == true) tasks.Add((InstallWin10LtscIot21H2Async, ChkWin10LtscIot21H2));
-
-            CheckBox currentTaskCheckBox = null;
             try
             {
-                foreach (var taskInfo in tasks)
-                {
-                    currentTaskCheckBox = taskInfo.CheckBox;
-
-                    if (_cancellationTokenSource.Token.IsCancellationRequested)
-                    {
-                        UpdateStatus("Quá trình cài đặt đã bị dừng.", "Red");
-                        break;
-                    }
-
-                    // Delay 500ms giữa các task để tránh tải nhiều file cùng lúc gây lỗi server
-                    if (tasks.Count > 1)
-                    {
-                        await Task.Delay(500);
-                    }
-
-                    await taskInfo.Action();
-
-                    if (_cancellationTokenSource.Token.IsCancellationRequested)
-                    {
-                        if (taskInfo.CheckBox != null)
-                        {
-                            taskInfo.CheckBox.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
-                        }
-                        UpdateStatus("Quá trình cài đặt đã bị dừng.", "Red");
-                        break;
-                    }
-
-                    if (taskInfo.CheckBox != null)
-                    {
-                        taskInfo.CheckBox.IsChecked = false;
-                        taskInfo.CheckBox.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Cyan);
-                    }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                if (currentTaskCheckBox != null)
-                {
-                    currentTaskCheckBox.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
-                }
-                UpdateStatus("Quá trình cài đặt đã bị hủy.", "Red");
+                // Execute the task queue with the new multi-task system
+                await ExecuteTaskQueueAsync(selectedTasks);
             }
             catch (Exception ex)
             {
@@ -617,8 +531,6 @@ namespace GMTPC.Tool
                 BtnPause.IsEnabled = false;
                 UpdateInstallButtonState();
                 UpdateStatus("Hoàn tất tất cả các tác vụ.", "Green");
-                
-                // Đặt lại trạng thái không còn cài đặt
                 SetInstallingState(false);
             }
         }

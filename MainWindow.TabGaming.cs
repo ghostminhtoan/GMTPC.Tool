@@ -213,47 +213,6 @@ namespace GMTPC.Tool
             UpdateInstallButtonState();
         }
 
-
-        private void BtnGhostOfTsushima_Temp_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                using (var folderDialog = new System.Windows.Forms.FolderBrowserDialog())
-                {
-                    folderDialog.Description = "Chọn folder tạm thời cho Ghost of Tsushima (đề phòng ổ C đầy)";
-                    folderDialog.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    folderDialog.ShowNewFolderButton = true;
-
-                    System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
-
-                    if (result != System.Windows.Forms.DialogResult.OK)
-                    {
-                        UpdateStatus("Đã hủy chọn folder", "Yellow");
-                        return;
-                    }
-
-                    string selectedPath = folderDialog.SelectedPath;
-
-                    // Create temp folder in selected location
-                    string tempFolderName = "GMTPC_GhostOfTsushima_Temp_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                    _ghostOfTsushimaTempFolder = Path.Combine(selectedPath, tempFolderName);
-
-                    if (!Directory.Exists(_ghostOfTsushimaTempFolder))
-                    {
-                        Directory.CreateDirectory(_ghostOfTsushimaTempFolder);
-                    }
-
-                    UpdateStatus($"Đã chọn folder: {_ghostOfTsushimaTempFolder}", "Green");
-                    MessageBox.Show($"Folder tạm thời đã được chọn:\n{_ghostOfTsushimaTempFolder}\n\nBây giờ bạn có thể click Install để tải về.", "Ghost of Tsushima", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Lỗi khi chọn folder: {ex.Message}", "Red");
-            }
-        }
-
-
         private async Task InstallProcessLassoAsync()
         {
             try
@@ -554,47 +513,54 @@ namespace GMTPC.Tool
         {
             try
             {
-                // Use the folder selected by Temp button
-                string tempFolder = _ghostOfTsushimaTempFolder;
-
+                // Use the auto-selected temp path from drive ComboBox
+                // Format: {DriveLetter}:\temp (e.g., K:\temp)
+                string tempFolder = GetSelectedTempPath();
+                
                 if (string.IsNullOrEmpty(tempFolder))
                 {
-                    UpdateStatus("Lỗi: Chưa chọn folder lưu trữ. Vui lòng click nút 'Temp' để chọn folder.", "Red");
-                    MessageBox.Show("Vui lòng click nút 'Temp' bên cạnh checkbox Ghost of Tsushima để chọn folder tạm thời trước khi Install!", "Ghost of Tsushima", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    UpdateStatus("Error: Cannot create temp folder. Select different drive.", "Red");
                     return;
                 }
 
-                UpdateStatus($"Đang tải về folder: {tempFolder}", "Cyan");
+                UpdateStatus($"Downloading to: {tempFolder}", "Cyan");
 
-                string part01Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe");
-                string part02Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part02.rar");
-                string part03Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part03.rar");
-                string part04Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part04.rar");
-                string part05Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part05.rar");
-                string part06Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part06.rar");
-                string part07Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part07.rar");
-                string part08Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part08.rar");
-                string part09Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part09.rar");
-                string part10Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part10.rar");
-                string part11Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part11.rar");
-                string part12Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part12.rar");
-                string part13Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part13.rar");
-                string part14Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part14.rar");
-                string part15Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part15.rar");
-                string part16Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part16.rar");
-                string part17Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part17.rar");
-                string part18Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part18.rar");
-                string part19Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part19.rar");
-                string part20Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part20.rar");
-                string part21Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part21.rar");
-                string part22Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part22.rar");
-                string part23Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part23.rar");
-                string part24Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part24.rar");
-                string part25Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part25.rar");
-                string part26Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part26.rar");
-                string part27Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part27.rar");
-                string part28Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part28.rar");
-                string part29Path = Path.Combine(tempFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part29.rar");
+                // Create Ghost of Tsushima subfolder in temp
+                string gotFolder = Path.Combine(tempFolder, "GhostOfTsushima");
+                if (!Directory.Exists(gotFolder))
+                {
+                    Directory.CreateDirectory(gotFolder);
+                }
+
+                string part01Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe");
+                string part02Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part02.rar");
+                string part03Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part03.rar");
+                string part04Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part04.rar");
+                string part05Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part05.rar");
+                string part06Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part06.rar");
+                string part07Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part07.rar");
+                string part08Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part08.rar");
+                string part09Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part09.rar");
+                string part10Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part10.rar");
+                string part11Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part11.rar");
+                string part12Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part12.rar");
+                string part13Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part13.rar");
+                string part14Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part14.rar");
+                string part15Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part15.rar");
+                string part16Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part16.rar");
+                string part17Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part17.rar");
+                string part18Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part18.rar");
+                string part19Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part19.rar");
+                string part20Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part20.rar");
+                string part21Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part21.rar");
+                string part22Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part22.rar");
+                string part23Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part23.rar");
+                string part24Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part24.rar");
+                string part25Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part25.rar");
+                string part26Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part26.rar");
+                string part27Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part27.rar");
+                string part28Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part28.rar");
+                string part29Path = Path.Combine(gotFolder, "Ghost.of.Tsushima_LinkNeverDie.Com.part29.rar");
 
                 // Download all 29 parts
                 UpdateStatus("Đang tải Ghost of Tsushima - Part 1/29...", "Cyan");
@@ -729,20 +695,8 @@ namespace GMTPC.Tool
                     UpdateStatus("Ghost of Tsushima đã hoàn tất!", "Green");
                 }
 
-                // Delete temp folder after installation
-                UpdateStatus("Đang xóa file tạm thời...", "Cyan");
-                try
-                {
-                    if (Directory.Exists(tempFolder))
-                    {
-                        Directory.Delete(tempFolder, true);
-                        UpdateStatus($"Đã xóa folder tạm: {tempFolder}", "Green");
-                    }
-                }
-                catch (Exception exDelete)
-                {
-                    UpdateStatus($"Không thể xóa folder tạm: {exDelete.Message}", "Yellow");
-                }
+                // Note: Not deleting temp folder - user may want to keep files
+                UpdateStatus("Installation complete. Files remain in \\temp.", "Green");
             }
             catch (Exception ex)
             {

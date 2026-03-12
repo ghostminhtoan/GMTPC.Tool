@@ -47,8 +47,8 @@ namespace GMTPC.Tool.Services
     public sealed class SegmentedDownloadEngine
     {
         // ── tunables ──────────────────────────────────────────────────────────
-        private const long ChunkSize = 8L * 1024 * 1024;      // 8 MB per work-item
-        private const long MinSizeForSegmented = 5L * 1024 * 1024; // 5 MB minimum
+        private const long ChunkSize = 512L * 1024;         // 512 KB per work-item (reduced from 8MB for faster startup)
+        private const long MinSizeForSegmented = 512L * 1024; // 512 KB minimum (aligned with chunk size)
         private const int  MaxRedirects = 10;
         private const int  MaxRetries   = 10;
         private static readonly TimeSpan HeadTimeout   = TimeSpan.FromSeconds(60);

@@ -34,9 +34,6 @@ namespace GMTPC.Tool
         private string _installationStatus = "";
         private double originalWidth;
         private double originalHeight;
-        
-        // Folder selection for Ghost of Tsushima
-        private string _ghostOfTsushimaTempFolder = null;
 
         // ===================== Build Number Display =====================
         private void SetBuildNumber()
@@ -284,7 +281,7 @@ namespace GMTPC.Tool
             {
                 var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
 
-                int segments = 8;
+                int segments = 16; // Default to 16 segments for optimal performance
                 await Dispatcher.InvokeAsync(() =>
                 {
                     if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
@@ -303,9 +300,10 @@ namespace GMTPC.Tool
                     });
                 });
 
-                UpdateStatus($"Dang tai {displayName}...", "Cyan");
+                UpdateStatus($"Dang tai {displayName}... ({segments} threads)", "Cyan");
 
-                var engine = new GMTPC.Tool.Services.SegmentedDownloadEngine();
+                // Use optimized download engine for maximum throughput
+                var engine = new GMTPC.Tool.Services.SegmentedDownloadEngineOptimized();
                 await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct);
 
                 await Dispatcher.InvokeAsync(() => ResetDownloadUI());
@@ -325,15 +323,20 @@ namespace GMTPC.Tool
 
         private void ApplyDownloadProgressToUI(GMTPC.Tool.Services.DownloadProgressInfo info)
         {
-            bool isSingle = info.SegmentPercents == null || info.SegmentPercents.Length <= 1;
-            DownloadProgressBar.Visibility = isSingle ? Visibility.Visible : Visibility.Collapsed;
-            if (isSingle && info.SegmentPercents != null && info.SegmentPercents.Length == 1)
-                DownloadProgressBar.Value = info.SegmentPercents[0];
+            // Always show main progress bar AND segment bars simultaneously
+            DownloadProgressBar.Visibility = Visibility.Visible;
+            
+            // Update main progress bar with overall percentage
+            DownloadProgressBar.Value = info.OverallPercent;
+            
+            // Update speed and progress text
             SpeedTextBlock.Text = FormatSpeed(info.SpeedBytesPerSec);
             ProgressTextBlock.Text = info.TotalBytes > 0
                 ? $"{FormatBytes(info.BytesDone)} / {FormatBytes(info.TotalBytes)}"
                 : FormatBytes(info.BytesDone);
-            if (!isSingle && info.SegmentPercents != null)
+            
+            // Update segment bars
+            if (info.SegmentPercents != null && info.SegmentPercents.Length > 1)
             {
                 int count = info.SegmentPercents.Length;
                 if (ConnectionTraceGrid.Children.Count != count)
