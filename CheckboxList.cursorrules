@@ -1,0 +1,140 @@
+<!-- AI Summary: 2026-03-11 - Added ChkGhostOfTsushima (29 parts) to Tab Gaming -->
+
+# Danh sách Checkbox
+
+> File này lưu trữ thông tin các checkbox cài đặt phần mềm đã tạo.
+> Cập nhật sau mỗi lần tạo/sửa checkbox bằng Workflow_createcheckbox hoặc Workflow_editcheckbox.
+
+## Tab System Information
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| *(Tab hiển thị thông tin hệ thống, không có checkbox cài đặt)* | | |
+
+## Tab Popular
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkInstallIDM | https://tinyurl.com/idmhcmvn | `/s /a /u /o /quiet /skipdlgst` |
+| ChkInstallWinRAR | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.exe | `/silent /I /EN` |
+| ChkInstallBID | https://bulkimagedownloader.com/files/bid_6_62_setup_x64.exe | *(không có)* |
+| ChkActivateWindows | (Built-in Windows Activation) | `slmgr /ipk ...` |
+| ChkPauseWindowsUpdate | (Windows Update Service) | *(system service)* |
+| ChkVcredist | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe | `/passive` |
+| ChkDirectX | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/DirectX.exe | `/passive` |
+| ChkJava | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/java.exe | `/s` |
+| ChkOpenAL | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/oalinst.exe | `/S` |
+| ChkRevoUninstaller | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/RevoUninstallerPro.exe | `/S` |
+| ChkInstallZalo | https://zalo.me/download/zalo-pc?utm=90000 | `/s` |
+
+## Tab Office
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkOfficeToolPlus | *(Office Tool Plus)* | *(tool riêng)* |
+| ChkOfficeSoftmaker | *(Office Softmaker)* | *(tool riêng)* |
+| ChkActivateOffice | (Office Activation) | *(script riêng)* |
+| ChkGouenjiFonts | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Gouenji.Fansub.Fonts.exe | `/passive /norestart` |
+| ChkNotepadPlusPlus | https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.x64.msi | `/passive /norestart` |
+
+## Tab Multimedia
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkAdvancedCodecPack | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/ADVANCED_Codec_Pack.exe | `/S /V/qn` |
+| ChkPotPlayer | *(PotPlayer)* | *(tool riêng)* |
+| ChkFastStone | *(FastStone Capture)* | *(tool riêng)* |
+| ChkFoxit | *(Foxit PDF Reader)* | *(tool riêng)* |
+| ChkBandiview | *(Bandiview)* | *(tool riêng)* |
+
+## Tab System
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkMMTApps | *(MMT Apps)* | *(tool riêng)* |
+| ChkDISMPP | *(DISM++)* | *(tool riêng)* |
+| ChkComfortClipboardPro | *(Comfort Clipboard Pro)* | *(tool riêng)* |
+| ChkFolderSize | *(FolderSize)* | *(tool riêng)* |
+| ChkPowerISO | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe | `/S` |
+| ChkTeraCopy | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe | `/S` |
+| ChkVPN1111 | https://1111-releases.cloudflareclient.com/win/latest | `/passive` |
+| ChkGoogleDrive | *(Google Drive)* | *(tool riêng)* |
+| ChkNetLimiter | *(NetLimiter)* | *(tool riêng)* |
+
+## Tab Partition
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkAomeiPartitionAssistant | *(AOMEI Partition Assistant)* | *(tool riêng)* |
+| ChkDiskGenius | *(Disk Genius)* | *(tool riêng)* |
+
+## Tab Gaming
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkProcessLasso | *(Process Lasso)* | *(tool riêng)* |
+| ChkThrottlestop | *(Throttlestop)* | *(tool riêng)* |
+| ChkMSIAfterburner | *(MSI Afterburner)* | *(tool riêng)* |
+| ChkLeagueOfLegends | *(League of Legends VN)* | *(tool riêng)* |
+| ChkPorofessor | *(Porofessor)* | *(tool riêng)* |
+| ChkSamuraiMaiden | *(Samurai Maiden)* | *(tool riêng)* |
+| ChkGhostOfTsushima | https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe (29 parts) | *(multi-part installer)* |
+
+## Tab Browser
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkChrome | https://dl.google.com/chrome/install/latest/chrome_installer.exe | `/silent /install` |
+| ChkCocCoc | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/CocCoc.exe | `/silent /install` |
+| ChkEdge | https://go.microsoft.com/fwlink/?linkid=2108834&Channel=Stable&language=vi | `/silent /install` |
+
+## Tab Remote Desktop
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkUltraviewer | *(Ultraviewer)* | *(tool riêng)* |
+| ChkTeamViewerQS | *(TeamViewer QuickSupport)* | *(tool riêng)* |
+| ChkTeamViewerFull | *(TeamViewer Full)* | *(tool riêng)* |
+| ChkAnyDesk | *(AnyDesk)* | *(tool riêng)* |
+| ChkVMWare162Lite | *(VMWare 16.2 lite)* | *(tool riêng)* |
+
+## Tab Driver
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| Chk3DPChip | https://www.3dpchip.com/3dp/chip.exe | `/S` |
+| Chk3DPNet | https://www.3dpchip.com/3dp/net.exe | `/S` |
+
+## Tab Windows - Microsoft
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkWin11_26H1 | https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso | *(ISO image)* |
+
+## Tab Windows Mod MMT
+
+| Tên Checkbox | Link Download | Argument |
+|-------------|---------------|----------|
+| ChkWin10LtscIot21H2 | https://www.mediafire.com/file/b54r3aup07dddhe/win_10_LTSC_IOT_21H2_-_2021%25E2%2580%259510_-_No_Defender_Office_-_MMTPC_3.0.iso/file | *(ISO image)* |
+
+---
+
+**Tổng số:** 48 checkboxes
+
+**Ghi chú:**
+- Các checkbox được phân loại theo Tab tương ứng trong giao diện (MainWindow.xaml)
+- Link download có thể là URL rút gọn (tinyurl) hoặc link trực tiếp từ GitHub Releases
+- Argument là tham số dòng lệnh để cài đặt tự động (silent/unattended) - được hiển thị với định dạng `code`
+- *(không có)* = Không yêu cầu tham số dòng lệnh
+- *(tool riêng)* = Sử dụng phương thức cài đặt riêng trong code
+
+## Legend - Màu sắc Argument
+
+| Loại Argument | Định dạng | Ý nghĩa |
+|--------------|-----------|---------|
+| `/silent`, `/passive` | `code` | Cài đặt ngầm, không hiển thị UI |
+| `/s`, `/S` | `code` | Silent install (rút gọn) |
+| `/norestart` | `code` | Không khởi động lại sau cài đặt |
+| *(không có)* | *italic* | Không cần tham số |
+| *(tool riêng)* | *italic* | Sử dụng phương thức cài đặt custom |
+| *(ISO image)* | *italic* | File ISO Windows (không phải installer thông thường) |

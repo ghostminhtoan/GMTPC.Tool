@@ -27,7 +27,7 @@ namespace GMTPC.Tool
             string cocCocInstallerPath = Path.Combine(GetGMTPCFolder(), "coccoc_standalone_vi.exe");
             try
             {
-                await DownloadWithProgressAsync("https://files.coccoc.com/browser/coccoc_standalone_vi.exe", cocCocInstallerPath, "Cốc Cốc");
+                await DownloadWithProgressAsync(COCCOC_DOWNLOAD_URL, cocCocInstallerPath, "Cốc Cốc");
 
                 // Reset progress UI after download
                 Dispatcher.Invoke(() =>
@@ -37,11 +37,11 @@ namespace GMTPC.Tool
                     SpeedTextBlock.Text = "";
                 });
 
-                UpdateStatus("Đang chạy Cốc Cốc installer...", "Yellow");
+                UpdateStatus("Đang chạy Cốc Cốc installer ( " + COCCOC_INSTALL_ARGUMENTS + " )...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = cocCocInstallerPath,
-                    Arguments = "/silent /install",
+                    Arguments = COCCOC_INSTALL_ARGUMENTS,
                     UseShellExecute = true
                 };
 
@@ -84,7 +84,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Microsoft Edge...", "Cyan");
                 string edgePath = Path.Combine(GetGMTPCFolder(), "MicrosoftEdgeSetup.exe");
-                await DownloadWithProgressAsync("https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&source=EdgeStablePage&Channel=Stable&language=vi&brand=M100", edgePath, "Microsoft Edge");
+                await DownloadWithProgressAsync(EDGE_DOWNLOAD_URL, edgePath, "Microsoft Edge");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -93,10 +93,11 @@ namespace GMTPC.Tool
                     SpeedTextBlock.Text = "";
                 });
 
-                UpdateStatus("Đang chạy Microsoft Edge installer...", "Yellow");
+                UpdateStatus("Đang chạy Microsoft Edge installer ( " + EDGE_INSTALL_ARGUMENTS + " )...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = edgePath,
+                    Arguments = EDGE_INSTALL_ARGUMENTS,
                     UseShellExecute = true
                 };
                 Process process = Process.Start(startInfo);
@@ -167,10 +168,7 @@ namespace GMTPC.Tool
             string chromeInstallerPath = Path.Combine(GetGMTPCFolder(), "ChromeSetup.exe");
             try
             {
-                // URL theo yêu cầu người dùng
-                string chromeUrl = "https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7BE9FD60DA-2FFA-E657-6449-67646C84E6C0%7D%26lang%3Dvi%26browser%3D5%26usagestats%3D1%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-statsdef_1%26installdataindex%3Dempty/update2/installers/ChromeSetup.exe";
-
-                await DownloadWithProgressAsync(chromeUrl, chromeInstallerPath, "Google Chrome");
+                await DownloadWithProgressAsync(CHROME_DOWNLOAD_URL, chromeInstallerPath, "Google Chrome");
 
                 // Reset progress UI after download
                 Dispatcher.Invoke(() =>
@@ -180,12 +178,13 @@ namespace GMTPC.Tool
                     SpeedTextBlock.Text = "";
                 });
 
-                UpdateStatus("Đang chạy Chrome installer...", "Yellow");
+                UpdateStatus("Đang chạy Chrome installer ( " + CHROME_INSTALL_ARGUMENTS + " )...", "Yellow");
 
-                // Run installer (no silent args to avoid unexpected behavior)
+                // Run installer with arguments
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = chromeInstallerPath,
+                    Arguments = CHROME_INSTALL_ARGUMENTS,
                     UseShellExecute = true
                 };
 

@@ -16,6 +16,12 @@ using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
 
+/*
+ * AI Summary:
+ * Date: 2026-03-09
+ * - Added ChkAdvancedCodecPack (advanced codec pack)
+ */
+
 namespace GMTPC.Tool
 {
     public partial class MainWindow
@@ -192,46 +198,6 @@ namespace GMTPC.Tool
             }
         }
 
-
-        private async Task InstallAdvancedCodecAsync()
-        {
-            try
-            {
-                UpdateStatus("Đang tải Advanced Codec Pack...", "Cyan");
-                string codecPath = Path.Combine(GetGMTPCFolder(), "ADVANCED_Codec_Pack.exe");
-                await DownloadWithProgressAsync("https://github.com/github.com/ghostminhtoan/MMT/releases/download/v1.0/ADVANCED_Codec_Pack.exe", codecPath, "Advanced Codec Pack");
-
-                Dispatcher.Invoke(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                });
-
-                UpdateStatus("Đang chạy Advanced Codec installer (silent)...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = codecPath,
-                    Arguments = "/S /v/qn",
-                    UseShellExecute = true
-                };
-                Process process = Process.Start(startInfo);
-
-                if (process != null)
-                {
-                    await Task.Run(() => process.WaitForExit());
-                    UpdateStatus("Advanced Codec Pack đã hoàn tất.", "Green");
-                }
-
-                if (File.Exists(codecPath)) File.Delete(codecPath);
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Lỗi khi cài Advanced Codec Pack: {ex.Message}", "Red");
-            }
-        }
-
-
         private void ChkPotPlayer_Click(object sender, RoutedEventArgs e)
         {
             if (ChkPotPlayer.IsChecked == true)
@@ -291,16 +257,15 @@ namespace GMTPC.Tool
             UpdateInstallButtonState();
         }
 
-
-        private void ChkAdvancedCodec_Click(object sender, RoutedEventArgs e)
+        private void ChkAdvancedCodecPack_Click(object sender, RoutedEventArgs e)
         {
-            if (ChkAdvancedCodec.IsChecked == true)
+            if (ChkAdvancedCodecPack.IsChecked == true)
             {
-                UpdateStatus("Đã chọn: Advanced Codec Pack (Video Music codec)", "Green");
+                UpdateStatus("Đã chọn: Advanced Codec Pack", "Green");
             }
             else
             {
-                UpdateStatus("Đã hủy chọn: Advanced Codec Pack (Video Music codec)", "Yellow");
+                UpdateStatus("Đã hủy chọn: Advanced Codec Pack", "Yellow");
             }
 
             UpdateInstallButtonState();

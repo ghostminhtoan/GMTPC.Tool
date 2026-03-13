@@ -1,10 +1,13 @@
 ﻿// AI CONTEXT:
 // App.xaml.cs – Application lifecycle and startup checks.
 // Ensures the app runs with Administrator privileges before launching UI.
+// TCP & ThreadPool optimizations for peak download speed.
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Reflection;
 using System.Security.Principal;
+using System.Threading;
 using System.Windows;
 
 namespace GMTPC.Tool
@@ -13,6 +16,23 @@ namespace GMTPC.Tool
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            // ================================================================
+            // TCP & ThreadPool Optimization - Achieve Peak Speed Immediately
+            // ================================================================
+            
+            // Force .NET to allocate minimum threads upfront (eliminates Thread Injection Rate delay)
+            // 100 worker threads + 100 completion port threads for 16 segments per download
+            ThreadPool.SetMinThreads(100, 100);
+            
+            // Disable default .NET network delays for instant TCP connection
+            ServicePointManager.UseNagleAlgorithm = false;           // Disable Nagle (reduces latency)
+            ServicePointManager.Expect100Continue = false;           // Disable 100-continue (eliminates round-trip)
+            ServicePointManager.DefaultConnectionLimit = 100;        // Allow 100 concurrent connections per host
+            ServicePointManager.MaxServicePoints = 100;              // Cache up to 100 ServicePoints
+            ServicePointManager.SetTcpKeepAlive(true, 10000, 1000);  // TCP keepalive: 10s idle, 1s interval
+            
+            // ================================================================
+            
             // Kiểm tra quyền Administrator
             if (!IsRunningAsAdministrator())
             {
@@ -60,7 +80,7 @@ namespace GMTPC.Tool
 
             base.OnStartup(e);
         }
-        
+
         private bool IsRunningAsAdministrator()
         {
             try

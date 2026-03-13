@@ -1,4 +1,17 @@
-﻿using System;
+﻿// =======================================================================
+// MainWindow.SystemButtons.cs
+// Chức năng: Logic các nút điều khiển chung: Select All, Select None,
+//            SelectNoneAllTabs, Install, Pause, Resume, Refresh Color,
+//            BtnDownloadPage, DPI controls
+// Cập nhật gần đây:
+//   - 2026-03-11: Added ChkGhostOfTsushima to BtnSelectAll, BtnSelectNone,
+//                 BtnSelectNoneAllTabs, UpdateInstallButtonState, BtnInstall_Click
+//   - 2026-03-05: Thêm currentDPIScale, DPI_STEPS, ApplyDPIScale từ xaml.cs
+//                 theo AI_WORKFLOW.md
+//   - 2026-03-08: Thêm MouseRightButtonUp cho BtnDownloadPage để copy link
+//   - 2026-03-09: Removed ChkAdvancedCodec, ChkTeracopy, ChkVPN1111 references
+// =======================================================================
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,16 +23,89 @@ using Microsoft.Win32;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using GMTPC.Tool.Services;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media.Animation;
 
 namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
+        // ===================== DPI Scale Fields =====================
+        private double currentDPIScale = 1.0;
+        private readonly int[] DPI_STEPS = new int[] { 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 200 };
+
+        private void ApplyDPIScale()
+        {
+            ScaleTransform scaleTransform = new ScaleTransform(currentDPIScale, currentDPIScale);
+            MainGrid.LayoutTransform = scaleTransform;
+
+            bool isPortrait = SystemParameters.PrimaryScreenWidth < SystemParameters.PrimaryScreenHeight;
+            double designMaxWidth  = isPortrait ? 580  : 1000;
+            double designMaxHeight = isPortrait ? 950  : 750;
+
+            var workArea = SystemParameters.WorkArea;
+            this.MaxHeight = Math.Min(designMaxHeight * currentDPIScale, workArea.Height);
+            this.MaxWidth  = Math.Min(designMaxWidth  * currentDPIScale, workArea.Width);
+
+            MainGrid.InvalidateMeasure();
+            this.InvalidateMeasure();
+
+            this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Render, new Action(() =>
+            {
+                this.SizeToContent = SizeToContent.Manual;
+                this.Width  = double.NaN;
+                this.Height = double.NaN;
+                this.SizeToContent = SizeToContent.WidthAndHeight;
+            }));
+
+            this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, new Action(() =>
+            {
+                const double margin = 12.0;
+                try
+                {
+                    double maxAllowedHeight = Math.Max(0, workArea.Height - margin);
+                    double maxAllowedWidth  = Math.Max(0, workArea.Width  - margin);
+
+                    if (this.ActualHeight > maxAllowedHeight) this.Height = maxAllowedHeight;
+                    if (this.ActualWidth  > maxAllowedWidth)  this.Width  = maxAllowedWidth;
+
+                    if (this.Top  < workArea.Top  + margin) this.Top  = workArea.Top  + margin;
+                    if (this.Left < workArea.Left + margin) this.Left = workArea.Left + margin;
+                    if (this.Top  + this.Height > workArea.Bottom - margin) this.Top  = workArea.Bottom - margin - this.Height;
+                    if (this.Left + this.Width  > workArea.Right  - margin) this.Left = workArea.Right  - margin - this.Width;
+                }
+                catch { }
+
+                try { this.SizeToContent = SizeToContent.Manual; } catch { }
+            }));
+
+            int dpiPercent = (int)(currentDPIScale * 100);
+            string dpiText = $"{dpiPercent}%";
+
+            ComboBoxItem selectedItem = CboDPIValue.SelectedItem as ComboBoxItem;
+            string currentSelection  = selectedItem?.Content.ToString() ?? "";
+
+            if (currentSelection != dpiText)
+            {
+                foreach (ComboBoxItem item in CboDPIValue.Items)
+                {
+                    if (item.Content.ToString() == dpiText)
+                    {
+                        CboDPIValue.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
+
+            UpdateStatus($"Đã đặt tỷ lệ DPI: {dpiText}", "Green");
+        }
+
+        private void ResetDPIButtonStates() { /* Kept for compatibility */ }
         private void BtnDPIMinus_Click(object sender, RoutedEventArgs e)
         {
             // Find current index in DPI_STEPS
@@ -30,6 +116,7 @@ namespace GMTPC.Tool
             // Update combo box selection if available
             try { if (CboDPIValue != null && idx >= 0 && idx < CboDPIValue.Items.Count) CboDPIValue.SelectedIndex = idx; } catch { }
             ApplyDPIScale();
+            UpdateSecondaryStatus($"Đã đổi DPI: {DPI_STEPS[idx]}%", "Cyan");
         }
 
         private void BtnDPIPlus_Click(object sender, RoutedEventArgs e)
@@ -51,6 +138,7 @@ namespace GMTPC.Tool
             currentDPIScale = DPI_STEPS[idx] / 100.0;
             try { if (CboDPIValue != null && idx >= 0 && idx < CboDPIValue.Items.Count) CboDPIValue.SelectedIndex = idx; } catch { }
             ApplyDPIScale();
+            UpdateSecondaryStatus($"Đã đổi DPI: {DPI_STEPS[idx]}%", "Cyan");
         }
 
         private void CboDPIValue_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -83,6 +171,7 @@ namespace GMTPC.Tool
                 // Keep combobox selection consistent
                 try { if (CboDPIValue != null && closest >= 0 && closest < CboDPIValue.Items.Count) CboDPIValue.SelectedIndex = closest; } catch { }
                 ApplyDPIScale();
+                UpdateSecondaryStatus($"Đã đổi DPI: {DPI_STEPS[closest]}%", "Cyan");
             }
         }
 
@@ -124,7 +213,7 @@ namespace GMTPC.Tool
                     Chk3DPChip.IsChecked = true;
                     Chk3DPNet.IsChecked = true;
                     ChkRevoUninstaller.IsChecked = true;
-                    ChkZalo.IsChecked = true;
+                    ChkInstallZalo.IsChecked = true;
                 }
                 // Nếu tab là "System"
                 else if (tabHeader == "System")
@@ -135,8 +224,8 @@ namespace GMTPC.Tool
                     ChkComfortClipboardPro.IsChecked = true;
                     ChkFolderSize.IsChecked = true;
                     ChkPowerISO.IsChecked = true;
+                    ChkTeraCopy.IsChecked = true;
                     ChkVPN1111.IsChecked = true;
-                    ChkTeracopy.IsChecked = true;
                     ChkGoogleDrive.IsChecked = true;
                     ChkNetLimiter.IsChecked = true;
                 }
@@ -145,8 +234,8 @@ namespace GMTPC.Tool
                     ChkOfficeToolPlus.IsChecked = true;
                     ChkOfficeSoftmaker.IsChecked = true;
                     ChkActivateOffice.IsChecked = true;
-                    ChkFonts.IsChecked = true;
-                    ChkNotepadPP.IsChecked = true;
+                    ChkGouenjiFonts.IsChecked = true;
+                    ChkNotepadPlusPlus.IsChecked = true;
                 }
                 // Nếu tab là "Partition"
                 else if (tabHeader == "Partition")
@@ -165,6 +254,7 @@ namespace GMTPC.Tool
                     ChkLeagueOfLegends.IsChecked = true;
                     ChkPorofessor.IsChecked = true;
                     ChkSamuraiMaiden.IsChecked = true;
+                    ChkGhostOfTsushima.IsChecked = true;
                 }
                 // Nếu tab là "Browser"
                 else if (tabHeader == "Browser")
@@ -176,11 +266,11 @@ namespace GMTPC.Tool
                 else if (tabHeader == "Multimedia")
                 {
                     // Chọn checkbox trong tab Multimedia
+                    ChkAdvancedCodecPack.IsChecked = true;
                     ChkPotPlayer.IsChecked = true;
                     ChkFastStone.IsChecked = true;
                     ChkFoxit.IsChecked = true;
                     ChkBandiview.IsChecked = true;
-                    ChkAdvancedCodec.IsChecked = true;
                 }
                 // Nếu tab là "Remote Desktop"
                 else if (tabHeader == "Remote Desktop")
@@ -192,10 +282,14 @@ namespace GMTPC.Tool
                     ChkAnyDesk.IsChecked = true;
                     ChkVMWare162Lite.IsChecked = true;
                 }
+                else if (tabHeader == "Driver")
+                {
+                    Chk3DPChip.IsChecked = true;
+                    Chk3DPNet.IsChecked = true;
+                }
                 else if (tabHeader == "Windows - Microsoft")
                 {
                     ChkWin11_26H1.IsChecked = true;
-                    ChkWin10_20H2_2022April.IsChecked = true;
                 }
                 else if (tabHeader == "Windows Mod MMT")
                 {
@@ -231,7 +325,7 @@ namespace GMTPC.Tool
                     Chk3DPChip.IsChecked = false;
                     Chk3DPNet.IsChecked = false;
                     ChkRevoUninstaller.IsChecked = false;
-                    ChkZalo.IsChecked = false;
+                    ChkInstallZalo.IsChecked = false;
                 }
                 // Nếu tab là "System"
                 else if (tabHeader == "System")
@@ -242,8 +336,8 @@ namespace GMTPC.Tool
                     ChkComfortClipboardPro.IsChecked = false;
                     ChkFolderSize.IsChecked = false;
                     ChkPowerISO.IsChecked = false;
+                    ChkTeraCopy.IsChecked = false;
                     ChkVPN1111.IsChecked = false;
-                    ChkTeracopy.IsChecked = false;
                     ChkGoogleDrive.IsChecked = false;
                     ChkNetLimiter.IsChecked = false;
                 }
@@ -252,8 +346,8 @@ namespace GMTPC.Tool
                     ChkOfficeToolPlus.IsChecked = false;
                     ChkOfficeSoftmaker.IsChecked = false;
                     ChkActivateOffice.IsChecked = false;
-                    ChkFonts.IsChecked = false;
-                    ChkNotepadPP.IsChecked = false;
+                    ChkGouenjiFonts.IsChecked = false;
+                    ChkNotepadPlusPlus.IsChecked = false;
                 }
                 // Nếu tab là "Partition"
                 else if (tabHeader == "Partition")
@@ -272,6 +366,7 @@ namespace GMTPC.Tool
                     ChkLeagueOfLegends.IsChecked = false;
                     ChkPorofessor.IsChecked = false;
                     ChkSamuraiMaiden.IsChecked = false;
+                    ChkGhostOfTsushima.IsChecked = false;
                 }
                 // Nếu tab là "Browser"
                 else if (tabHeader == "Browser")
@@ -283,11 +378,11 @@ namespace GMTPC.Tool
                 else if (tabHeader == "Multimedia")
                 {
                     // Bỏ chọn checkbox trong tab Multimedia
+                    ChkAdvancedCodecPack.IsChecked = false;
                     ChkPotPlayer.IsChecked = false;
                     ChkFastStone.IsChecked = false;
                     ChkFoxit.IsChecked = false;
                     ChkBandiview.IsChecked = false;
-                    ChkAdvancedCodec.IsChecked = false;
                 }
                 // Nếu tab là "Remote Desktop"
                 else if (tabHeader == "Remote Desktop")
@@ -299,10 +394,14 @@ namespace GMTPC.Tool
                     ChkAnyDesk.IsChecked = false;
                     ChkVMWare162Lite.IsChecked = false;
                 }
+                else if (tabHeader == "Driver")
+                {
+                    Chk3DPChip.IsChecked = false;
+                    Chk3DPNet.IsChecked = false;
+                }
                 else if (tabHeader == "Windows - Microsoft")
                 {
                     ChkWin11_26H1.IsChecked = false;
-                    ChkWin10_20H2_2022April.IsChecked = false;
                 }
                 else if (tabHeader == "Windows Mod MMT")
                 {
@@ -337,8 +436,9 @@ namespace GMTPC.Tool
             ChkFastStone.IsChecked = false;
             ChkFoxit.IsChecked = false;
             ChkBandiview.IsChecked = false;
+            ChkAdvancedCodecPack.IsChecked = false;
             ChkRevoUninstaller.IsChecked = false;
-            ChkZalo.IsChecked = false;
+            ChkInstallZalo.IsChecked = false;
 
             // Bỏ chọn checkbox trong tab System
             ChkMMTApps.IsChecked = false;
@@ -346,8 +446,8 @@ namespace GMTPC.Tool
             ChkComfortClipboardPro.IsChecked = false;
             ChkFolderSize.IsChecked = false;
             ChkPowerISO.IsChecked = false;
+            ChkTeraCopy.IsChecked = false;
             ChkVPN1111.IsChecked = false;
-            ChkTeracopy.IsChecked = false;
             ChkGoogleDrive.IsChecked = false;
             ChkNetLimiter.IsChecked = false;
 
@@ -362,6 +462,7 @@ namespace GMTPC.Tool
             ChkLeagueOfLegends.IsChecked = false;
             ChkPorofessor.IsChecked = false;
             ChkSamuraiMaiden.IsChecked = false;
+            ChkGhostOfTsushima.IsChecked = false;
 
             // Bỏ chọn checkbox trong tab Remote Desktop
             ChkUltraviewer.IsChecked = false;
@@ -370,133 +471,55 @@ namespace GMTPC.Tool
             ChkAnyDesk.IsChecked = false;
             ChkVMWare162Lite.IsChecked = false;
 
+            // Bỏ chọn checkbox trong tab Driver
+            Chk3DPChip.IsChecked = false;
+            Chk3DPNet.IsChecked = false;
+
             // Bỏ chọn checkbox trong tab Office
             ChkOfficeToolPlus.IsChecked = false;
             ChkOfficeSoftmaker.IsChecked = false;
-            ChkFonts.IsChecked = false;
+            ChkActivateOffice.IsChecked = false;
+            ChkGouenjiFonts.IsChecked = false;
+            ChkNotepadPlusPlus.IsChecked = false;
 
-            // Bỏ chọn Notepad++
-            ChkNotepadPP.IsChecked = false;
-
-            // Bỏ chọn Advanced Codec
-            ChkAdvancedCodec.IsChecked = false;
-
-            // Bỏ chọn Win 11
+            // Bỏ chọn checkbox trong tab Windows - Microsoft
             ChkWin11_26H1.IsChecked = false;
 
-            // Bỏ chọn Win 10 20H2 April 2022
-            ChkWin10_20H2_2022April.IsChecked = false;
+            // Bỏ chọn checkbox trong tab Windows Mod MMT
+            ChkWin10LtscIot21H2.IsChecked = false;
 
             UpdateInstallButtonState();
         }
 
         private async void BtnInstall_Click(object sender, RoutedEventArgs e)
         {
-            UpdateStatus("Đang chờ...", "Yellow"); // Thêm phản hồi tức thì
-            await Task.Delay(1); // Cho phép UI cập nhật ngay lập tức
+            // Collect all selected tasks using the new multi-task queue system
+            var selectedTasks = CollectSelectedTasks();
+            
+            if (selectedTasks.Count == 0)
+            {
+                UpdateStatus("Vui lòng chọn ít nhất một phần mềm để cài đặt", "Orange");
+                return;
+            }
 
+            // Set installing state
+            SetInstallingState(true);
+
+            UpdateStatus("Đang chờ...", "Yellow");
+            await Task.Delay(1);
+
+            // Initialize cancellation tokens
             _cancellationTokenSource = new CancellationTokenSource();
-            _pauseCts = new CancellationTokenSource();
-            _pauseEvent.Set(); // Mặc định là không pause
+            _pauseEvent.Set();
             BtnPause.Content = "Pause";
             BtnStop.IsEnabled = true;
             BtnPause.IsEnabled = true;
             BtnInstall.IsEnabled = false;
 
-            var tasks = new List<(Func<Task> Action, CheckBox CheckBox)>();
-
-            if (ChkInstallIDM.IsChecked == true) tasks.Add((() => RunAutomatedProcessAsync(), ChkInstallIDM));
-            if (ChkActivateWindows.IsChecked == true) tasks.Add((() => Task.Run(() => ActivateWindows()), ChkActivateWindows));
-            if (ChkActivateOffice.IsChecked == true) tasks.Add((() => Task.Run(() => ActivateOffice()), ChkActivateOffice));
-            if (ChkOfficeToolPlus.IsChecked == true) tasks.Add((InstallOfficeToolPlusAsync, ChkOfficeToolPlus)); // Thêm task cho Office Tool Plus
-            if (ChkPauseWindowsUpdate.IsChecked == true) tasks.Add((() => Task.Run(() => PauseWindowsUpdate()), ChkPauseWindowsUpdate));
-            if (ChkInstallWinRAR.IsChecked == true) tasks.Add((InstallAndActivateWinRARAsync, ChkInstallWinRAR));
-            if (ChkInstallBID.IsChecked == true) tasks.Add((InstallAndActivateBIDAsync, ChkInstallBID));
-            if (ChkVcredist.IsChecked == true) tasks.Add((InstallVcredistAsync, ChkVcredist));
-            if (ChkDirectX.IsChecked == true) tasks.Add((InstallDirectXAsync, ChkDirectX));
-            if (ChkJava.IsChecked == true) tasks.Add((InstallJavaAsync, ChkJava));
-            if (ChkOpenAL.IsChecked == true) tasks.Add((InstallOpenALAsync, ChkOpenAL));
-            if (ChkChrome.IsChecked == true) tasks.Add((InstallChromeAsync, ChkChrome));
-            if (ChkCocCoc.IsChecked == true) tasks.Add((InstallCocCocAsync, ChkCocCoc));
-            if (ChkEdge.IsChecked == true) tasks.Add((InstallEdgeAsync, ChkEdge));
-            if (ChkPotPlayer.IsChecked == true) tasks.Add((InstallPotPlayerAsync, ChkPotPlayer));
-            if (ChkFastStone.IsChecked == true) tasks.Add((InstallFastStoneAsync, ChkFastStone));
-            if (ChkFoxit.IsChecked == true) tasks.Add((InstallFoxitAsync, ChkFoxit));
-            if (ChkBandiview.IsChecked == true) tasks.Add((InstallBandiviewAsync, ChkBandiview));
-            if (ChkRevoUninstaller.IsChecked == true) tasks.Add((InstallHibitUninstallerAsync, ChkRevoUninstaller));
-            if (ChkZalo.IsChecked == true) tasks.Add((InstallZaloAsync, ChkZalo));
-            if (Chk3DPChip.IsChecked == true) tasks.Add((Run3DPChipAsync, Chk3DPChip));
-            if (Chk3DPNet.IsChecked == true) tasks.Add((Install3DPNetAsync, Chk3DPNet));
-            if (ChkMMTApps.IsChecked == true) tasks.Add((InstallMMTAppsAsync, ChkMMTApps));
-            if (ChkDISMPP.IsChecked == true) tasks.Add((InstallDISMPPAsync, ChkDISMPP));
-            if (ChkComfortClipboardPro.IsChecked == true) tasks.Add((InstallComfortClipboardProAsync, ChkComfortClipboardPro));
-            if (ChkOfficeSoftmaker.IsChecked == true) tasks.Add((InstallOfficeSoftmakerAsync, ChkOfficeSoftmaker));
-            if (ChkNotepadPP.IsChecked == true) tasks.Add((InstallNotepadPPAsync, ChkNotepadPP));
-            if (ChkFonts.IsChecked == true) tasks.Add((InstallFontsAsync, ChkFonts));
-            // Only add once to avoid duplicate install and MessageBox
-            if (ChkPowerISO.IsChecked == true) tasks.Add((InstallPowerISOAsync, ChkPowerISO));
-            if (ChkVPN1111.IsChecked == true) tasks.Add((InstallVPN1111Async, ChkVPN1111));
-            if (ChkTeracopy.IsChecked == true) tasks.Add((InstallTeraCopyAsync, ChkTeracopy));
-            if (ChkGoogleDrive.IsChecked == true) tasks.Add((InstallGoogleDriveAsync, ChkGoogleDrive));
-            if (ChkNetLimiter.IsChecked == true) tasks.Add((InstallNetLimiterAsync, ChkNetLimiter));
-            if (ChkFolderSize.IsChecked == true) tasks.Add((InstallFolderSizeAsync, ChkFolderSize));
-            if (ChkDiskGenius.IsChecked == true) tasks.Add((InstallDiskGeniusAsync, ChkDiskGenius));
-            if (ChkProcessLasso.IsChecked == true) tasks.Add((InstallProcessLassoAsync, ChkProcessLasso));
-            if (ChkThrottlestop.IsChecked == true) tasks.Add((InstallThrottlestopAsync, ChkThrottlestop));
-            if (ChkMSIAfterburner.IsChecked == true) tasks.Add((InstallMSIAfterbumerAsync, ChkMSIAfterburner));
-            if (ChkLeagueOfLegends.IsChecked == true) tasks.Add((InstallLeagueOfLegendsVNAsync, ChkLeagueOfLegends));
-            if (ChkPorofessor.IsChecked == true) tasks.Add((InstallPorofessorAsync, ChkPorofessor));
-            if (ChkSamuraiMaiden.IsChecked == true) tasks.Add((InstallSamuraiMaidenAsync, ChkSamuraiMaiden));
-            if (ChkAomeiPartitionAssistant.IsChecked == true) tasks.Add((InstallAomeiPartitionAssistantAsync, ChkAomeiPartitionAssistant));
-            if (ChkUltraviewer.IsChecked == true) tasks.Add((InstallUltraviewerAsync, ChkUltraviewer));
-            if (ChkTeamViewerQS.IsChecked == true) tasks.Add((InstallTeamViewerQuickSupportAsync, ChkTeamViewerQS));
-            if (ChkTeamViewerFull.IsChecked == true) tasks.Add((InstallTeamViewerFullAsync, ChkTeamViewerFull));
-            if (ChkAnyDesk.IsChecked == true) tasks.Add((InstallAnyDeskAsync, ChkAnyDesk));
-            if (ChkVMWare162Lite.IsChecked == true) tasks.Add((InstallVMWare162LiteAsync, ChkVMWare162Lite));
-            if (ChkAdvancedCodec.IsChecked == true) tasks.Add((InstallAdvancedCodecAsync, ChkAdvancedCodec));
-            if (ChkWin11_26H1.IsChecked == true) tasks.Add((InstallWin11_26H1Async, ChkWin11_26H1));
-            if (ChkWin10_20H2_2022April.IsChecked == true) tasks.Add((InstallWin10_20H2_2022AprilAsync, ChkWin10_20H2_2022April));
-            if (ChkWin10LtscIot21H2.IsChecked == true) tasks.Add((InstallWin10LtscIot21H2Async, ChkWin10LtscIot21H2));
-
-            CheckBox currentTaskCheckBox = null;
             try
             {
-                foreach (var taskInfo in tasks)
-                {
-                    currentTaskCheckBox = taskInfo.CheckBox;
-
-                    if (_cancellationTokenSource.Token.IsCancellationRequested)
-                    {
-                        UpdateStatus("Quá trình cài đặt đã bị dừng.", "Red");
-                        break;
-                    }
-
-                    await taskInfo.Action();
-
-                    if (_cancellationTokenSource.Token.IsCancellationRequested)
-                    {
-                        if (taskInfo.CheckBox != null)
-                        {
-                            taskInfo.CheckBox.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
-                        }
-                        UpdateStatus("Quá trình cài đặt đã bị dừng.", "Red");
-                        break;
-                    }
-
-                    if (taskInfo.CheckBox != null)
-                    {
-                        taskInfo.CheckBox.IsChecked = false;
-                        taskInfo.CheckBox.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Cyan);
-                    }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                if (currentTaskCheckBox != null)
-                {
-                    currentTaskCheckBox.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
-                }
-                UpdateStatus("Quá trình cài đặt đã bị hủy.", "Red");
+                // Execute the task queue with the new multi-task system
+                await ExecuteTaskQueueAsync(selectedTasks);
             }
             catch (Exception ex)
             {
@@ -508,6 +531,7 @@ namespace GMTPC.Tool
                 BtnPause.IsEnabled = false;
                 UpdateInstallButtonState();
                 UpdateStatus("Hoàn tất tất cả các tác vụ.", "Green");
+                SetInstallingState(false);
             }
         }
 
@@ -526,7 +550,13 @@ namespace GMTPC.Tool
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe");
 
             if (ChkInstallBID?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://antibodysoftware-17031.kxcdn.com/files/bid_6_60_setup_x64.exe");
+                _cachedDownloadLinks.Add("https://bulkimagedownloader.com/download");
+
+            if (ChkActivateWindows?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/activate/ACTIVATE.WINDOWS.cmd");
+
+            if (ChkPauseWindowsUpdate?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.11.ps1");
 
             if (ChkVcredist?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe");
@@ -551,9 +581,6 @@ namespace GMTPC.Tool
 
             if (ChkRevoUninstaller?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://www.hibitsoft.ir/HiBitUninstaller/RevoUninstaller-setup.exe");
-
-            if (ChkZalo?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://zalo.me/download/zalo-pc?utm=90000");
 
             if (Chk3DPNet?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Net.exe");
@@ -588,8 +615,14 @@ namespace GMTPC.Tool
             if (ChkBandiview?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Bandiview.exe");
 
-            if (ChkAdvancedCodec?.IsChecked == true)
+            if (ChkAdvancedCodecPack?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/ADVANCED_Codec_Pack.exe");
+
+            if (ChkTeraCopy?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe");
+
+            if (ChkVPN1111?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://1111-releases.cloudflareclient.com/win/latest");
 
             if (ChkTeamViewerQS?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://dl.teamviewer.com/download/TeamViewerQS_x64.exe");
@@ -609,17 +642,8 @@ namespace GMTPC.Tool
             if (ChkOfficeSoftmaker?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Office.Softmaker.exe");
 
-            if (ChkNotepadPP?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.exe");
-
             if (ChkPowerISO?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe");
-
-            if (ChkVPN1111?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://1111-releases.cloudflareclient.com/win/latest");
-
-            if (ChkTeracopy?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe");
 
             if (ChkGoogleDrive?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://dl.google.com/drive-file-stream/GoogleDriveSetup.exe");
@@ -648,19 +672,30 @@ namespace GMTPC.Tool
             if (ChkPorofessor?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://download.overwolf.com/installer/prod/339334cdda5e1ea8a3c8a31ba816fb37/Porofessor%20Standalone%20-%20Installer.exe");
 
-            if (ChkFonts?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Gouenji.Fansub.Fonts.exe");
+            if (ChkSamuraiMaiden?.IsChecked == true)
+            {
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part1.exe");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part2.rar");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part3.rar");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN_LinkNeverDie.Com.part4.rar");
+            }
 
             if (ChkWin11_26H1?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso");
 
-            if (ChkWin10_20H2_2022April?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://glennsferryschools-my.sharepoint.com/:u:/g/personal/billgates_glennsferryschools_onmicrosoft_com/Ed8HqTyoPFxLktIGaRFqDOYBQP5hWqV8d69Qq9TJ-k9L0A?download=1");
+            if (ChkWin10LtscIot21H2?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://www.mediafire.com/file/b54r3aup07dddhe/win_10_LTSC_IOT_21H2_-_2021%25E2%2580%259510_-_No_Defender_Office_-_MMTPC_3.0.iso/file");
 
             // Hiển thị tooltip với danh sách link
-            string tooltipText = _cachedDownloadLinks.Count == 0
-                ? "Chọn các checkbox bên trên để xem link download"
-                : $"Click để mở {_cachedDownloadLinks.Count} link:\n" + string.Join("\n", _cachedDownloadLinks);
+            string tooltipText;
+            if (_cachedDownloadLinks.Count == 0)
+            {
+                tooltipText = "Vui lòng chọn (check) các checkbox ứng với phần mềm muốn tải để xem link download trực tiếp";
+            }
+            else
+            {
+                tooltipText = $"Click để mở {_cachedDownloadLinks.Count} link:\n" + string.Join("\n", _cachedDownloadLinks);
+            }
 
             BtnDownloadPage.ToolTip = new System.Windows.Controls.ToolTip
             {
@@ -676,8 +711,7 @@ namespace GMTPC.Tool
                 // Sử dụng danh sách link đã được cache khi hover
                 if (_cachedDownloadLinks.Count == 0)
                 {
-                    Process.Start("https://github.com/ghostminhtoan/MMT/releases");
-                    UpdateStatus("Mở trang download tổng quát", "Cyan");
+                    UpdateStatus("Vui lòng chọn (check) các checkbox ứng với phần mềm muốn tải trước", "Orange");
                 }
                 else
                 {
@@ -695,57 +729,92 @@ namespace GMTPC.Tool
             }
         }
 
+        private void BtnDownloadPage_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var contextMenu = new ContextMenu();
+            var copyItem = new MenuItem { Header = "Copy Link" };
+            copyItem.Click += (s, args) =>
+            {
+                if (_cachedDownloadLinks.Count > 0)
+                {
+                    string allLinks = string.Join("\n", _cachedDownloadLinks);
+                    Clipboard.SetText(allLinks);
+                    UpdateStatus($"Đã copy {_cachedDownloadLinks.Count} link vào clipboard", "Green");
+                }
+                else
+                {
+                    UpdateStatus("Không có link nào để copy", "Orange");
+                }
+            };
+            contextMenu.Items.Add(copyItem);
+            contextMenu.IsOpen = true;
+            e.Handled = true;
+        }
+
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
+            // Global Stop using Registry - affects ALL downloads across ALL tabs instantly
+            // No Visual Tree scanning, no UI thread blocking
+            
+            // Cancel local token
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 _cancellationTokenSource.Cancel();
-                UpdateStatus("Đang dừng quá trình cài đặt...", "Yellow");
-                BtnStop.IsEnabled = false;
-                BtnPause.IsEnabled = false;
-                BtnInstall.IsEnabled = true;
-
-                // Resume event if cancelled while paused
-                if (!_pauseEvent.IsSet)
-                {
-                    _pauseEvent.Set();
-                    BtnPause.Content = "Pause";
-                }
-
-                // Đặt lại tiến độ khi bị hủy
-                Dispatcher.Invoke(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ConnectionTraceGrid.Children.Clear();
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                });
             }
+            
+            // Stop ALL registered downloads via global registry (fire-and-forget)
+            DownloadRegistry.StopAll();
+            
+            // Update UI instantly - no waiting
+            UpdateStatus("Stopped", "Yellow");
+            BtnStop.IsEnabled = false;
+            BtnPause.IsEnabled = false;
+            BtnInstall.IsEnabled = true;
+
+            // Resume pause event to unblock any waiting threads
+            if (!_pauseEvent.IsSet)
+            {
+                _pauseEvent.Set();
+                BtnPause.Content = "Pause";
+            }
+
+            // Reset progress UI immediately
+            Dispatcher.InvokeAsync(() =>
+            {
+                DownloadProgressBar.Value = 0;
+                ConnectionTraceGrid.Children.Clear();
+                ProgressTextBlock.Text = "";
+                SpeedTextBlock.Text = "";
+                ConnectionCountTextBlock.Text = "";
+            });
+
+            // Clear local task tracking
+            _activeDownloadTasks.Clear();
+            
+            // Clear global registry
+            DownloadRegistry.Clear();
         }
 
         private void BtnPause_Click(object sender, RoutedEventArgs e)
         {
-            // Only allow pause during download
+            // Global Pause using Registry - affects ALL downloads across ALL tabs
+            // No Visual Tree scanning, works even for tabs that were never activated
             if (_pauseEvent == null || !BtnPause.IsEnabled)
                 return;
 
             if (_pauseEvent.IsSet)
             {
-                // Đang chạy -> Tạm dừng
-                _pauseEvent.Reset();
-                if (_pauseCts != null && !_pauseCts.IsCancellationRequested)
-                    _pauseCts.Cancel(); // Ngắt ngay lập tức mạng
+                // Running -> Pause: Use global registry to pause ALL downloads
+                DownloadRegistry.PauseAll();
                 BtnPause.Content = "Resume";
-                UpdateStatus("Đã tạm dừng quá trình tải xuống (Đang ngắt kết nối...)", "Yellow");
+                UpdateStatus("Paused - Click Resume to continue", "Yellow");
             }
             else
             {
-                // Đang tạm dừng -> Chạy tiếp
-                if (_pauseCts == null || _pauseCts.IsCancellationRequested)
-                    _pauseCts = new CancellationTokenSource();
-                _pauseEvent.Set();
+                // Paused -> Resume: Use global registry to resume ALL downloads
+                DownloadRegistry.ResumeAll();
                 BtnPause.Content = "Pause";
-                UpdateStatus("Đang tiếp tục quá trình tải xuống...", "Cyan");
+                UpdateStatus("Resuming...", "Cyan");
             }
         }
 
@@ -755,17 +824,16 @@ namespace GMTPC.Tool
             {
                 ChkInstallIDM, ChkInstallWinRAR, ChkInstallBID, ChkActivateWindows,
                 ChkPauseWindowsUpdate, ChkVcredist, ChkDirectX, ChkJava, ChkOpenAL,
-                Chk3DPChip, Chk3DPNet, ChkRevoUninstaller, ChkZalo,
-                ChkOfficeToolPlus, ChkOfficeSoftmaker, ChkActivateOffice, ChkFonts,
-                ChkNotepadPP, ChkPotPlayer, ChkFastStone, ChkFoxit, ChkBandiview,
-                ChkAdvancedCodec, ChkMMTApps, ChkDISMPP, ChkComfortClipboardPro,
-                ChkFolderSize, ChkPowerISO, ChkVPN1111, ChkTeracopy, ChkGoogleDrive,
+                Chk3DPChip, Chk3DPNet, ChkRevoUninstaller,
+                ChkOfficeToolPlus, ChkOfficeSoftmaker, ChkActivateOffice,
+                ChkPotPlayer, ChkFastStone, ChkFoxit, ChkBandiview, ChkAdvancedCodecPack,
+                ChkMMTApps, ChkDISMPP, ChkComfortClipboardPro,
+                ChkFolderSize, ChkPowerISO, ChkTeraCopy, ChkVPN1111, ChkGoogleDrive,
                 ChkNetLimiter, ChkAomeiPartitionAssistant, ChkDiskGenius, ChkProcessLasso,
                 ChkThrottlestop, ChkMSIAfterburner, ChkLeagueOfLegends, ChkPorofessor,
                 ChkSamuraiMaiden, ChkChrome, ChkCocCoc, ChkEdge,
                 ChkUltraviewer, ChkTeamViewerQS, ChkTeamViewerFull, ChkAnyDesk, ChkVMWare162Lite,
-                ChkWin11_26H1,
-                ChkWin10_20H2_2022April, ChkWin10LtscIot21H2,
+                ChkWin11_26H1, ChkWin10LtscIot21H2,
                 // ChkWin10ProWorkstations22H2 removed
             };
 
@@ -773,6 +841,173 @@ namespace GMTPC.Tool
             {
                 if (chk != null)
                     chk.ClearValue(System.Windows.Controls.Control.ForegroundProperty);
+            }
+        }
+
+        // Hiển thị link download khi hover vào checkbox
+        private void Checkbox_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is CheckBox checkBox)
+            {
+                string link = null;
+                switch (checkBox.Name)
+                {
+                    case "ChkInstallIDM":
+                        link = "https://tinyurl.com/idmhcmvn";
+                        break;
+                    case "ChkInstallWinRAR":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe";
+                        break;
+                    case "ChkInstallBID":
+                        link = "https://bulkimagedownloader.com/download";
+                        break;
+                    case "ChkActivateWindows":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/ACTIVATE.WINDOWS.cmd";
+                        break;
+                    case "ChkPauseWindowsUpdate":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/test/pause.update.win.11.ps1";
+                        break;
+                    case "ChkVcredist":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe";
+                        break;
+                    case "ChkDirectX":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/DirectX.exe";
+                        break;
+                    case "ChkJava":
+                        link = "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=252627_99a6cb9582554a09bd4ac60f73f9b8e6";
+                        break;
+                    case "ChkOpenAL":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OpenAL.exe";
+                        break;
+                    case "Chk3DPChip":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Chip.exe";
+                        break;
+                    case "Chk3DPNet":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Net.exe";
+                        break;
+                    case "ChkRevoUninstaller":
+                        link = "https://www.hibitsoft.ir/HiBitUninstaller/RevoUninstaller-setup.exe";
+                        break;
+                    case "ChkOfficeToolPlus":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OfficeToolPlus.exe";
+                        break;
+                    case "ChkOfficeSoftmaker":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/SoftMaker.Office.exe";
+                        break;
+                    case "ChkPotPlayer":
+                        link = "https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup64.exe";
+                        break;
+                    case "ChkFastStone":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FastStone.Capture.exe";
+                        break;
+                    case "ChkFoxit":
+                        link = "https://cdn01.foxitsoftware.com/product/reader/desktop/win/2025.2.0/FoxitPDFReader20252_L10N_Setup_Prom_x64.exe";
+                        break;
+                    case "ChkBandiview":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Bandiview.exe";
+                        break;
+                    case "ChkAdvancedCodecPack":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/ADVANCED_Codec_Pack.exe";
+                        break;
+                    case "ChkTeraCopy":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/TeraCopy.Pro.v3.17.0.0.exe";
+                        break;
+                    case "ChkVPN1111":
+                        link = "https://1111-releases.cloudflareclient.com/win/latest";
+                        break;
+                    case "ChkMMTApps":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/MMT.Apps.exe";
+                        break;
+                    case "ChkDISMPP":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/WinPE/DISM++.exe";
+                        break;
+                    case "ChkComfortClipboardPro":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Comfort.Clipboard.Pro.exe";
+                        break;
+                    case "ChkPowerISO":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe";
+                        break;
+                    case "ChkGoogleDrive":
+                        link = "https://dl.google.com/drive-file-stream/GoogleDriveSetup.exe";
+                        break;
+                    case "ChkNetLimiter":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/netlimiter-4.1.12.0.exe";
+                        break;
+                    case "ChkAomeiPartitionAssistant":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/AOMEI.Partition.Assistant.exe";
+                        break;
+                    case "ChkDiskGenius":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/WinPE/Disk.Genius.exe";
+                        break;
+                    case "ChkProcessLasso":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/ProcessLasso.exe";
+                        break;
+                    case "ChkThrottlestop":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Throttlestop.exe";
+                        break;
+                    case "ChkMSIAfterburner":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/MSI.Afterburner.exe";
+                        break;
+                    case "ChkChrome":
+                        link = "https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7BE9FD60DA-2FFA-E657-6449-67646C84E6C0%7D%26lang%3Dvi%26browser%3D5%26usagestats%3D1%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-statsdef_1%26installdataindex%3Dempty/update2/installers/ChromeSetup.exe";
+                        break;
+                    case "ChkCocCoc":
+                        link = "https://files.coccoc.com/browser/coccoc_standalone_vi.exe";
+                        break;
+                    case "ChkEdge":
+                        link = "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&source=EdgeStablePage&Channel=Stable&language=vi&brand=M100";
+                        break;
+                    case "ChkUltraviewer":
+                        link = "https://dl2.ultraviewer.net/UltraViewer_setup_6.6_vi.exe";
+                        break;
+                    case "ChkTeamViewerQS":
+                        link = "https://download.teamviewer.com/download/TeamViewerQS.exe";
+                        break;
+                    case "ChkTeamViewerFull":
+                        link = "https://download.teamviewer.com/download/TeamViewer_Setup.exe";
+                        break;
+                    case "ChkAnyDesk":
+                        link = "https://anydesk.com/en/downloads/thank-you?dv=win_exe";
+                        break;
+                    case "ChkVMWare162Lite":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/VMware.Workstation.Pro.16.2.Lite.exe";
+                        break;
+                    case "ChkActivateOffice":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/activate/activate-office.bat";
+                        break;
+                    case "ChkFolderSize":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FolderSize.exe";
+                        break;
+                    case "ChkLeagueOfLegends":
+                        link = "https://lol.qq.com/download/";
+                        break;
+                    case "ChkPorofessor":
+                        link = "https://porofessor.gg/downloads";
+                        break;
+                    case "ChkSamuraiMaiden":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/game/SAMURAI.MAIDEN.LinkNeverDie.Com.part1.exe";
+                        break;
+                    case "ChkGhostOfTsushima":
+                        link = "https://github.com/ghostminhtoan/MMT/releases/download/game/Ghost.of.Tsushima_LinkNeverDie.Com.part01.exe (29 parts)";
+                        break;
+                    case "ChkWin11_26H1":
+                        link = "https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso";
+                        break;
+                    case "ChkWin10LtscIot21H2":
+                        link = "https://www.mediafire.com/file/b54r3aup07dddhe/win_10_LTSC_IOT_21H2_-_2021%25E2%2580%259510_-_No_Defender_Office_-_MMTPC_3.0.iso/file";
+                        break;
+                }
+
+                if (!string.IsNullOrEmpty(link))
+                {
+                    checkBox.ToolTip = new ToolTip
+                    {
+                        Content = "Link: " + link,
+                        Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse,
+                        HorizontalOffset = 10,
+                        VerticalOffset = 10
+                    };
+                }
             }
         }
     }
