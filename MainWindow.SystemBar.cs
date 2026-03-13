@@ -277,6 +277,70 @@ namespace GMTPC.Tool
         public bool IsDownloading => _downloadSemaphore.CurrentCount == 0;
 
         /// <summary>
+        /// FAST SINGLE-LINK DOWNLOAD - Standardized "Golden Standard" method
+        /// Used by VPN1111 and ALL other single-link downloads for instant peak speed
+        /// Skips probe overhead - goes straight to download for known direct URLs
+        /// </summary>
+        private async Task DownloadSingleLinkFastAsync(string downloadUrl, string destinationPath, string displayName)
+        {
+            await _downloadSemaphore.WaitAsync();
+            try
+            {
+                var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
+
+                Progress<GMTPC.Tool.Services.DownloadProgressInfo> uiProgress = null;
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    ResetDownloadUI();
+                    uiProgress = new Progress<GMTPC.Tool.Services.DownloadProgressInfo>(info =>
+                    {
+                        if (!ct.IsCancellationRequested)
+                            ApplyDownloadProgressToUI(info);
+                    });
+                });
+
+                UpdateStatus($"Dang tai {displayName}...", "Cyan");
+
+                // Create download context for global registry
+                var taskContext = new DownloadTaskContext
+                {
+                    TaskName = displayName,
+                    DestinationPath = destinationPath,
+                    CancellationTokenSource = _cancellationTokenSource,
+                    PauseEvent = _pauseEvent,
+                    StartTime = DateTime.Now,
+                    IsPaused = false
+                };
+
+                // Register in global registry
+                DownloadRegistry.Register(destinationPath, taskContext);
+
+                try
+                {
+                    // FAST PATH: Skip probe, download immediately
+                    var engine = new GMTPC.Tool.Services.SegmentedDownloadEngineOptimized();
+                    await engine.DownloadSingleFastAsync(downloadUrl, destinationPath, uiProgress, ct, _pauseEvent);
+
+                    await Dispatcher.InvokeAsync(() => ResetDownloadUI());
+                }
+                finally
+                {
+                    DownloadRegistry.Unregister(destinationPath);
+                }
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Loi tai: {ex.Message}", "Red");
+                throw;
+            }
+            finally
+            {
+                _downloadSemaphore.Release();
+            }
+        }
+
+        /// <summary>
         /// Main download entry-point. Delegates to SegmentedDownloadEngine via IProgress.
         /// Uses ManualResetEventSlim for pause/resume support
         /// Registers download in global registry for cross-tab pause/stop

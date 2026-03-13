@@ -278,7 +278,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải Google Drive...", "Cyan");
                 string googleDrivePath = Path.Combine(taskFolder, "GoogleDriveSetup.exe");
-                await DownloadWithProgressAsync("https://dl.google.com/drive-file-stream/GoogleDriveSetup.exe", googleDrivePath, "Google Drive");
+                await DownloadSingleLinkFastAsync("https://dl.google.com/drive-file-stream/GoogleDriveSetup.exe", googleDrivePath, "Google Drive");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -327,7 +327,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải FolderSize...", "Cyan");
                 string folderSizePath = Path.Combine(taskFolder, "FolderSize-2.6-x64.msi");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FolderSize-2.6-x64.msi", folderSizePath, "FolderSize");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FolderSize-2.6-x64.msi", folderSizePath, "FolderSize");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -615,7 +615,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải DISM++...", "Cyan");
                 string dismppPath = Path.Combine(taskFolder, "DISM++.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/WinPE/DISM++.exe", dismppPath, "DISM++ Installer");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/WinPE/DISM++.exe", dismppPath, "DISM++ Installer");
 
                 MessageBoxResult result = MessageBox.Show("Yes = Cài đặt tự động vào ổ C\nNo = Cài vào ổ khác", " Cài đặt tự động DISM++", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
@@ -671,7 +671,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải NetLimiter...", "Cyan");
                 string netLimiterPath = Path.Combine(taskFolder, "NetLimiter.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/netlimiter-4.1.12.0.exe", netLimiterPath, "NetLimiter");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/netlimiter-4.1.12.0.exe", netLimiterPath, "NetLimiter");
 
                 UpdateStatus("Đang cài đặt NetLimiter...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo
@@ -796,7 +796,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải Comfort Clipboard Pro...", "Cyan");
                 string comfortClipboardPath = Path.Combine(taskFolder, "Comfort.Clipboard.Pro.7.0.2.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Comfort.Clipboard.Pro.7.0.2.exe", comfortClipboardPath, "Comfort Clipboard Pro Installer");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Comfort.Clipboard.Pro.7.0.2.exe", comfortClipboardPath, "Comfort Clipboard Pro Installer");
 
                 MessageBoxResult result = MessageBox.Show("Yes = Cài đặt tự động vào ổ C\nNo = Cài vào ổ khác", " Cài đặt tự động Comfort Clipboard Pro", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
@@ -841,7 +841,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải MMT.Apps.exe...", "Cyan");
                 string mmtAppsPath = Path.Combine(taskFolder, "MMT.Apps.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/MMT.Apps.exe", mmtAppsPath, "MMT Apps Installer");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/MMT.Apps.exe", mmtAppsPath, "MMT Apps Installer");
 
                 MessageBoxResult result = MessageBox.Show("Yes = Cài đặt tự động vào ổ C\nNo = Cài vào ổ khác", "Cài đặt tự động MMT Apps", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
@@ -979,7 +979,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải Disk Genius...", "Cyan");
                 string diskGeniusPath = Path.Combine(taskFolder, "DiskGenius.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/WinPE/Disk.Genius.exe", diskGeniusPath, "Disk Genius");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/WinPE/Disk.Genius.exe", diskGeniusPath, "Disk Genius");
 
                 MessageBoxResult result = MessageBox.Show("Yes = Cài đặt tự động vào ổ C\nNo = Cài vào ổ khác", "Cài đặt Disk Genius", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
@@ -1024,7 +1024,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải AOMEI Partition Assistant...", "Cyan");
                 string filePath = Path.Combine(taskFolder, "AOMEI.Partition.Assistant.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/WinPE/AOMEI.Partition.Assistant.exe", filePath, "AOMEI Partition Assistant");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/WinPE/AOMEI.Partition.Assistant.exe", filePath, "AOMEI Partition Assistant");
 
                 MessageBoxResult result = MessageBox.Show("Yes = Cài đặt tự động vào ổ C\nNo = Cài vào ổ khác", "Cài đặt AOMEI Partition Assistant", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
@@ -1068,7 +1068,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải Advanced Codec Pack...", "Cyan");
                 string codecPath = Path.Combine(taskFolder, "ADVANCED_Codec_Pack.exe");
-                await DownloadWithProgressAsync(ADVANCEDCODECPACK_DOWNLOAD_URL, codecPath, "Advanced Codec Pack");
+                await DownloadSingleLinkFastAsync(ADVANCEDCODECPACK_DOWNLOAD_URL, codecPath, "Advanced Codec Pack");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -1114,7 +1114,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải TeraCopy...", "Cyan");
                 string teraPath = Path.Combine(taskFolder, "TeraCopy.Pro.v3.17.0.0.exe");
-                await DownloadWithProgressAsync(TERACOPY_DOWNLOAD_URL, teraPath, "TeraCopy");
+                await DownloadSingleLinkFastAsync(TERACOPY_DOWNLOAD_URL, teraPath, "TeraCopy");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -1160,7 +1160,7 @@ namespace GMTPC.Tool
                 
                 UpdateStatus("Đang tải VPN 1111...", "Cyan");
                 string vpnPath = Path.Combine(taskFolder, "VPN1111.msi");
-                await DownloadWithProgressAsync(VPN1111_DOWNLOAD_URL, vpnPath, "VPN 1111");
+                await DownloadSingleLinkFastAsync(VPN1111_DOWNLOAD_URL, vpnPath, "VPN 1111");
 
                 Dispatcher.Invoke(() =>
                 {

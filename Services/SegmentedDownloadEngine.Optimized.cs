@@ -68,7 +68,7 @@ namespace GMTPC.Tool.Services
         /// Supports pause/resume via ManualResetEventSlim
         /// </summary>
         public async Task DownloadAsync(string url, string destinationPath, int segments,
-            IProgress<DownloadProgressInfo> progress, CancellationToken ct, 
+            IProgress<DownloadProgressInfo> progress, CancellationToken ct,
             System.Threading.ManualResetEventSlim pauseEvent = null)
         {
             if (string.IsNullOrWhiteSpace(url)) throw new ArgumentNullException(nameof(url));
@@ -98,6 +98,35 @@ namespace GMTPC.Tool.Services
             catch (Exception)
             {
                 // On any error, clean up partial download
+                CleanupPartialDownload(destinationPath);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// FAST PATH: Direct single-connection download without probe
+        /// Use this for known direct URLs (GitHub, Cloudflare, etc.) to skip HEAD request overhead
+        /// This is the "Golden Standard" for single-link downloads - used by VPN1111
+        /// </summary>
+        public async Task DownloadSingleFastAsync(string url, string destinationPath, 
+            IProgress<DownloadProgressInfo> progress, CancellationToken ct,
+            System.Threading.ManualResetEventSlim pauseEvent = null)
+        {
+            if (string.IsNullOrWhiteSpace(url)) throw new ArgumentNullException(nameof(url));
+            if (string.IsNullOrWhiteSpace(destinationPath)) throw new ArgumentNullException(nameof(destinationPath));
+
+            try
+            {
+                // Skip probe entirely - go straight to download
+                await DownloadSingleOptimizedAsync(url, destinationPath, progress, ct, pauseEvent);
+            }
+            catch (OperationCanceledException)
+            {
+                CleanupPartialDownload(destinationPath);
+                throw;
+            }
+            catch (Exception)
+            {
                 CleanupPartialDownload(destinationPath);
                 throw;
             }
