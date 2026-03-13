@@ -1,7 +1,7 @@
 // =======================================================================
 // MainWindow.SystemBar.cs
 // Chức năng: Xử lý progress bar, connection trace, và download UI
-// Cập nhật: 2026-03-14 - Fix đổi segment bị đơ checkbox
+// Cập nhật: 2026-03-14 - Fix đổi segment: Pause → Clear queue → Re-queue từ vị trí đã tải → Resume
 // =======================================================================
 using System;
 using System.Collections.Concurrent;
@@ -302,10 +302,61 @@ namespace GMTPC.Tool
 
                                 if (_isReSegmenting)
                                 {
-                                    await Dispatcher.InvokeAsync(() => { UpdateStatus("Đang tạm dừng 3 giây để chuẩn bị chia lại luồng...", "Yellow"); });
-                                    try { await Task.Delay(3000, ct); } catch { }
+                                    // Pause và đợi các worker dừng
+                                    await Dispatcher.InvokeAsync(() => { UpdateStatus($"Đang tạm dừng để chia lại {numConnections} luồng...", "Cyan"); });
+                                    
+                                    // Hủy _pauseCts để dừng các worker hiện tại
+                                    if (_pauseCts != null && !_pauseCts.IsCancellationRequested)
+                                        _pauseCts.Cancel();
+                                    
+                                    // Đợi các worker dừng an toàn
+                                    await Task.Delay(1000, ct);
+                                    
+                                    // Tạo _pauseCts mới cho lần chạy tiếp theo
+                                    _pauseCts = new CancellationTokenSource();
+                                    
                                     _isReSegmenting = false;
                                     lastNumConnectionsForUI = -1; // Force UI reset
+                                    
+                                    // Clear chunk queue để tạo lại với segment mới
+                                    chunkQueue.Clear();
+                                    _remainingRanges.Clear();
+                                    
+                                    // Tạo queue mới bắt đầu từ totalDownloaded
+                                    long remainingStart = totalDownloaded;
+                                    long remainingEnd = fileSize - 1;
+                                    
+                                    if (remainingStart < remainingEnd)
+                                    {
+                                        long newRegionSize = (remainingEnd - remainingStart + 1) / numConnections;
+                                        long[] newRegionStarts = new long[numConnections];
+                                        long[] newRegionEnds = new long[numConnections];
+                                        
+                                        for (int i = 0; i < numConnections; i++)
+                                        {
+                                            newRegionStarts[i] = remainingStart + (i * newRegionSize);
+                                            newRegionEnds[i] = (i == numConnections - 1) ? remainingEnd : (remainingStart + (i + 1) * newRegionSize - 1);
+                                        }
+                                        
+                                        // Thêm các range mới vào queue
+                                        bool hasWork = true;
+                                        while (hasWork)
+                                        {
+                                            hasWork = false;
+                                            for (int i = 0; i < numConnections; i++)
+                                            {
+                                                if (newRegionStarts[i] <= newRegionEnds[i])
+                                                {
+                                                    long chunkEnd = Math.Min(newRegionStarts[i] + ChunkSize - 1, newRegionEnds[i]);
+                                                    chunkQueue.Enqueue(new DownloadRange { Start = newRegionStarts[i], End = chunkEnd, Downloaded = 0 });
+                                                    newRegionStarts[i] = chunkEnd + 1;
+                                                    hasWork = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    UpdateStatus($"Đang tải với {numConnections} luồng (đã tải: {FormatBytes(totalDownloaded)} / {FormatBytes(fileSize)})...", "Cyan");
                                 }
 
                                 // Setup UI for Connections (now representing Regions)
@@ -765,34 +816,31 @@ namespace GMTPC.Tool
 
         private void CboSegmentCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Không cho phép đổi segment khi đang tải để tránh đơ checkbox
-            if (IsDownloading)
-            {
-                UpdateStatus("Không thể thay đổi số luồng khi đang tải. Vui lòng dừng tải trước khi đổi.", "Orange");
-                // Reset lại về giá trị cũ
-                if (CboSegmentCount != null && e.PreviousSelectionItem != null)
-                {
-                    CboSegmentCount.SelectedItem = e.PreviousSelectionItem;
-                }
+            // Chỉ xử lý đổi segment khi đang tải
+            if (!IsDownloading || _pauseEvent == null)
                 return;
-            }
 
             if (CboSegmentCount?.SelectedItem is ComboBoxItem item && item.Content != null)
             {
                 if (int.TryParse(item.Content.ToString(), out int newCount))
                 {
-                    _isReSegmenting = true; // Luôn đánh dấu để khi Resume (hoặc Auto-restart) sẽ có delay 3s
-
-                    if (_pauseEvent != null && _pauseEvent.IsSet)
+                    // Bước 1: Pause toàn bộ quá trình tải
+                    DownloadRegistry.PauseAll();
+                    
+                    // Bước 2: Đánh dấu để re-segment
+                    _isReSegmenting = true;
+                    
+                    UpdateStatus($"Đã chọn {newCount} luồng. Đang tạm dừng và chuẩn bị chia lại luồng...", "Cyan");
+                    
+                    // Bước 3: Tự động resume sau khi pause
+                    // Việc resume sẽ được thực hiện khi người dùng nhấn Resume button
+                    // Hoặc có thể tự động resume sau 1 khoảng thời gian ngắn
+                    Dispatcher.InvokeAsync(async () =>
                     {
-                        UpdateStatus($"Đang điều chỉnh số luồng tải thành {newCount} và khởi động lại phiên tải...", "Cyan");
-                        // Không cancel _pauseCts ở đây để tránh dừng tải và untick checkbox
-                        // Chỉ đánh dấu _isReSegmenting để vòng lặp tải hiện tại sẽ tự động re-segment
-                    }
-                    else
-                    {
-                        UpdateStatus($"Đã thay đổi số luồng tải thành {newCount}. Bạn hãy nhấn Resume để áp dụng sau 3 giây chờ.", "Cyan");
-                    }
+                        await Task.Delay(500);
+                        DownloadRegistry.ResumeAll();
+                        UpdateStatus($"Đang tải với {newCount} luồng...", "Cyan");
+                    });
                 }
             }
         }
