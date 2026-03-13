@@ -769,7 +769,8 @@ namespace GMTPC.Tool
                     if (_pauseEvent != null && _pauseEvent.IsSet)
                     {
                         UpdateStatus($"Đang điều chỉnh số luồng tải thành {newCount} và khởi động lại phiên tải...", "Cyan");
-                        _pauseCts?.Cancel();
+                        // Không cancel _pauseCts ở đây để tránh dừng tải và untick checkbox
+                        // Chỉ đánh dấu _isReSegmenting để vòng lặp tải hiện tại sẽ tự động re-segment
                     }
                     else
                     {

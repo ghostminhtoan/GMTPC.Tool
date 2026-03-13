@@ -23,21 +23,21 @@ namespace GMTPC.Tool.Services
     public sealed class SegmentedDownloadEngineOptimized
     {
         // ── Performance Tunables ─────────────────────────────────────────────
-        private const long ChunkSize = 512L * 1024;              // 512 KB chunks for fast startup
-        private const long MinSizeForSegmented = 1L * 1024 * 1024; // 1 MB minimum for segmented
+        private const long ChunkSize = 2L * 1024 * 1024;         // 2 MB chunks for fewer requests
+        private const long MinSizeForSegmented = 5L * 1024 * 1024; // 5 MB minimum for segmented
         private const int MaxRedirects = 10;
         private const int MaxRetries = 10;
-        
+
         // Timeout settings
         private static readonly TimeSpan HeadTimeout = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan ChunkTimeout = TimeSpan.FromHours(2);
-        
+
         // Speed calculation
         private const double EmaAlpha = 0.3;  // More responsive to recent speed changes
-        
+
         // Buffer sizes - OPTIMIZED for >100 MB/s throughput
-        private const int NetworkBufferSize = 1048576;           // 1MB network buffer (reduced I/O ops)
-        private const int FileBufferSize = 1048576;              // 1MB file buffer for HDD optimization
+        private const int NetworkBufferSize = 2097152;           // 2MB network buffer (reduced I/O ops)
+        private const int FileBufferSize = 2097152;              // 2MB file buffer for HDD optimization
         private const int MaxConcurrentConnections = 32;         // Allow more concurrent connections
         
         // User-Agent for better server compatibility
@@ -54,9 +54,9 @@ namespace GMTPC.Tool.Services
             ServicePointManager.Expect100Continue = false;
             ServicePointManager.UseNagleAlgorithm = false;
             ServicePointManager.MaxServicePoints = 100;
-            
-            // Pre-allocate buffer pool (8MB total pool for 16 threads @ 512KB each)
-            for (int i = 0; i < 16; i++)
+
+            // Pre-allocate buffer pool (64MB total pool for 32 threads @ 2MB each)
+            for (int i = 0; i < 32; i++)
             {
                 _bufferPool.Enqueue(new byte[NetworkBufferSize]);
             }
@@ -308,12 +308,12 @@ namespace GMTPC.Tool.Services
 
                                     while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, cts.Token)) > 0)
                                     {
-                                        // WAIT ON PAUSE EVENT - blocks here during pause, continues when resumed
-                                        if (pauseEvent != null)
+                                        // WAIT ON PAUSE EVENT - non-blocking async wait during pause, continues when resumed
+                                        if (pauseEvent != null && !pauseEvent.IsSet)
                                         {
-                                            pauseEvent.Wait(cts.Token);
+                                            await Task.Run(() => pauseEvent.Wait(cts.Token), cts.Token);
                                         }
-                                        
+
                                         // Async write to pre-allocated file
                                         await fs.WriteAsync(buffer, 0, read, cts.Token);
                                         done += read;
@@ -532,10 +532,10 @@ namespace GMTPC.Tool.Services
                     {
                         while (!ct.IsCancellationRequested)
                         {
-                            // WAIT ON PAUSE EVENT - blocks here during pause, continues when resumed
-                            if (pauseEvent != null)
+                            // WAIT ON PAUSE EVENT - non-blocking async wait during pause, continues when resumed
+                            if (pauseEvent != null && !pauseEvent.IsSet)
                             {
-                                pauseEvent.Wait(ct);  // Thread-safe wait with cancellation support
+                                await Task.Run(() => pauseEvent.Wait(ct), ct);
                             }
 
                             ChunkRange chunk;
