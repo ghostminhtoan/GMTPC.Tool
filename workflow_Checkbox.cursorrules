@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-11 - Added Workflow_createcheckbox_multipart for multi-part games with folder selection -->
+<!-- AI Summary: 2026-03-13 - Added standardized download architecture with MainWindow.SystemDownload.cs -->
 
 <system_context>
 Bạn là một AI Code Agent chuyên nghiệp, làm việc trên dự án "MMT Tools" (WPF, .NET 4.8, C# 7.3).
@@ -10,6 +10,36 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
 2. Luôn lưu file ở định dạng UTF-8.
 3. Luôn thêm/cập nhật khối comment "AI Summary" ở đầu MỌI file bạn chỉnh sửa (Ghi rõ ngày cập nhật và tóm tắt thao tác).
 </global_rules>
+
+<download_architecture>
+    <!-- ==================== DOWNLOAD METHODS ==================== -->
+    <rule name="Standardized_Download_Methods">
+        <description>
+        TẤT CẢ checkbox phải sử dụng các hàm download từ MainWindow.SystemDownload.cs
+        KHÔNG được tạo logic download riêng trong mỗi Install*Async method.
+        </description>
+        
+        <methods>
+            <method name="DownloadSingleLinkFastAsync" usage="CHO TẤT CẢ single-link downloads">
+                - Sử dụng cho: VPN1111, MMT Apps, Google Drive, DISM++, NetLimiter, etc.
+                - Đặc điểm: Bỏ qua ProbeAsync → tải ngay lập tức
+                - Ví dụ: await DownloadSingleLinkFastAsync(url, path, "Display Name");
+            </method>
+            
+            <method name="DownloadWithProgressAsync" usage="CHO Archive.org, Mediafire">
+                - Sử dụng cho: File cần dò redirect (Win10/Win11 ISO, Mediafire links)
+                - Đặc điểm: Có ProbeAsync (HEAD request) để tìm final URL
+                - Ví dụ: await DownloadWithProgressAsync(url, path, "Display Name");
+            </method>
+            
+            <method name="DownloadMultiPartAsync" usage="CHO multi-part games">
+                - Sử dụng cho: Game nhiều parts (Ghost of Tsushima 29 parts, Samurai Maiden 4 parts)
+                - Đặc điểm: Tải tuần tự từng part vào cùng 1 thư mục
+                - Ví dụ: await DownloadMultiPartAsync(urls, paths, "Game Name");
+            </method>
+        </methods>
+    </rule>
+</download_architecture>
 
 <workflow_definitions>
     <!-- ==================== CREATE CHECKBOX ==================== -->
@@ -330,9 +360,19 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
     
     <file name="MainWindow.SystemBar.cs">
         - Phương thức UpdateStatus() để hiển thị trạng thái
-        - Phương thức UpdateProgress() để cập nhật progress bar
+        - Progress Bar và Connection Trace UI handling
+        - UpdateConnectionTraceOrientation()
     </file>
-    
+
+    <file name="MainWindow.SystemDownload.cs">
+        - DownloadSingleLinkFastAsync() - "Golden Standard" cho single-link downloads
+        - DownloadWithProgressAsync() - Cho Archive.org, Mediafire (có probe)
+        - DownloadMultiPartAsync() - Cho multi-part games
+        - ApplyDownloadProgressToUI() - Cập nhật progress bar
+        - ResetDownloadUI() - Reset UI về trạng thái ban đầu
+        - FormatSpeed(), FormatBytes() - Helper methods
+    </file>
+
     <file name="MainWindow.SystemButtons.cs">
         - Xử lý sự kiện các Button: BtnInstall, BtnSelectAll, BtnSelectNone
         - Phương thức UpdateInstallButtonState()
