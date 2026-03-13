@@ -116,10 +116,11 @@ namespace GMTPC.Tool
                         }
                     }
 
-                    using (HttpClient client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }))
+                    using (HttpClient client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false, MaxConnectionsPerServer = 16 }))
                     {
                         client.Timeout = TimeSpan.FromMinutes(60);
                         client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                        client.DefaultRequestHeaders.ConnectionClose = false;
 
                         if (!supportsRanges || fileSize < 5 * 1024 * 1024)
                         {
@@ -339,12 +340,17 @@ namespace GMTPC.Tool
                                             
                                             try
                                             {
-                                                var handler = new HttpClientHandler { AllowAutoRedirect = false }; 
+                                                var handler = new HttpClientHandler 
+                                                { 
+                                                    AllowAutoRedirect = false,
+                                                    MaxConnectionsPerServer = 16
+                                                };
                                                 using (var chunkClient = new HttpClient(handler))
-                                                using (var fs = new FileStream(destinationPath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite | System.IO.FileShare.Delete, 262144, true))
+                                                using (var fs = new FileStream(destinationPath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite | System.IO.FileShare.Delete, 1048576, useAsync: true))
                                                 {
                                                     chunkClient.Timeout = TimeSpan.FromMinutes(60);
                                                     chunkClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                                                    chunkClient.DefaultRequestHeaders.ConnectionClose = false;
 
                                                     while (chunkQueue.TryDequeue(out var range))
                                                     {
@@ -381,7 +387,7 @@ namespace GMTPC.Tool
                                                                 using (var stream = await response.Content.ReadAsStreamAsync())
                                                                 {
                                                                     fs.Seek(range.Start, SeekOrigin.Begin);
-                                                                    byte[] buffer = new byte[256 * 1024]; // 256KB buffer
+                                                                    byte[] buffer = new byte[1024 * 1024]; // 1MB buffer for better throughput
                                                                     int read;
                                                                     int consecutiveEmptyReads = 0;
                                                                     const int maxConsecutiveEmptyReads = 3;
@@ -391,7 +397,7 @@ namespace GMTPC.Tool
                                                                         read = await stream.ReadAsync(buffer, 0, buffer.Length, sessionLinkedCts.Token);
                                                                         if (read > 0)
                                                                         {
-                                                                            consecutiveEmptyReads = 0; // Reset on successful read
+                                                                            consecutiveEmptyReads = 0;
                                                                             await fs.WriteAsync(buffer, 0, read, sessionLinkedCts.Token);
                                                                             range.Downloaded += read;
 
@@ -514,7 +520,6 @@ namespace GMTPC.Tool
 
 
 
-        // Fallback: 1 connection, stream thẳng vào file xác
         private async Task DownloadSingleConnectionAsync(string downloadUrl, string destinationPath, string displayName)
         {
             var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
@@ -525,14 +530,15 @@ namespace GMTPC.Tool
             {
                 try
                 {
-                    using (HttpClient client = new HttpClient())
+                    using (HttpClient client = new HttpClient(new HttpClientHandler { MaxConnectionsPerServer = 16 }))
                     {
                         client.Timeout = TimeSpan.FromMinutes(60);
                         client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                        client.DefaultRequestHeaders.ConnectionClose = false;
                         DateTime downloadStart = DateTime.Now;
                         DateTime lastUpdate = DateTime.Now;
                         long totalBytes = 0;
-                        
+
                         long lastTotalForSpeed = 0;
                         DateTime lastSpeedUpdate = DateTime.Now;
                         double smoothedSpeed = 0.0; // EMA smoothed speed
@@ -556,10 +562,10 @@ namespace GMTPC.Tool
                             // ── Bước 2 & 3: Mở file xác, ghi chunk-by-chunk từ offset 0, không lưu RAM ──
                             using (var fs = new FileStream(destinationPath,
                                 contentLength > 0 ? FileMode.Open : FileMode.Create,
-                                FileAccess.Write, FileShare.None, 81920, useAsync: true))
+                                FileAccess.Write, FileShare.None, 1048576, useAsync: true))
                             {
                                 fs.Seek(0, SeekOrigin.Begin);
-                                int bufferSize = contentLength > 100 * 1024 * 1024 ? 262144 : 81920;
+                                int bufferSize = 1048576; // 1MB buffer for better throughput
                                 byte[] buffer = new byte[bufferSize];
                                 int bytesRead;
 
