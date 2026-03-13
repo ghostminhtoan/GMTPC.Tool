@@ -1,3 +1,8 @@
+// =======================================================================
+// MainWindow.SystemBar.cs
+// Chức năng: Xử lý progress bar, connection trace, và download UI
+// Cập nhật: 2026-03-14 - Fix đổi segment bị đơ checkbox
+// =======================================================================
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -760,6 +765,18 @@ namespace GMTPC.Tool
 
         private void CboSegmentCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Không cho phép đổi segment khi đang tải để tránh đơ checkbox
+            if (IsDownloading)
+            {
+                UpdateStatus("Không thể thay đổi số luồng khi đang tải. Vui lòng dừng tải trước khi đổi.", "Orange");
+                // Reset lại về giá trị cũ
+                if (CboSegmentCount != null && e.PreviousSelectionItem != null)
+                {
+                    CboSegmentCount.SelectedItem = e.PreviousSelectionItem;
+                }
+                return;
+            }
+
             if (CboSegmentCount?.SelectedItem is ComboBoxItem item && item.Content != null)
             {
                 if (int.TryParse(item.Content.ToString(), out int newCount))
