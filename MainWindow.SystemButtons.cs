@@ -758,7 +758,7 @@ namespace GMTPC.Tool
                 // Cancel immediately
                 _cancellationTokenSource.Cancel();
                 
-                // Update UI instantly (no Dispatcher.Invoke waiting)
+                // Update UI instantly
                 UpdateStatus("Stopped", "Yellow");
                 BtnStop.IsEnabled = false;
                 BtnPause.IsEnabled = false;
@@ -770,6 +770,16 @@ namespace GMTPC.Tool
                     _pauseEvent.Set();
                     BtnPause.Content = "Pause";
                 }
+
+                // Reset progress UI immediately
+                Dispatcher.InvokeAsync(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ConnectionTraceGrid.Children.Clear();
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                    ConnectionCountTextBlock.Text = "";
+                });
 
                 // Clear task tracking
                 _activeDownloadTasks.Clear();
