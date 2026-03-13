@@ -23,6 +23,7 @@ using Microsoft.Win32;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using GMTPC.Tool.Services;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Net.Http;
@@ -752,57 +753,66 @@ namespace GMTPC.Tool
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
-            // Global Stop - INSTANT response, no waiting
+            // Global Stop using Registry - affects ALL downloads across ALL tabs instantly
+            // No Visual Tree scanning, no UI thread blocking
+            
+            // Cancel local token
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
-                // Cancel immediately
                 _cancellationTokenSource.Cancel();
-                
-                // Update UI instantly
-                UpdateStatus("Stopped", "Yellow");
-                BtnStop.IsEnabled = false;
-                BtnPause.IsEnabled = false;
-                BtnInstall.IsEnabled = true;
-
-                // Resume pause event to unblock any waiting threads
-                if (!_pauseEvent.IsSet)
-                {
-                    _pauseEvent.Set();
-                    BtnPause.Content = "Pause";
-                }
-
-                // Reset progress UI immediately
-                Dispatcher.InvokeAsync(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ConnectionTraceGrid.Children.Clear();
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                    ConnectionCountTextBlock.Text = "";
-                });
-
-                // Clear task tracking
-                _activeDownloadTasks.Clear();
             }
+            
+            // Stop ALL registered downloads via global registry (fire-and-forget)
+            DownloadRegistry.StopAll();
+            
+            // Update UI instantly - no waiting
+            UpdateStatus("Stopped", "Yellow");
+            BtnStop.IsEnabled = false;
+            BtnPause.IsEnabled = false;
+            BtnInstall.IsEnabled = true;
+
+            // Resume pause event to unblock any waiting threads
+            if (!_pauseEvent.IsSet)
+            {
+                _pauseEvent.Set();
+                BtnPause.Content = "Pause";
+            }
+
+            // Reset progress UI immediately
+            Dispatcher.InvokeAsync(() =>
+            {
+                DownloadProgressBar.Value = 0;
+                ConnectionTraceGrid.Children.Clear();
+                ProgressTextBlock.Text = "";
+                SpeedTextBlock.Text = "";
+                ConnectionCountTextBlock.Text = "";
+            });
+
+            // Clear local task tracking
+            _activeDownloadTasks.Clear();
+            
+            // Clear global registry
+            DownloadRegistry.Clear();
         }
 
         private void BtnPause_Click(object sender, RoutedEventArgs e)
         {
-            // Global Pause - affects ALL active downloads
+            // Global Pause using Registry - affects ALL downloads across ALL tabs
+            // No Visual Tree scanning, works even for tabs that were never activated
             if (_pauseEvent == null || !BtnPause.IsEnabled)
                 return;
 
             if (_pauseEvent.IsSet)
             {
-                // Running -> Pause: Signal ALL threads to pause via ManualResetEventSlim
-                _pauseEvent.Reset();
+                // Running -> Pause: Use global registry to pause ALL downloads
+                DownloadRegistry.PauseAll();
                 BtnPause.Content = "Resume";
                 UpdateStatus("Paused - Click Resume to continue", "Yellow");
             }
             else
             {
-                // Paused -> Resume: Allow ALL threads to continue
-                _pauseEvent.Set();
+                // Paused -> Resume: Use global registry to resume ALL downloads
+                DownloadRegistry.ResumeAll();
                 BtnPause.Content = "Pause";
                 UpdateStatus("Resuming...", "Cyan");
             }

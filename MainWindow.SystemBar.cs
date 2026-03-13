@@ -279,6 +279,7 @@ namespace GMTPC.Tool
         /// <summary>
         /// Main download entry-point. Delegates to SegmentedDownloadEngine via IProgress.
         /// Uses ManualResetEventSlim for pause/resume support
+        /// Registers download in global registry for cross-tab pause/stop
         /// </summary>
         private async Task DownloadWithProgressAsync(string downloadUrl, string destinationPath, string displayName = "File")
         {
@@ -308,11 +309,33 @@ namespace GMTPC.Tool
 
                 UpdateStatus($"Dang tai {displayName}... ({segments} threads)", "Cyan");
 
-                // Use optimized download engine with pause event support
-                var engine = new GMTPC.Tool.Services.SegmentedDownloadEngineOptimized();
-                await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct, _pauseEvent);
+                // Create download context for global registry
+                var taskContext = new DownloadTaskContext
+                {
+                    TaskName = displayName,
+                    DestinationPath = destinationPath,
+                    CancellationTokenSource = _cancellationTokenSource,
+                    PauseEvent = _pauseEvent,
+                    StartTime = DateTime.Now,
+                    IsPaused = false
+                };
 
-                await Dispatcher.InvokeAsync(() => ResetDownloadUI());
+                // Register in global registry for cross-tab pause/stop
+                DownloadRegistry.Register(destinationPath, taskContext);
+
+                try
+                {
+                    // Use optimized download engine with pause event support
+                    var engine = new GMTPC.Tool.Services.SegmentedDownloadEngineOptimized();
+                    await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct, _pauseEvent);
+
+                    await Dispatcher.InvokeAsync(() => ResetDownloadUI());
+                }
+                finally
+                {
+                    // Always unregister from registry when done
+                    DownloadRegistry.Unregister(destinationPath);
+                }
                 return;
             }
             catch (OperationCanceledException) { throw; }

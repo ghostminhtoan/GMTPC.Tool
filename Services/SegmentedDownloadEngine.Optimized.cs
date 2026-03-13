@@ -112,30 +112,38 @@ namespace GMTPC.Tool.Services
         }
 
         // ── Probe with optimized HttpClient ──────────────────────────────────
+        /// <summary>
+        /// Probes URL to get final destination (after redirects) and file size
+        /// Critical for Archive.org and Mediafire which use HTTP 301/302 redirects
+        /// </summary>
         private async Task<ProbeResult> ProbeAsync(string url, CancellationToken ct)
         {
             var result = new ProbeResult { FinalUrl = url, FileSize = 0, SupportsRange = false };
 
+            // STEP 1: HEAD request with auto-redirect to get final URL
             try
             {
-                using (var handler = new HttpClientHandler 
-                { 
-                    AllowAutoRedirect = true,
+                using (var handler = new HttpClientHandler
+                {
+                    AllowAutoRedirect = true,  // Follow redirects automatically
                     UseCookies = false,
                     AutomaticDecompression = DecompressionMethods.None
                 })
                 using (var client = new HttpClient(handler) { Timeout = HeadTimeout })
                 {
+                    // Spoof User-Agent to avoid server throttling (Archive.org, Mediafire)
                     client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                    client.DefaultRequestHeaders.Add("Accept", "*/*");
 
                     using (var cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
                     {
                         cts.CancelAfter(HeadTimeout);
-                        
+
                         var request = new HttpRequestMessage(HttpMethod.Head, url);
-                        var response = await client.SendAsync(request, 
+                        var response = await client.SendAsync(request,
                             HttpCompletionOption.ResponseHeadersRead, cts.Token);
 
+                        // Get the FINAL URL after all redirects
                         result.FinalUrl = response.RequestMessage?.RequestUri?.AbsoluteUri ?? url;
                         result.FileSize = response.Content.Headers.ContentLength ?? 0;
                         result.SupportsRange = response.Headers.AcceptRanges.Contains("bytes");
@@ -146,31 +154,39 @@ namespace GMTPC.Tool.Services
 
             if (result.FileSize > 0 && result.SupportsRange) return result;
 
-            // Fallback: GET with Range header
+            // STEP 2: Fallback - GET with Range header and manual redirect following
             try
             {
                 string probeUrl = result.FinalUrl;
-                
-                using (var handler = new HttpClientHandler { AllowAutoRedirect = false })
+
+                using (var handler = new HttpClientHandler 
+                { 
+                    AllowAutoRedirect = false,  // Manual redirect handling
+                    UseCookies = false,
+                    AutomaticDecompression = DecompressionMethods.None
+                })
                 using (var client = new HttpClient(handler) { Timeout = HeadTimeout })
                 {
+                    // Spoof User-Agent and Accept headers
                     client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                    client.DefaultRequestHeaders.Add("Accept", "*/*");
 
                     for (int redirect = 0; redirect < MaxRedirects; redirect++)
                     {
                         using (var cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
                         {
                             cts.CancelAfter(HeadTimeout);
-                            
+
                             var request = new HttpRequestMessage(HttpMethod.Get, probeUrl);
                             request.Headers.Range = new RangeHeaderValue(0, 0);
-                            
+
                             var response = await client.SendAsync(request,
                                 HttpCompletionOption.ResponseHeadersRead, cts.Token);
 
                             int status = (int)response.StatusCode;
                             if (status >= 300 && status <= 399 && response.Headers.Location != null)
                             {
+                                // Follow redirect to final destination
                                 probeUrl = response.Headers.Location.IsAbsoluteUri
                                     ? response.Headers.Location.AbsoluteUri
                                     : new Uri(new Uri(probeUrl), response.Headers.Location).AbsoluteUri;
@@ -630,20 +646,51 @@ namespace GMTPC.Tool.Services
         // ── Cleanup Helper ───────────────────────────────────────────────────
         /// <summary>
         /// Safely deletes a partial download file after cancellation/failure
-        /// Swallows exceptions if file is still locked by OS
+        /// Uses fire-and-forget pattern with retry loop to avoid blocking UI
         /// </summary>
         private static void CleanupPartialDownload(string destinationPath)
         {
-            try
+            // Fire-and-forget: Run deletion in background task
+            Task.Run(() =>
             {
-                if (File.Exists(destinationPath))
+                try
                 {
-                    try { File.Delete(destinationPath); }
-                    catch (IOException) { /* File still locked - swallow */ }
-                    catch (UnauthorizedAccessException) { /* No permission - swallow */ }
+                    if (File.Exists(destinationPath))
+                    {
+                        // Retry loop: Try to delete file multiple times if OS hasn't released handle
+                        int maxRetries = 5;
+                        int retryDelayMs = 100;
+                        
+                        for (int attempt = 0; attempt < maxRetries; attempt++)
+                        {
+                            try
+                            {
+                                File.Delete(destinationPath);
+                                break; // Success - exit retry loop
+                            }
+                            catch (IOException)
+                            {
+                                // File still locked by OS - wait and retry
+                                if (attempt < maxRetries - 1)
+                                {
+                                    Thread.Sleep(retryDelayMs);
+                                    retryDelayMs *= 2; // Exponential backoff: 100ms, 200ms, 400ms...
+                                }
+                            }
+                            catch (UnauthorizedAccessException)
+                            {
+                                // No permission - give up
+                                break;
+                            }
+                        }
+                    }
                 }
-            }
-            catch { /* Ignore cleanup errors */ }
+                catch
+                {
+                    // Ignore all cleanup errors - this is fire-and-forget
+                }
+            });
+            // Note: We don't await this task - it runs independently in background
         }
 
         // ── Chunk Range Helper ───────────────────────────────────────────────
