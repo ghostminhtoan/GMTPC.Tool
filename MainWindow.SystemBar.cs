@@ -322,9 +322,41 @@ namespace GMTPC.Tool
                 }
                 return;
             }
-            catch (OperationCanceledException) { throw; }
+            catch (OperationCanceledException) 
+            {
+                // Fire-and-forget cleanup - don't wait for file delete to complete
+                Task.Run(() => 
+                {
+                    try 
+                    {
+                        if (File.Exists(destinationPath))
+                        {
+                            try { File.Delete(destinationPath); }
+                            catch (IOException) { /* File locked - swallow */ }
+                            catch (UnauthorizedAccessException) { /* No permission - swallow */ }
+                        }
+                    }
+                    catch { /* Ignore cleanup errors */ }
+                });
+                throw; 
+            }
             catch (Exception ex)
             {
+                // Fire-and-forget cleanup on error
+                Task.Run(() => 
+                {
+                    try 
+                    {
+                        if (File.Exists(destinationPath))
+                        {
+                            try { File.Delete(destinationPath); }
+                            catch (IOException) { /* File locked - swallow */ }
+                            catch (UnauthorizedAccessException) { /* No permission - swallow */ }
+                        }
+                    }
+                    catch { /* Ignore cleanup errors */ }
+                });
+                
                 UpdateStatus($"Loi tai: {ex.Message}", "Red");
                 throw;
             }

@@ -756,8 +756,10 @@ namespace GMTPC.Tool
             // Global Stop - affects ALL active downloads regardless of UI checkbox state
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
+                // Cancel immediately - UI responds instantly
                 _cancellationTokenSource.Cancel();
-                UpdateStatus("Stopping all downloads...", "Yellow");
+                
+                UpdateStatus("Stopping...", "Yellow");
                 BtnStop.IsEnabled = false;
                 BtnPause.IsEnabled = false;
                 BtnInstall.IsEnabled = true;
@@ -769,8 +771,8 @@ namespace GMTPC.Tool
                     BtnPause.Content = "Pause";
                 }
 
-                // Reset progress UI
-                Dispatcher.Invoke(() =>
+                // Reset progress UI immediately (don't wait for cleanup)
+                Dispatcher.InvokeAsync(() =>
                 {
                     DownloadProgressBar.Value = 0;
                     ConnectionTraceGrid.Children.Clear();
@@ -778,8 +780,11 @@ namespace GMTPC.Tool
                     SpeedTextBlock.Text = "";
                 });
 
-                // Clear active task tracking
-                _activeDownloadTasks.Clear();
+                // Fire-and-forget: Clear active task tracking and let cleanup happen in background
+                Task.Run(() => 
+                {
+                    _activeDownloadTasks.Clear();
+                });
             }
         }
 
