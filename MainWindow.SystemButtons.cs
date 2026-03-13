@@ -509,7 +509,6 @@ namespace GMTPC.Tool
 
             // Initialize cancellation tokens
             _cancellationTokenSource = new CancellationTokenSource();
-            _pauseCts = new CancellationTokenSource();
             _pauseEvent.Set();
             BtnPause.Content = "Pause";
             BtnStop.IsEnabled = true;
@@ -753,13 +752,14 @@ namespace GMTPC.Tool
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
-            // Global Stop - affects ALL active downloads regardless of UI checkbox state
+            // Global Stop - INSTANT response, no waiting
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
-                // Cancel immediately - UI responds instantly
+                // Cancel immediately
                 _cancellationTokenSource.Cancel();
                 
-                UpdateStatus("Stopping...", "Yellow");
+                // Update UI instantly (no Dispatcher.Invoke waiting)
+                UpdateStatus("Stopped", "Yellow");
                 BtnStop.IsEnabled = false;
                 BtnPause.IsEnabled = false;
                 BtnInstall.IsEnabled = true;
@@ -771,51 +771,30 @@ namespace GMTPC.Tool
                     BtnPause.Content = "Pause";
                 }
 
-                // Reset progress UI immediately (don't wait for cleanup)
-                Dispatcher.InvokeAsync(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ConnectionTraceGrid.Children.Clear();
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                });
-
-                // Fire-and-forget: Clear active task tracking and let cleanup happen in background
-                Task.Run(() => 
-                {
-                    _activeDownloadTasks.Clear();
-                });
+                // Clear task tracking
+                _activeDownloadTasks.Clear();
             }
         }
 
         private void BtnPause_Click(object sender, RoutedEventArgs e)
         {
-            // Global Pause - affects ALL active downloads regardless of UI checkbox state
+            // Global Pause - affects ALL active downloads
             if (_pauseEvent == null || !BtnPause.IsEnabled)
                 return;
 
             if (_pauseEvent.IsSet)
             {
-                // Running -> Pause: Signal all threads to pause
+                // Running -> Pause: Signal ALL threads to pause via ManualResetEventSlim
                 _pauseEvent.Reset();
-                
-                // Cancel pauseCts to trigger OperationCanceledException in download tasks
-                if (_pauseCts != null && !_pauseCts.IsCancellationRequested)
-                {
-                    _pauseCts.Cancel();
-                    _pauseCts.Dispose();
-                }
-                _pauseCts = new CancellationTokenSource();  // Fresh token for resume
-                
                 BtnPause.Content = "Resume";
-                UpdateStatus("Paused all downloads", "Yellow");
+                UpdateStatus("Paused - Click Resume to continue", "Yellow");
             }
             else
             {
-                // Paused -> Resume: Set pause event to allow threads to continue
+                // Paused -> Resume: Allow ALL threads to continue
                 _pauseEvent.Set();
                 BtnPause.Content = "Pause";
-                UpdateStatus("Resuming all downloads...", "Cyan");
+                UpdateStatus("Resuming...", "Cyan");
             }
         }
 

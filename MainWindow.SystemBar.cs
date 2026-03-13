@@ -28,7 +28,6 @@ namespace GMTPC.Tool
         // ===================== Shared State Fields =====================
         // Global pause/cancellation management
         private CancellationTokenSource _cancellationTokenSource;
-        private CancellationTokenSource _pauseCts;
         private System.Threading.ManualResetEventSlim _pauseEvent = new System.Threading.ManualResetEventSlim(true);
         private List<DownloadRange> _remainingRanges = new List<DownloadRange>();
 
@@ -279,84 +278,46 @@ namespace GMTPC.Tool
 
         /// <summary>
         /// Main download entry-point. Delegates to SegmentedDownloadEngine via IProgress.
-        /// Uses linked cancellation token for pause/resume support
+        /// Uses ManualResetEventSlim for pause/resume support
         /// </summary>
         private async Task DownloadWithProgressAsync(string downloadUrl, string destinationPath, string displayName = "File")
         {
             await _downloadSemaphore.WaitAsync();
             try
             {
-                // Create linked token that combines global cancel + pause
-                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-                    _cancellationTokenSource?.Token ?? CancellationToken.None,
-                    _pauseCts?.Token ?? CancellationToken.None))
+                var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
+
+                int segments = 16; // Default to 16 segments for optimal performance
+                await Dispatcher.InvokeAsync(() =>
                 {
-                    var ct = linkedCts.Token;
+                    if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
+                        int.TryParse(item.Content?.ToString(), out int n))
+                        segments = n;
+                });
 
-                    int segments = 16; // Default to 16 segments for optimal performance
-                    await Dispatcher.InvokeAsync(() =>
+                Progress<GMTPC.Tool.Services.DownloadProgressInfo> uiProgress = null;
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    ResetDownloadUI();
+                    uiProgress = new Progress<GMTPC.Tool.Services.DownloadProgressInfo>(info =>
                     {
-                        if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
-                            int.TryParse(item.Content?.ToString(), out int n))
-                            segments = n;
+                        if (!ct.IsCancellationRequested)
+                            ApplyDownloadProgressToUI(info);
                     });
+                });
 
-                    Progress<GMTPC.Tool.Services.DownloadProgressInfo> uiProgress = null;
-                    await Dispatcher.InvokeAsync(() =>
-                    {
-                        ResetDownloadUI();
-                        uiProgress = new Progress<GMTPC.Tool.Services.DownloadProgressInfo>(info =>
-                        {
-                            if (!ct.IsCancellationRequested)
-                                ApplyDownloadProgressToUI(info);
-                        });
-                    });
+                UpdateStatus($"Dang tai {displayName}... ({segments} threads)", "Cyan");
 
-                    UpdateStatus($"Dang tai {displayName}... ({segments} threads)", "Cyan");
+                // Use optimized download engine with pause event support
+                var engine = new GMTPC.Tool.Services.SegmentedDownloadEngineOptimized();
+                await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct, _pauseEvent);
 
-                    // Use optimized download engine for maximum throughput
-                    var engine = new GMTPC.Tool.Services.SegmentedDownloadEngineOptimized();
-                    await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct);
-
-                    await Dispatcher.InvokeAsync(() => ResetDownloadUI());
-                }
+                await Dispatcher.InvokeAsync(() => ResetDownloadUI());
                 return;
             }
-            catch (OperationCanceledException) 
-            {
-                // Fire-and-forget cleanup - don't wait for file delete to complete
-                Task.Run(() => 
-                {
-                    try 
-                    {
-                        if (File.Exists(destinationPath))
-                        {
-                            try { File.Delete(destinationPath); }
-                            catch (IOException) { /* File locked - swallow */ }
-                            catch (UnauthorizedAccessException) { /* No permission - swallow */ }
-                        }
-                    }
-                    catch { /* Ignore cleanup errors */ }
-                });
-                throw; 
-            }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
-                // Fire-and-forget cleanup on error
-                Task.Run(() => 
-                {
-                    try 
-                    {
-                        if (File.Exists(destinationPath))
-                        {
-                            try { File.Delete(destinationPath); }
-                            catch (IOException) { /* File locked - swallow */ }
-                            catch (UnauthorizedAccessException) { /* No permission - swallow */ }
-                        }
-                    }
-                    catch { /* Ignore cleanup errors */ }
-                });
-                
                 UpdateStatus($"Loi tai: {ex.Message}", "Red");
                 throw;
             }
@@ -441,7 +402,7 @@ namespace GMTPC.Tool
                         const double emaAlpha = 0.25; // 25% new, 75% history
                         string speedText = "0 B/s";
 
-                        using (var sessionLinkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, _pauseCts.Token))
+                        using (var sessionLinkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
                         using (var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, sessionLinkedCts.Token))
                         {
                             response.EnsureSuccessStatusCode();
@@ -467,10 +428,12 @@ namespace GMTPC.Tool
 
                                 while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, sessionLinkedCts.Token)) > 0)
                                 {
-                                    // Wait for pause event (Asynchronous wait to avoid UI freeze)
-                                    await Task.Run(() => _pauseEvent.Wait(ct)); // Check for global stop
-                                    sessionLinkedCts.Token.ThrowIfCancellationRequested(); // Check for pause
-                                    
+                                    // Wait for pause event - blocks during pause, continues on resume
+                                    if (_pauseEvent != null)
+                                    {
+                                        _pauseEvent.Wait(sessionLinkedCts.Token);
+                                    }
+
                                     // Đắp dữ liệu vào đúng vị trí trong file xác, không lưu RAM
                                     await fs.WriteAsync(buffer, 0, bytesRead, sessionLinkedCts.Token);
                                     totalBytes += bytesRead;
@@ -664,7 +627,7 @@ namespace GMTPC.Tool
                     if (_pauseEvent != null && _pauseEvent.IsSet)
                     {
                         UpdateStatus($"Đang điều chỉnh số luồng tải thành {newCount} và khởi động lại phiên tải...", "Cyan");
-                        _pauseCts?.Cancel();
+                        _cancellationTokenSource?.Cancel();
                     }
                     else
                     {

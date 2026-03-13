@@ -65,9 +65,11 @@ namespace GMTPC.Tool.Services
         /// <summary>
         /// Downloads file using optimized multi-segment approach
         /// On cancellation, partial file is automatically deleted
+        /// Supports pause/resume via ManualResetEventSlim
         /// </summary>
         public async Task DownloadAsync(string url, string destinationPath, int segments,
-            IProgress<DownloadProgressInfo> progress, CancellationToken ct)
+            IProgress<DownloadProgressInfo> progress, CancellationToken ct, 
+            System.Threading.ManualResetEventSlim pauseEvent = null)
         {
             if (string.IsNullOrWhiteSpace(url)) throw new ArgumentNullException(nameof(url));
             if (string.IsNullOrWhiteSpace(destinationPath)) throw new ArgumentNullException(nameof(destinationPath));
@@ -81,11 +83,11 @@ namespace GMTPC.Tool.Services
                 // Choose strategy based on file size and server support
                 if (!probe.SupportsRange || probe.FileSize < MinSizeForSegmented)
                 {
-                    await DownloadSingleOptimizedAsync(probe.FinalUrl, destinationPath, progress, ct);
+                    await DownloadSingleOptimizedAsync(probe.FinalUrl, destinationPath, progress, ct, pauseEvent);
                     return;
                 }
 
-                await DownloadSegmentedOptimizedAsync(probe.FinalUrl, destinationPath, probe.FileSize, segments, progress, ct);
+                await DownloadSegmentedOptimizedAsync(probe.FinalUrl, destinationPath, probe.FileSize, segments, progress, ct, pauseEvent);
             }
             catch (OperationCanceledException)
             {
@@ -201,10 +203,11 @@ namespace GMTPC.Tool.Services
 
         // ── Single Connection Optimized Download ─────────────────────────────
         private async Task DownloadSingleOptimizedAsync(string url, string destinationPath,
-            IProgress<DownloadProgressInfo> progress, CancellationToken ct)
+            IProgress<DownloadProgressInfo> progress, CancellationToken ct,
+            System.Threading.ManualResetEventSlim pauseEvent)
         {
             int retry = 0;
-            
+
             while (true)
             {
                 try
@@ -260,6 +263,12 @@ namespace GMTPC.Tool.Services
 
                                     while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, cts.Token)) > 0)
                                     {
+                                        // WAIT ON PAUSE EVENT - blocks here during pause, continues when resumed
+                                        if (pauseEvent != null)
+                                        {
+                                            pauseEvent.Wait(cts.Token);
+                                        }
+                                        
                                         // Async write to pre-allocated file
                                         await fs.WriteAsync(buffer, 0, read, cts.Token);
                                         done += read;
@@ -313,9 +322,11 @@ namespace GMTPC.Tool.Services
         /// <summary>
         /// Downloads file using parallel segments with simultaneous connection firing
         /// All 16 segments start at the same time via Task.WhenAll (no sequential ramp-up)
+        /// Supports pause/resume via ManualResetEventSlim
         /// </summary>
         private async Task DownloadSegmentedOptimizedAsync(string url, string destinationPath,
-            long fileSize, int segments, IProgress<DownloadProgressInfo> progress, CancellationToken ct)
+            long fileSize, int segments, IProgress<DownloadProgressInfo> progress, CancellationToken ct,
+            System.Threading.ManualResetEventSlim pauseEvent)
         {
             // CRITICAL: Pre-allocate file to prevent fragmentation
             // This is essential for HDD performance - avoids scattered writes
@@ -418,7 +429,7 @@ namespace GMTPC.Tool.Services
                         workers[i] = Task.Run(async () =>
                         {
                             await ProcessChunksAsync(url, destinationPath, chunkQueue, retryQueue,
-                                workerIndex, regionProgress, progressState, ct);
+                                workerIndex, regionProgress, progressState, ct, pauseEvent);
                         }, ct);
                     }
 
@@ -447,11 +458,12 @@ namespace GMTPC.Tool.Services
         /// <summary>
         /// Each worker opens its own FileStream with RandomAccess for lock-free parallel writes
         /// Each segment writes directly to its pre-allocated offset without global file lock
+        /// Waits on pauseEvent during pause - resumes when event is set
         /// </summary>
         private async Task ProcessChunksAsync(string url, string destinationPath,
             ConcurrentQueue<ChunkRange> chunkQueue, ConcurrentQueue<ChunkRange> retryQueue,
-            int regionIndex, long[] regionProgress, ProgressState progressState,
-            CancellationToken ct)
+            int regionIndex, long[] regionProgress, ProgressState progressState, CancellationToken ct,
+            System.Threading.ManualResetEventSlim pauseEvent)
         {
             using (var handler = new HttpClientHandler
             {
@@ -475,8 +487,14 @@ namespace GMTPC.Tool.Services
                     {
                         while (!ct.IsCancellationRequested)
                         {
+                            // WAIT ON PAUSE EVENT - blocks here during pause, continues when resumed
+                            if (pauseEvent != null)
+                            {
+                                pauseEvent.Wait(ct);  // Thread-safe wait with cancellation support
+                            }
+
                             ChunkRange chunk;
-                            
+
                             // Try primary queue first, then retry queue
                             if (!chunkQueue.TryDequeue(out chunk))
                             {
