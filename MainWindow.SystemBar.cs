@@ -279,40 +279,47 @@ namespace GMTPC.Tool
 
         /// <summary>
         /// Main download entry-point. Delegates to SegmentedDownloadEngine via IProgress.
+        /// Uses linked cancellation token for pause/resume support
         /// </summary>
         private async Task DownloadWithProgressAsync(string downloadUrl, string destinationPath, string displayName = "File")
         {
             await _downloadSemaphore.WaitAsync();
             try
             {
-                var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
-
-                int segments = 16; // Default to 16 segments for optimal performance
-                await Dispatcher.InvokeAsync(() =>
+                // Create linked token that combines global cancel + pause
+                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                    _cancellationTokenSource?.Token ?? CancellationToken.None,
+                    _pauseCts?.Token ?? CancellationToken.None))
                 {
-                    if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
-                        int.TryParse(item.Content?.ToString(), out int n))
-                        segments = n;
-                });
+                    var ct = linkedCts.Token;
 
-                Progress<GMTPC.Tool.Services.DownloadProgressInfo> uiProgress = null;
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    ResetDownloadUI();
-                    uiProgress = new Progress<GMTPC.Tool.Services.DownloadProgressInfo>(info =>
+                    int segments = 16; // Default to 16 segments for optimal performance
+                    await Dispatcher.InvokeAsync(() =>
                     {
-                        if (!ct.IsCancellationRequested)
-                            ApplyDownloadProgressToUI(info);
+                        if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
+                            int.TryParse(item.Content?.ToString(), out int n))
+                            segments = n;
                     });
-                });
 
-                UpdateStatus($"Dang tai {displayName}... ({segments} threads)", "Cyan");
+                    Progress<GMTPC.Tool.Services.DownloadProgressInfo> uiProgress = null;
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        ResetDownloadUI();
+                        uiProgress = new Progress<GMTPC.Tool.Services.DownloadProgressInfo>(info =>
+                        {
+                            if (!ct.IsCancellationRequested)
+                                ApplyDownloadProgressToUI(info);
+                        });
+                    });
 
-                // Use optimized download engine for maximum throughput
-                var engine = new GMTPC.Tool.Services.SegmentedDownloadEngineOptimized();
-                await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct);
+                    UpdateStatus($"Dang tai {displayName}... ({segments} threads)", "Cyan");
 
-                await Dispatcher.InvokeAsync(() => ResetDownloadUI());
+                    // Use optimized download engine for maximum throughput
+                    var engine = new GMTPC.Tool.Services.SegmentedDownloadEngineOptimized();
+                    await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct);
+
+                    await Dispatcher.InvokeAsync(() => ResetDownloadUI());
+                }
                 return;
             }
             catch (OperationCanceledException) { throw; }

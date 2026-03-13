@@ -793,16 +793,21 @@ namespace GMTPC.Tool
             {
                 // Running -> Pause: Signal all threads to pause
                 _pauseEvent.Reset();
+                
+                // Cancel pauseCts to trigger OperationCanceledException in download tasks
                 if (_pauseCts != null && !_pauseCts.IsCancellationRequested)
+                {
                     _pauseCts.Cancel();
+                    _pauseCts.Dispose();
+                }
+                _pauseCts = new CancellationTokenSource();  // Fresh token for resume
+                
                 BtnPause.Content = "Resume";
                 UpdateStatus("Paused all downloads", "Yellow");
             }
             else
             {
-                // Paused -> Resume: Create new cancellation token and resume
-                if (_pauseCts == null || _pauseCts.IsCancellationRequested)
-                    _pauseCts = new CancellationTokenSource();
+                // Paused -> Resume: Set pause event to allow threads to continue
                 _pauseEvent.Set();
                 BtnPause.Content = "Pause";
                 UpdateStatus("Resuming all downloads...", "Cyan");

@@ -7,9 +7,11 @@
 //                 chuyển sang các partial class phù hợp
 // =======================================================================
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
+using GMTPC.Tool.Services;
 
 namespace GMTPC.Tool
 {
@@ -50,9 +52,42 @@ namespace GMTPC.Tool
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            // Clean up temp partition folder on exit
+            CleanupTempPartition();
+            
             RemoveDefenderExclusion();
             SystemEvents.DisplaySettingsChanged -= SystemEvents_DisplaySettingsChanged;
             Application.Current.Shutdown();
+        }
+
+        /// <summary>
+        /// Deletes the temp partition folder on app close
+        /// Format: {Drive}:\temp\
+        /// </summary>
+        private void CleanupTempPartition()
+        {
+            try
+            {
+                string tempPath = DownloadConfiguration.TempBasePath;
+                if (!string.IsNullOrEmpty(tempPath) && Directory.Exists(tempPath))
+                {
+                    // Delete all files in temp folder
+                    foreach (var file in Directory.GetFiles(tempPath))
+                    {
+                        try { File.Delete(file); } catch { }
+                    }
+                    
+                    // Delete all subfolders (task folders)
+                    foreach (var dir in Directory.GetDirectories(tempPath))
+                    {
+                        try { Directory.Delete(dir, true); } catch { }
+                    }
+                    
+                    // Delete temp folder itself
+                    try { Directory.Delete(tempPath, true); } catch { }
+                }
+            }
+            catch { /* Swallow cleanup errors */ }
         }
 
         private void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
