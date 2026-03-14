@@ -1,28 +1,17 @@
 // =============================================================================
 // Services/SegmentedDownloadEngine.Optimized.cs
 // AI Summary:
-// Date: 2026-03-14
-// - MAJOR SPEED BOOST: Increased from 16 to 32 concurrent connections (matching IDM)
-// - Changed chunk size from 512KB to 256KB for better granularity with 32 parallel connections
-// - Increased HEAD probe timeout from 30s to 60s for archive.org reliability
-// - Increased chunk timeout from 2h to 4h for very large files
-// - Doubled buffer pool size: 16 → 32 buffers (8MB total for 32 connections @ 256KB)
-// - Improved EMA alpha smoothing: 0.3 → 0.2 for more stable speed reporting
+// Date: 2026-03-14 (CRITICAL BUGFIX)
+// - FIXED: DiscoverFileSizeAsync timeout was 5s (too short for large files) → INCREASED to 60s
+//   Bug: File size discovery timeout caused fallback to single-connection download (6 MB/s)
+//   Fix: Now uses HeadTimeout (60s) → enables proper 32-segment parallelism
+// - FIXED: MainWindow.SystemDownload now calls with 32 segments (was 16)
+// - Added Range fallback in DiscoverFileSizeAsync for servers without Content-Length header
+// - Expected speed after fix: 60+ MB/s on gigabit (vs 6 MB/s single-connection bug)
+//
 // High-performance multi-thread segmented download engine
 // Optimizations: 32 async connections, buffer pooling, connection tuning, minimal lock contention
-// Expected speed improvement: 6 MB/s → 60+ MB/s on gigabit connections
 // UTF-8 with BOM – .NET Framework 4.8 / C# 7.3
-//
-// Previous Update: 2026-03-14 - Thêm pause 2 giây khi đổi segment, gộp chunks đã tải dở
-// Previous: 2026-03-14 - MAXIMUM SPEED OPTIMIZATION - ZERO PROBE overhead
-//   - DownloadMultiSegmentFastAsync: Complete removal of file size probe
-//   - ChunkSize: 512 KB (optimal for 16 connections)
-//   - NetworkBufferSize: 512 KB
-//   - FileBufferSize: 512 KB
-//   - MaxConcurrentConnections: 16 (matching IDM-style parallelism)
-//   - Buffer pool: 16 buffers
-//   - MinSizeForSegmented: 1 MB
-// =============================================================================
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -515,9 +504,9 @@ namespace GMTPC.Tool.Services
 
         // ── File Size Discovery (Minimal Overhead) ───────────────────────────
         /// <summary>
-        /// Discovers file size with a HEAD request (very fast, no body download)
+        /// Discovers file size with a HEAD request (critical for segmented downloads)
         /// Returns 0 if file size cannot be determined
-        /// This is the minimal overhead needed for segmented download to work
+        /// IMPORTANT: Increased timeout to HeadTimeout (60s) to handle large files/slow networks
         /// </summary>
         private async Task<long> DiscoverFileSizeAsync(string url, CancellationToken ct)
         {
@@ -528,25 +517,45 @@ namespace GMTPC.Tool.Services
                     UseCookies = false,
                     AutomaticDecompression = DecompressionMethods.None
                 })
-                using (var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(5) })
+                using (var client = new HttpClient(handler) { Timeout = HeadTimeout })  // 60 seconds for large files
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
                     client.DefaultRequestHeaders.Add("Accept", "*/*");
 
                     using (var cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
                     {
-                        cts.CancelAfter(TimeSpan.FromSeconds(5));
+                        cts.CancelAfter(HeadTimeout);  // 60 seconds - enough for archive.org, GitHub large releases
                         var request = new HttpRequestMessage(HttpMethod.Head, url);
                         var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
 
-                        if (response.IsSuccessStatusCode)
+                        if (response.IsSuccessStatusCode && response.Content.Headers.ContentLength.HasValue)
                         {
-                            return response.Content.Headers.ContentLength ?? 0;
+                            return response.Content.Headers.ContentLength.Value;
+                        }
+                        
+                        // If no Content-Length header, try to get it from GET with Range:0-0
+                        response.Dispose();
+                        request = new HttpRequestMessage(HttpMethod.Get, url);
+                        request.Headers.Range = new RangeHeaderValue(0, 0);
+                        response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                        
+                        if (response.StatusCode == System.Net.HttpStatusCode.PartialContent &&
+                            response.Content.Headers.ContentRange?.Length.HasValue == true)
+                        {
+                            return response.Content.Headers.ContentRange.Length.Value;
+                        }
+                        else if (response.IsSuccessStatusCode && response.Content.Headers.ContentLength.HasValue)
+                        {
+                            return response.Content.Headers.ContentLength.Value;
                         }
                     }
                 }
             }
-            catch
+            catch (OperationCanceledException)
+            {
+                // Timeout - file too large or server too slow
+            }
+            catch (Exception)
             {
                 // Best effort - return 0 on error
             }

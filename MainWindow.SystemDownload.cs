@@ -7,7 +7,8 @@
 // Kiến trúc tải file chuẩn hóa cho toàn bộ ứng dụng
 // Tất cả checkbox phải gọi qua các hàm trong file này
 // 
-// Cập nhật: 2026-03-14 - Hỗ trợ pause 2 giây khi đổi segment, gộp chunks
+// Cập nhật: 2026-03-14 (CRITICAL FIX) - Tăng segments 16→32, fixed file size discovery timeout
+// Previous: 2026-03-14 - Hỗ trợ pause 2 giây khi đổi segment, gộp chunks đã tải dở
 // =======================================================================
 using System;
 using System.Threading;
@@ -121,9 +122,9 @@ namespace GMTPC.Tool
 
                 try
                 {
-                    // FAST PATH + MULTI-SEGMENT: Skip probe, download with 16 segments
+                    // FAST PATH + MULTI-SEGMENT: Skip probe, download with 32 segments (max performance)
                     var engine = new SegmentedDownloadEngineOptimized();
-                    await engine.DownloadMultiSegmentFastAsync(downloadUrl, destinationPath, 16, uiProgress, ct, _pauseEvent);
+                    await engine.DownloadMultiSegmentFastAsync(downloadUrl, destinationPath, 32, uiProgress, ct, _pauseEvent);
 
                     await Dispatcher.InvokeAsync(() => ResetDownloadUI());
                 }
