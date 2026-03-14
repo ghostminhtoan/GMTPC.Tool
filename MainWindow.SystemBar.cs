@@ -170,100 +170,32 @@ namespace GMTPC.Tool
                 return;
             }
 
-            // Nếu đang downloading, cho user chọn: Dừng và restart với segment mới hay không
-            if (IsDownloading && _currentDownloadInfo != null)
+            // Nếu đang downloading, cho phép đổi bằng cách pause + reallocate + resume
+            if (IsDownloading && _currentDownloadInfo != null && _activeDownloadEngine != null)
             {
-                var result = MessageBox.Show(
-                    "Thay đổi segment sẽ dừng download hiện tại và bắt đầu lại.\n\nBạn có chắc chắn không?",
-                    "Thay đổi Segment Count",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.No)
-                {
-                    // Khôi phục lại giá trị cũ
-                    if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ComboBoxItem oldItem)
-                    {
-                        CboSegmentCount.SelectedItem = oldItem;
-                    }
-                    return;
-                }
-
                 // Get new segment count
                 int newSegments = 16;
                 if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
                     int.TryParse(item.Content?.ToString(), out int n))
                     newSegments = n;
 
-                // Stop current download
-                UpdateStatus("Dang dung download de thay doi segment...", "Orange");
-                _cancellationTokenSource?.Cancel();
-
-                // Wait for download to fully stop
-                try { await Task.Delay(500); } catch { }
-
-                // Reset UI and download state
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    ResetDownloadUI();
-                    IsDownloading = false;
-                });
-
-                // Restart with new segment count
                 try
                 {
-                    UpdateStatus($"Tai lai voi {newSegments} segments...", "Cyan");
-
-                    _cancellationTokenSource = new CancellationTokenSource();
-                    var ct = _cancellationTokenSource.Token;
-
-                    Progress<DownloadProgressInfo> uiProgress = null;
-                    await Dispatcher.InvokeAsync(() =>
-                    {
-                        ResetDownloadUI();
-                        uiProgress = new Progress<DownloadProgressInfo>(info =>
-                        {
-                            if (!ct.IsCancellationRequested)
-                                ApplyDownloadProgressToUI(info);
-                        });
-                    });
-
-                    // Create new context with updated segment count
-                    var taskContext = new DownloadTaskContext
-                    {
-                        TaskName = _currentDownloadInfo.DisplayName,
-                        DestinationPath = _currentDownloadInfo.DestinationPath,
-                        CancellationTokenSource = _cancellationTokenSource,
-                        PauseEvent = _pauseEvent,
-                        StartTime = DateTime.Now,
-                        IsPaused = false
-                    };
-
-                    DownloadRegistry.Register(_currentDownloadInfo.DestinationPath, taskContext);
-
-                    // Restart download with new segment count
-                    var engine = new SegmentedDownloadEngineOptimized();
-                    await engine.DownloadAsync(
-                        _currentDownloadInfo.DownloadUrl,
-                        _currentDownloadInfo.DestinationPath,
-                        newSegments,
-                        uiProgress,
-                        ct,
-                        _pauseEvent);
-
-                    UpdateStatus($"Tai xong {_currentDownloadInfo.DisplayName}", "Lime");
-                }
-                catch (OperationCanceledException)
-                {
-                    UpdateStatus("Dung tai (user dung segment change)", "Orange");
+                    UpdateStatus($"Dang doi segment count thanh {newSegments}...", "Yellow");
+                    
+                    // Call engine method to pause, reallocate, and resume
+                    _activeDownloadEngine.ReallocateSegmentsDuringDownload(newSegments);
+                    
+                    UpdateStatus($"Da doi sang {newSegments} segments, tai tiep tuc...", "Cyan");
                 }
                 catch (Exception ex)
                 {
-                    UpdateStatus($"Loi tai: {ex.Message}", "Red");
-                }
-                finally
-                {
-                    await Dispatcher.InvokeAsync(() => IsDownloading = false);
+                    UpdateStatus($"Loi doi segment: {ex.Message}", "Red");
+                    // Restore previous selection on error
+                    if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ComboBoxItem oldItem)
+                    {
+                        CboSegmentCount.SelectedItem = oldItem;
+                    }
                 }
             }
         }

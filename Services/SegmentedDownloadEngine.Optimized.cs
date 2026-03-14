@@ -52,6 +52,17 @@ namespace GMTPC.Tool.Services
         // Buffer pool for memory efficiency (reduces GC pressure at high throughput)
         private static readonly ConcurrentQueue<byte[]> _bufferPool = new ConcurrentQueue<byte[]>();
 
+        // ────────────────────────────────────────────────────────────────────
+        // State untuk dynamic segment changes
+        // ────────────────────────────────────────────────────────────────────
+        private long _currentFileSize = 0;
+        private long _currentDownloadedBytes = 0;
+        private ConcurrentQueue<ChunkRange> _chunkQueue = null;
+        private ConcurrentQueue<ChunkRange> _retryQueue = null;
+        private int _currentSegments = 0;
+        private System.Threading.ManualResetEventSlim _pauseEvent = null;
+        private object _reallocLock = new object();
+
         static SegmentedDownloadEngineOptimized()
         {
             // Global connection optimization for .NET Framework
@@ -64,6 +75,69 @@ namespace GMTPC.Tool.Services
             for (int i = 0; i < 32; i++)
             {
                 _bufferPool.Enqueue(new byte[NetworkBufferSize]);
+            }
+        }
+
+        /// <summary>
+        /// Call này từ UI khi user muốn đổi segment count TRONG LÚC DOWNLOAD
+        /// Phương pháp: Pause → Reallocate chunks → Resume
+        /// Không cần dừng hoàn toàn hay download lại từ đầu
+        /// </summary>
+        public void ReallocateSegmentsDuringDownload(int newSegmentCount)
+        {
+            if (_chunkQueue == null || _retryQueue == null || _pauseEvent == null)
+                return; // Not currently downloading
+
+            lock (_reallocLock)
+            {
+                try
+                {
+                    // Pause (dừng workers bằng cách reset pauseEvent)
+                    _pauseEvent.Reset();
+
+                    // Wait a bit for workers to actually pause
+                    Thread.Sleep(200);
+
+                    // Tính toán bytes còn lại cần download
+                    long remainingBytes = _currentFileSize - _currentDownloadedBytes;
+                    
+                    if (remainingBytes <= 0)
+                        return; // Already finished
+
+                    // Clear existing chunk queues
+                    while (_chunkQueue.TryDequeue(out _)) { }
+                    while (_retryQueue.TryDequeue(out _)) { }
+
+                    // Rebuild chunk queue với segment count mới
+                    newSegmentCount = Math.Max(1, Math.Min(newSegmentCount, 32));
+                    long regionSize = remainingBytes / Math.Max(1, newSegmentCount);
+                    if (regionSize < ChunkSize) regionSize = ChunkSize;
+
+                    long start = _currentDownloadedBytes;
+                    for (int i = 0; i < newSegmentCount && start < _currentFileSize; i++)
+                    {
+                        long end = (i == newSegmentCount - 1) ? _currentFileSize - 1 : start + regionSize - 1;
+                        
+                        while (start <= end && start < _currentFileSize)
+                        {
+                            long chunkEnd = Math.Min(start + ChunkSize - 1, end);
+                            _chunkQueue.Enqueue(new ChunkRange
+                            {
+                                Start = start,
+                                End = chunkEnd,
+                                Downloaded = 0
+                            });
+                            start = chunkEnd + 1;
+                        }
+                    }
+
+                    _currentSegments = newSegmentCount;
+                }
+                finally
+                {
+                    // Resume (set pauseEvent để workers tiếp tục)
+                    _pauseEvent.Set();
+                }
             }
         }
 
@@ -373,6 +447,7 @@ namespace GMTPC.Tool.Services
         /// Downloads file using parallel segments with simultaneous connection firing
         /// All 16 segments start at the same time via Task.WhenAll (no sequential ramp-up)
         /// Supports pause/resume via ManualResetEventSlim
+        /// Supports dynamic segment count changes via ReallocateSegmentsDuringDownload()
         /// </summary>
         private async Task DownloadSegmentedOptimizedAsync(string url, string destinationPath,
             long fileSize, int segments, IProgress<DownloadProgressInfo> progress, CancellationToken ct,
@@ -387,8 +462,12 @@ namespace GMTPC.Tool.Services
             }
 
             // Build chunk queue with interleaved regions for balanced visual progress
-            var chunkQueue = new ConcurrentQueue<ChunkRange>();
-            var retryQueue = new ConcurrentQueue<ChunkRange>();
+            _chunkQueue = new ConcurrentQueue<ChunkRange>();
+            _retryQueue = new ConcurrentQueue<ChunkRange>();
+            _currentFileSize = fileSize;
+            _currentDownloadedBytes = 0;
+            _currentSegments = segments;
+            _pauseEvent = pauseEvent;
             
             long regionSize = fileSize / segments;
             var regionProgress = new long[segments];
@@ -411,7 +490,7 @@ namespace GMTPC.Tool.Services
                     if (regionStarts[i] <= regionEnds[i])
                     {
                         long end = Math.Min(regionStarts[i] + ChunkSize - 1, regionEnds[i]);
-                        chunkQueue.Enqueue(new ChunkRange
+                        _chunkQueue.Enqueue(new ChunkRange
                         {
                             Start = regionStarts[i],
                             End = end,
@@ -478,7 +557,7 @@ namespace GMTPC.Tool.Services
                         int workerIndex = i;
                         workers[i] = Task.Run(async () =>
                         {
-                            await ProcessChunksAsync(url, destinationPath, chunkQueue, retryQueue,
+                            await ProcessChunksAsync(url, destinationPath, _chunkQueue, _retryQueue,
                                 workerIndex, regionProgress, progressState, ct, pauseEvent);
                         }, ct);
                     }
@@ -551,9 +630,9 @@ namespace GMTPC.Tool.Services
                             ChunkRange chunk;
 
                             // Try primary queue first, then retry queue
-                            if (!chunkQueue.TryDequeue(out chunk))
+                            if (!_chunkQueue.TryDequeue(out chunk))
                             {
-                                if (!retryQueue.TryDequeue(out chunk))
+                                if (!_retryQueue.TryDequeue(out chunk))
                                     break; // No more work
                             }
 
@@ -609,6 +688,7 @@ namespace GMTPC.Tool.Services
                                                     lock (progressState.Lock)
                                                     {
                                                         progressState.TotalDownloaded += read;
+                                                        _currentDownloadedBytes += read;  // Track for dynamic segment reallocation
                                                         regionProgress[regionIndex] += read;
 
                                                         // Speed calculation

@@ -32,6 +32,9 @@ namespace GMTPC.Tool
 
         private CurrentDownloadInfo _currentDownloadInfo = null;
 
+        // Track the active download engine so UI can call ReallocateSegmentsDuringDownload()
+        private SegmentedDownloadEngineOptimized _activeDownloadEngine = null;
+
         // Fields cho download
         private CancellationTokenSource _cancellationTokenSource;
         private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
@@ -200,13 +203,14 @@ namespace GMTPC.Tool
                 try
                 {
                     // Use optimized download engine with probe (for Archive.org, Mediafire)
-                    var engine = new SegmentedDownloadEngineOptimized();
-                    await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct, _pauseEvent);
+                    _activeDownloadEngine = new SegmentedDownloadEngineOptimized();
+                    await _activeDownloadEngine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct, _pauseEvent);
 
                     await Dispatcher.InvokeAsync(() => ResetDownloadUI());
                 }
                 finally
                 {
+                    _activeDownloadEngine = null;
                     DownloadRegistry.Unregister(destinationPath);
                 }
                 return;
