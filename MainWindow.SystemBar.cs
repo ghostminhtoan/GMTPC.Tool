@@ -183,8 +183,8 @@ namespace GMTPC.Tool
                 {
                     UpdateStatus($"Dang doi segment count thanh {newSegments}...", "Yellow");
                     
-                    // Call engine method to pause, reallocate, and resume
-                    _activeDownloadEngine.ReallocateSegmentsDuringDownload(newSegments);
+                    // Call async engine method to pause, reallocate, and resume
+                    await _activeDownloadEngine.ReallocateSegmentsDuringDownloadAsync(newSegments);
                     
                     UpdateStatus($"Da doi sang {newSegments} segments, tai tiep tuc...", "Cyan");
                 }

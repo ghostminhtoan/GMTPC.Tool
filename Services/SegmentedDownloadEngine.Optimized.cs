@@ -80,10 +80,10 @@ namespace GMTPC.Tool.Services
 
         /// <summary>
         /// Call này từ UI khi user muốn đổi segment count TRONG LÚC DOWNLOAD
-        /// Phương pháp: Pause → Reallocate chunks → Resume
+        /// Phương pháp: Pause → Wait → Reallocate chunks → Resume
         /// Không cần dừng hoàn toàn hay download lại từ đầu
         /// </summary>
-        public void ReallocateSegmentsDuringDownload(int newSegmentCount)
+        public async Task ReallocateSegmentsDuringDownloadAsync(int newSegmentCount)
         {
             if (_chunkQueue == null || _retryQueue == null || _pauseEvent == null)
                 return; // Not currently downloading
@@ -94,17 +94,28 @@ namespace GMTPC.Tool.Services
                 {
                     // Pause (dừng workers bằng cách reset pauseEvent)
                     _pauseEvent.Reset();
+                }
+                catch { }
+            }
 
-                    // Wait a bit for workers to actually pause
-                    Thread.Sleep(200);
+            try
+            {
+                // Wait untuk workers thực sự pause (200ms đủ cho workers reach pause point)
+                await Task.Delay(200);
 
+                lock (_reallocLock)
+                {
                     // Tính toán bytes còn lại cần download
                     long remainingBytes = _currentFileSize - _currentDownloadedBytes;
                     
                     if (remainingBytes <= 0)
-                        return; // Already finished
+                    {
+                        // Already finished
+                        _pauseEvent.Set();
+                        return;
+                    }
 
-                    // Clear existing chunk queues
+                    // Clear existing chunk queues - tất cả workers đang paused nên safe
                     while (_chunkQueue.TryDequeue(out _)) { }
                     while (_retryQueue.TryDequeue(out _)) { }
 
@@ -114,6 +125,8 @@ namespace GMTPC.Tool.Services
                     if (regionSize < ChunkSize) regionSize = ChunkSize;
 
                     long start = _currentDownloadedBytes;
+                    int chunksAdded = 0;
+                    
                     for (int i = 0; i < newSegmentCount && start < _currentFileSize; i++)
                     {
                         long end = (i == newSegmentCount - 1) ? _currentFileSize - 1 : start + regionSize - 1;
@@ -128,16 +141,26 @@ namespace GMTPC.Tool.Services
                                 Downloaded = 0
                             });
                             start = chunkEnd + 1;
+                            chunksAdded++;
                         }
                     }
 
                     _currentSegments = newSegmentCount;
                 }
-                finally
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ReallocateSegmentsDuringDownloadAsync error: {ex.Message}");
+            }
+            finally
+            {
+                // Resume (set pauseEvent để workers tiếp tục)
+                try
                 {
-                    // Resume (set pauseEvent để workers tiếp tục)
-                    _pauseEvent.Set();
+                    if (_pauseEvent != null)
+                        _pauseEvent.Set();
                 }
+                catch { }
             }
         }
 
@@ -711,7 +734,7 @@ namespace GMTPC.Tool.Services
                                                 // Handle stalled connections
                                                 if (emptyReads >= 2 && chunk.Downloaded < chunk.Length)
                                                 {
-                                                    retryQueue.Enqueue(new ChunkRange
+                                                    _retryQueue.Enqueue(new ChunkRange
                                                     {
                                                         Start = chunk.Start + chunk.Downloaded,
                                                         End = chunk.End,
@@ -731,7 +754,7 @@ namespace GMTPC.Tool.Services
                             catch
                             {
                                 // Re-queue failed chunk
-                                retryQueue.Enqueue(new ChunkRange
+                                _retryQueue.Enqueue(new ChunkRange
                                 {
                                     Start = chunk.Start + chunk.Downloaded,
                                     End = chunk.End,
