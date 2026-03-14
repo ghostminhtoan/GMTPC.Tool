@@ -1,16 +1,17 @@
 // =============================================================================
 // Services/SegmentedDownloadEngine.Optimized.cs
 // AI Summary:
-// Date: 2026-03-14 (CRITICAL BUGFIX)
-// - FIXED: DiscoverFileSizeAsync timeout was 5s (too short for large files) → INCREASED to 60s
-//   Bug: File size discovery timeout caused fallback to single-connection download (6 MB/s)
-//   Fix: Now uses HeadTimeout (60s) → enables proper 32-segment parallelism
-// - FIXED: MainWindow.SystemDownload now calls with 32 segments (was 16)
-// - Added Range fallback in DiscoverFileSizeAsync for servers without Content-Length header
-// - Expected speed after fix: 60+ MB/s on gigabit (vs 6 MB/s single-connection bug)
+// Date: 2026-03-14 (CRITICAL THROTTLE BUG FIX)
+// - REMOVED: Task.Delay(2000) in ProcessChunksAsync segment transition (line 779-785)
+//   BUG: Artificial 2-second pause on every segment change caused MASSIVE throttling
+//   Impact: 32 workers × 2s delay × many chunks = throughput collapse to 6 MB/s!
+//   Fix: Removed delay, kept only fs.FlushAsync() for data consistency
+// - DiscoverFileSizeAsync timeout: 5s → 60s (for large files)
+// - Segments: 16 → 32 concurrent connections
+// - Expected speed after fix: 60+ MB/s (vs 6 MB/s choked version)
 //
 // High-performance multi-thread segmented download engine
-// Optimizations: 32 async connections, buffer pooling, connection tuning, minimal lock contention
+// Optimizations: 32 async connections, buffer pooling, zero artificial delays
 // UTF-8 with BOM – .NET Framework 4.8 / C# 7.3
 using System;
 using System.Collections.Concurrent;
@@ -772,14 +773,12 @@ namespace GMTPC.Tool.Services
                                     break; // No more work
                             }
 
-                            // PAUSE 2 GIÂY KHI ĐỔI SEGMENT (sau khi hoàn thành chunk trước)
+                            // Handle segment transitions efficiently
+                            // Flush any pending writes to ensure data consistency during segment change
                             if (lastChunk != null && chunk.Start > lastChunk.End)
                             {
-                                // Đây là chunk mới sau khi hoàn thành chunk trước
-                                // Pause 2 giây để gộp chunks đã tải dở
-                                await Task.Delay(2000, ct);
-                                
-                                // Gộp chunks đã tải dở: Đảm bảo dữ liệu đã được flush vào file
+                                // Flush buffers immediately - no artificial delays
+                                // Delays cause massive throughput loss with 32 concurrent workers
                                 await fs.FlushAsync(ct);
                             }
 
