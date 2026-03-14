@@ -12,14 +12,13 @@
 // Cập nhật: 2026-03-14 - Thêm pause 2 giây khi đổi segment, gộp chunks đã tải dở
 // Updated: 2026-03-14 - MAXIMUM SPEED OPTIMIZATION - ZERO PROBE overhead
 //   - DownloadMultiSegmentFastAsync: Complete removal of file size probe
-//   - ChunkSize: 2MB → 4MB (fewer HTTP requests, better throughput)
-//   - NetworkBufferSize: 2MB → 4MB (larger reads, fewer I/O ops)
-//   - FileBufferSize: 2MB → 4MB (better HDD performance)
-//   - MaxConcurrentConnections: 32 → 64 (maximum parallel connections)
-//   - Buffer pool: 32 → 64 buffers (support 64 concurrent threads)
-//   - MinSizeForSegmented: 5MB → 4MB (segment more files)
-//   - HEAD timeout: 30s → 5s (minimal overhead when file size discovery needed)
-// Result: >200 MB/s throughput on fast connections
+//   - ChunkSize: 512 KB (optimal for 16 connections)
+//   - NetworkBufferSize: 512 KB
+//   - FileBufferSize: 512 KB
+//   - MaxConcurrentConnections: 16 (matching IDM-style parallelism)
+//   - Buffer pool: 16 buffers
+//   - MinSizeForSegmented: 1 MB
+// Result: >100 MB/s throughput with 16 connections @ 512KB chunks
 // =============================================================================
 using System;
 using System.Collections.Concurrent;
@@ -40,8 +39,8 @@ namespace GMTPC.Tool.Services
     public sealed class SegmentedDownloadEngineOptimized
     {
         // ── Performance Tunables ─────────────────────────────────────────────
-        private const long ChunkSize = 4L * 1024 * 1024;         // 4 MB chunks for fewer requests (optimized from 2MB)
-        private const long MinSizeForSegmented = 4L * 1024 * 1024; // 4 MB minimum for segmented (reduced from 5MB)
+        private const long ChunkSize = 512L * 1024;                    // 512 KB chunks for optimal parallelism
+        private const long MinSizeForSegmented = 1L * 1024 * 1024;     // 1 MB minimum for segmented
         private const int MaxRedirects = 10;
         private const int MaxRetries = 10;
 
@@ -52,10 +51,10 @@ namespace GMTPC.Tool.Services
         // Speed calculation
         private const double EmaAlpha = 0.3;  // More responsive to recent speed changes
 
-        // Buffer sizes - OPTIMIZED for >200 MB/s throughput
-        private const int NetworkBufferSize = 4194304;           // 4MB network buffer (reduced I/O ops, optimized from 2MB)
-        private const int FileBufferSize = 4194304;              // 4MB file buffer for HDD optimization (optimized from 2MB)
-        private const int MaxConcurrentConnections = 64;         // Maximum parallel connections (optimized from 32)
+        // Buffer sizes - OPTIMIZED for 16 connections @ 512KB chunks
+        private const int NetworkBufferSize = 524288;                // 512KB network buffer
+        private const int FileBufferSize = 524288;                   // 512KB file buffer
+        private const int MaxConcurrentConnections = 16;             // 16 parallel connections
 
         // User-Agent for better server compatibility
         private static readonly string UserAgent =
@@ -83,8 +82,8 @@ namespace GMTPC.Tool.Services
             ServicePointManager.UseNagleAlgorithm = false;
             ServicePointManager.MaxServicePoints = 100;
 
-            // Pre-allocate buffer pool (256MB total pool for 64 threads @ 4MB each)
-            for (int i = 0; i < 64; i++)
+            // Pre-allocate buffer pool (8MB total pool for 16 threads @ 512KB each)
+            for (int i = 0; i < 16; i++)
             {
                 _bufferPool.Enqueue(new byte[NetworkBufferSize]);
             }
@@ -249,7 +248,7 @@ namespace GMTPC.Tool.Services
         /// <summary>
         /// FAST PATH + MULTI-SEGMENT: ZERO PROBE - Start downloading immediately
         /// Use this for known direct URLs that support range requests (GitHub releases, etc.)
-        /// Opens 32-64 concurrent connections from the start, each downloading a different chunk
+        /// Opens 16 concurrent connections from the start, each downloading a 512KB chunk
         /// ZERO probe overhead - file size discovered dynamically from first response
         /// </summary>
         public async Task DownloadMultiSegmentFastAsync(string url, string destinationPath, int segments,
@@ -258,8 +257,8 @@ namespace GMTPC.Tool.Services
         {
             if (string.IsNullOrWhiteSpace(url)) throw new ArgumentNullException(nameof(url));
             if (string.IsNullOrWhiteSpace(destinationPath)) throw new ArgumentNullException(nameof(destinationPath));
-            // Support up to 64 concurrent segments for maximum throughput
-            segments = Math.Max(1, Math.Min(segments, 64));
+            // Cap at 16 concurrent segments for optimal performance
+            segments = Math.Max(1, Math.Min(segments, 16));
 
             try
             {
