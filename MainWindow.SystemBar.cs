@@ -2,8 +2,9 @@
 // MainWindow.SystemBar.cs
 // AI Summary:
 // Date: 2026-03-14
-// - Fixed CboSegmentCount_SelectionChanged: Now pause for 2 seconds before resume
-// - Allows proper segment change during download without stopping
+// - Fixed CboSegmentCount: Disable segment change during download
+// - Users can only change segment BEFORE clicking Install, not during
+// - Prevents "complete all tasks" error by disallowing pause/resume with different segment count
 // Chức năng: Xử lý progress bar, connection trace, và download UI
 // =======================================================================
 using System;
@@ -156,32 +157,26 @@ namespace GMTPC.Tool
 
         private void CboSegmentCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Chỉ xử lý đổi segment khi đang tải
-            if (!IsDownloading || _pauseEvent == null)
+            // Không cho phép đổi segment khi đang tải
+            // Chỉ có thể đổi segment TRƯỚC khi nhấn Install
+            if (IsDownloading)
+            {
+                UpdateStatus("⚠️ Không thể đổi segment trong lúc download. Vui lòng nhấn Stop rồi thử lại.", "Orange");
+                
+                // Khôi phục lại giá trị cũ
+                if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ComboBoxItem oldItem)
+                {
+                    CboSegmentCount.SelectedItem = oldItem;
+                }
                 return;
+            }
 
+            // Nếu không downloading, cho phép đổi bình thường
             if (CboSegmentCount?.SelectedItem is ComboBoxItem item && item.Content != null)
             {
                 if (int.TryParse(item.Content.ToString(), out int newCount))
                 {
-                    UpdateStatus($"Đã chọn {newCount} luồng. Đang tạm dừng 2 giây để thay đổi luồng download...", "Yellow");
-
-                    // Bước 1: Tạm dừng quá trình tải (PAUSE không CANCEL)
-                    DownloadRegistry.PauseAll();
-                    BtnPause.Content = "Resume";
-
-                    // Bước 2: Sau 2 giây, RESUME để tiếp tục với số segment mới
-                    // ENGINE sẽ đọc CboSegmentCount.SelectedItem để lấy số segment mới
-                    Dispatcher.InvokeAsync(async () =>
-                    {
-                        await Task.Delay(2000); // Chờ 2 giây để pause hoàn toàn
-
-                        // RESUME: Download engine sẽ tiếp tục với số segment mới
-                        // vì nó được đọc từ CboSegmentCount mỗi khi bắt đầu chunk mới
-                        DownloadRegistry.ResumeAll();
-                        BtnPause.Content = "Pause";
-                        UpdateStatus($"Đang tiếp tục tải với {newCount} luồng...", "Cyan");
-                    });
+                    UpdateStatus($"Đã đổi segment count: {newCount} luồng", "Green");
                 }
             }
         }
