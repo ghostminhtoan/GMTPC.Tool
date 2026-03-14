@@ -6,6 +6,8 @@
 //
 // Kiến trúc tải file chuẩn hóa cho toàn bộ ứng dụng
 // Tất cả checkbox phải gọi qua các hàm trong file này
+// 
+// Cập nhật: 2026-03-14 - Hỗ trợ pause 2 giây khi đổi segment, gộp chunks
 // =======================================================================
 using System;
 using System.Threading;
@@ -26,6 +28,7 @@ namespace GMTPC.Tool
         // Ví dụ: VPN1111, MMT Apps, Google Drive, DISM++, NetLimiter, etc.
         //
         // Tại sao nhanh? Bỏ qua ProbeAsync (HEAD request) → tải ngay lập tức
+        // Dùng 16 segments để tăng tốc độ tải
         // ===================================================================
         private async Task DownloadSingleLinkFastAsync(string downloadUrl, string destinationPath, string displayName)
         {
@@ -45,7 +48,7 @@ namespace GMTPC.Tool
                     });
                 });
 
-                UpdateStatus($"Dang tai {displayName}...", "Cyan");
+                UpdateStatus($"Đang tải {displayName}...", "Cyan");
 
                 // Create download context for global registry
                 var taskContext = new DownloadTaskContext
@@ -63,9 +66,9 @@ namespace GMTPC.Tool
 
                 try
                 {
-                    // FAST PATH: Skip probe, download immediately
+                    // FAST PATH + MULTI-SEGMENT: Skip probe, download with 16 segments
                     var engine = new SegmentedDownloadEngineOptimized();
-                    await engine.DownloadSingleFastAsync(downloadUrl, destinationPath, uiProgress, ct, _pauseEvent);
+                    await engine.DownloadMultiSegmentFastAsync(downloadUrl, destinationPath, 16, uiProgress, ct, _pauseEvent);
 
                     await Dispatcher.InvokeAsync(() => ResetDownloadUI());
                 }
@@ -77,7 +80,7 @@ namespace GMTPC.Tool
             catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
-                UpdateStatus($"Loi tai: {ex.Message}", "Red");
+                UpdateStatus($"Lỗi tải: {ex.Message}", "Red");
                 throw;
             }
             finally
@@ -166,20 +169,20 @@ namespace GMTPC.Tool
         // MULTI-PART DOWNLOAD (Nhiều file .part)
         // ===================================================================
         // Sử dụng cho: Game nhiều phần (Ghost of Tsushima 29 parts, Samurai Maiden 4 parts)
-        // Mỗi part được tải tuần tự, tất cả vào cùng 1 thư mục
+        // Mỗi part được tải tuần tự với 16 segments, tất cả vào cùng 1 thư mục
         // ===================================================================
         private async Task DownloadMultiPartAsync(
-            string[] downloadUrls, 
-            string[] destinationPaths, 
+            string[] downloadUrls,
+            string[] destinationPaths,
             string displayNamePrefix)
         {
             for (int i = 0; i < downloadUrls.Length; i++)
             {
                 string partName = $"{displayNamePrefix} - Part {i + 1}/{downloadUrls.Length}";
-                UpdateStatus($"Dang tai {partName}...", "Cyan");
-                
+                UpdateStatus($"Đang tải {partName}...", "Cyan");
+
                 await DownloadSingleLinkFastAsync(downloadUrls[i], destinationPaths[i], partName);
-                
+
                 // Reset UI between parts
                 Dispatcher.Invoke(() =>
                 {

@@ -3,6 +3,8 @@
 // High-performance multi-thread segmented download engine
 // Optimizations: Async I/O, buffer pooling, connection tuning, minimal lock contention
 // UTF-8 with BOM – .NET Framework 4.8 / C# 7.3
+// 
+// Cập nhật: 2026-03-14 - Thêm pause 2 giây khi đổi segment, gộp chunks đã tải dở
 // =============================================================================
 using System;
 using System.Collections.Concurrent;
@@ -108,7 +110,7 @@ namespace GMTPC.Tool.Services
         /// Use this for known direct URLs (GitHub, Cloudflare, etc.) to skip HEAD request overhead
         /// This is the "Golden Standard" for single-link downloads - used by VPN1111
         /// </summary>
-        public async Task DownloadSingleFastAsync(string url, string destinationPath, 
+        public async Task DownloadSingleFastAsync(string url, string destinationPath,
             IProgress<DownloadProgressInfo> progress, CancellationToken ct,
             System.Threading.ManualResetEventSlim pauseEvent = null)
         {
@@ -119,6 +121,73 @@ namespace GMTPC.Tool.Services
             {
                 // Skip probe entirely - go straight to download
                 await DownloadSingleOptimizedAsync(url, destinationPath, progress, ct, pauseEvent);
+            }
+            catch (OperationCanceledException)
+            {
+                CleanupPartialDownload(destinationPath);
+                throw;
+            }
+            catch (Exception)
+            {
+                CleanupPartialDownload(destinationPath);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// FAST PATH + MULTI-SEGMENT: Skip probe but use multi-segment download
+        /// Use this for known direct URLs that support range requests (GitHub releases, etc.)
+        /// Starts with 16 segments and dynamically chunks as each completes
+        /// </summary>
+        public async Task DownloadMultiSegmentFastAsync(string url, string destinationPath, int segments,
+            IProgress<DownloadProgressInfo> progress, CancellationToken ct,
+            System.Threading.ManualResetEventSlim pauseEvent = null)
+        {
+            if (string.IsNullOrWhiteSpace(url)) throw new ArgumentNullException(nameof(url));
+            if (string.IsNullOrWhiteSpace(destinationPath)) throw new ArgumentNullException(nameof(destinationPath));
+            segments = Math.Max(1, Math.Min(segments, 32));
+
+            try
+            {
+                // Quick GET request to get file size (faster than HEAD for some servers)
+                long fileSize = 0;
+                bool supportsRange = false;
+                string finalUrl = url;
+
+                using (var handler = new HttpClientHandler
+                {
+                    UseCookies = false,
+                    AutomaticDecompression = DecompressionMethods.None
+                })
+                using (var client = new HttpClient(handler) { Timeout = HeadTimeout })
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                    client.DefaultRequestHeaders.Add("Accept", "*/*");
+                    client.DefaultRequestHeaders.Range = new RangeHeaderValue(0, 0);
+
+                    using (var cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
+                    {
+                        cts.CancelAfter(HeadTimeout);
+                        var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+
+                        if (response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.PartialContent)
+                        {
+                            supportsRange = response.StatusCode == HttpStatusCode.PartialContent;
+                            fileSize = response.Content.Headers.ContentRange?.Length ?? response.Content.Headers.ContentLength ?? 0;
+                            finalUrl = response.RequestMessage?.RequestUri?.AbsoluteUri ?? url;
+                        }
+                    }
+                }
+
+                // If no file size or doesn't support range, fallback to single connection
+                if (!supportsRange || fileSize < MinSizeForSegmented)
+                {
+                    await DownloadSingleOptimizedAsync(finalUrl, destinationPath, progress, ct, pauseEvent);
+                    return;
+                }
+
+                // Download with multiple segments
+                await DownloadSegmentedOptimizedAsync(finalUrl, destinationPath, fileSize, segments, progress, ct, pauseEvent);
             }
             catch (OperationCanceledException)
             {
@@ -504,6 +573,7 @@ namespace GMTPC.Tool.Services
         /// Each worker opens its own FileStream with RandomAccess for lock-free parallel writes
         /// Each segment writes directly to its pre-allocated offset without global file lock
         /// Waits on pauseEvent during pause - resumes when event is set
+        /// PAUSE 2 GIÂY KHI ĐỔI SEGMENT - Gộp chunks đã tải dở
         /// </summary>
         private async Task ProcessChunksAsync(string url, string destinationPath,
             ConcurrentQueue<ChunkRange> chunkQueue, ConcurrentQueue<ChunkRange> retryQueue,
@@ -530,6 +600,8 @@ namespace GMTPC.Tool.Services
 
                     try
                     {
+                        ChunkRange lastChunk = null; // Track last chunk for pause logic
+
                         while (!ct.IsCancellationRequested)
                         {
                             // WAIT ON PAUSE EVENT - blocks here during pause, continues when resumed
@@ -545,6 +617,17 @@ namespace GMTPC.Tool.Services
                             {
                                 if (!retryQueue.TryDequeue(out chunk))
                                     break; // No more work
+                            }
+
+                            // PAUSE 2 GIÂY KHI ĐỔI SEGMENT (sau khi hoàn thành chunk trước)
+                            if (lastChunk != null && chunk.Start > lastChunk.End)
+                            {
+                                // Đây là chunk mới sau khi hoàn thành chunk trước
+                                // Pause 2 giây để gộp chunks đã tải dở
+                                await Task.Delay(2000, ct);
+                                
+                                // Gộp chunks đã tải dở: Đảm bảo dữ liệu đã được flush vào file
+                                await fs.FlushAsync(ct);
                             }
 
                             try
@@ -648,6 +731,9 @@ namespace GMTPC.Tool.Services
                                     Downloaded = 0
                                 });
                             }
+
+                            // Lưu lại chunk đã hoàn thành để theo dõi pause khi đổi segment
+                            lastChunk = chunk;
                         }
                     }
                     finally
