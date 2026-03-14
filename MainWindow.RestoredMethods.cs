@@ -9,6 +9,8 @@
 //   - 2026-03-07: Removed Zalo installation support
 //   - 2026-03-10: Fix IDM download - use DownloadWithProgressAsync (multi-segment)
 //                 instead of DownloadSingleConnectionAsync
+//   - 2026-03-14: Changed all DownloadWithProgressAsync to DownloadSingleLinkFastAsync
+//                 for faster download speed (skip probe, 16 segments)
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -224,7 +226,7 @@ namespace GMTPC.Tool
                 UpdateStatus("Đang tải Bulk Image Downloader...", "Cyan");
                 string downloadUrl = await GetBIDDownloadLinkAsync();
 
-                await DownloadWithProgressAsync(downloadUrl, bidPath, "Bulk Image Downloader");
+                await DownloadSingleLinkFastAsync(downloadUrl, bidPath, "Bulk Image Downloader");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
 
                 UpdateStatus("Đang chạy BID installer...", "Yellow");
@@ -244,7 +246,7 @@ namespace GMTPC.Tool
                 // ===== Step 3: Download and Run Activation =====
                 await Task.Delay(1000);
                 UpdateStatus("Đang tải BID patch...", "Cyan");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/Bulk.image.downloader.patch.exe", bidActivatePath, "BID Patch");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/Bulk.image.downloader.patch.exe", bidActivatePath, "BID Patch");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
 
                 UpdateStatus("Đang chạy BID patch...", "Yellow");
@@ -342,7 +344,7 @@ namespace GMTPC.Tool
 
                 // ===== Step 3: Download and install IDM =====
                 UpdateStatus("Đang tải Internet Download Manager...", "Cyan");
-                await DownloadWithProgressAsync(IDM_DOWNLOAD_URL, idmPath, "Internet Download Manager");
+                await DownloadSingleLinkFastAsync(IDM_DOWNLOAD_URL, idmPath, "Internet Download Manager");
 
                 // Reset progress bar
                 Dispatcher.Invoke(() =>
@@ -368,7 +370,7 @@ namespace GMTPC.Tool
 
                 // ===== Step 4: Download and run activate tool =====
                 UpdateStatus("Đang tải công cụ kích hoạt...", "Cyan");
-                await DownloadWithProgressAsync(IDM_ACTIVATE_URL, activatePath, "IDM Activate");
+                await DownloadSingleLinkFastAsync(IDM_ACTIVATE_URL, activatePath, "IDM Activate");
 
                 // Reset progress bar
                 Dispatcher.Invoke(() =>
@@ -489,7 +491,7 @@ namespace GMTPC.Tool
             string vcredistPath = GetDownloadTempPath("vcredist.all.in.one.by.MMT.Windows.Tech.exe");
             try
             {
-                await DownloadWithProgressAsync(VCREDIST_DOWNLOAD_URL, vcredistPath, "Vcredist");
+                await DownloadSingleLinkFastAsync(VCREDIST_DOWNLOAD_URL, vcredistPath, "Vcredist");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
                 UpdateStatus("Đang cài đặt Vcredist ( " + VCREDIST_INSTALL_ARGUMENTS + " )...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo { FileName = vcredistPath, Arguments = VCREDIST_INSTALL_ARGUMENTS, UseShellExecute = true };
@@ -505,7 +507,7 @@ namespace GMTPC.Tool
             string directxPath = GetDownloadTempPath("DirectX.exe");
             try
             {
-                await DownloadWithProgressAsync(DIRECTX_DOWNLOAD_URL, directxPath, "DirectX");
+                await DownloadSingleLinkFastAsync(DIRECTX_DOWNLOAD_URL, directxPath, "DirectX");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
                 UpdateStatus("Đang cài đặt DirectX ( " + DIRECTX_INSTALL_ARGUMENTS + " )...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo { FileName = directxPath, Arguments = DIRECTX_INSTALL_ARGUMENTS, UseShellExecute = true };
@@ -598,7 +600,7 @@ namespace GMTPC.Tool
             string idmCrackPath = GetDownloadTempPath("IDM_6.4x_Crack.exe");
             try
             {
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_Crack.exe", idmCrackPath, "IDM Crack");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_Crack.exe", idmCrackPath, "IDM Crack");
                 Process.Start(idmCrackPath);
             }
             catch (Exception ex) { UpdateStatus($"Lỗi: {ex.Message}", "Red"); }
@@ -617,7 +619,7 @@ namespace GMTPC.Tool
                 // ===== Step 2: Download and Run Activation =====
                 await Task.Delay(1000);
                 UpdateStatus("Đang tải BID patch...", "Cyan");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/Bulk.image.downloader.patch.exe", bidActivatePath, "BID Patch");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/Bulk.image.downloader.patch.exe", bidActivatePath, "BID Patch");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
 
                 UpdateStatus("Đang chạy BID patch...", "Yellow");
@@ -660,7 +662,7 @@ namespace GMTPC.Tool
             string directXPath = GetDownloadTempPath("directx_installer.exe");
             try
             {
-                await DownloadWithProgressAsync("https://download.microsoft.com/download/1/7/1/1718CCC4-6315-4D8E-9543-8E28A4E99C9C/dxwebsetup.exe", directXPath, "DirectX Installer");
+                await DownloadSingleLinkFastAsync("https://download.microsoft.com/download/1/7/1/1718CCC4-6315-4D8E-9543-8E28A4E99C9C/dxwebsetup.exe", directXPath, "DirectX Installer");
                 Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
                 UpdateStatus("Đang chạy DirectX installer với lệnh /q...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo { FileName = directXPath, Arguments = "/q", UseShellExecute = true };
@@ -677,7 +679,7 @@ namespace GMTPC.Tool
             string javaInstallerPath = GetDownloadTempPath("java_installer.exe");
             try
             {
-                await DownloadWithProgressAsync(JAVA_DOWNLOAD_URL, javaInstallerPath, "Java Installer");
+                await DownloadSingleLinkFastAsync(JAVA_DOWNLOAD_URL, javaInstallerPath, "Java Installer");
                 UpdateStatus("Đang chạy Java installer...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo { FileName = javaInstallerPath, Arguments = JAVA_INSTALL_ARGUMENTS, UseShellExecute = true };
                 Process process = Process.Start(startInfo);
@@ -699,7 +701,7 @@ namespace GMTPC.Tool
             string openALInstallerPath = GetDownloadTempPath("OpenAL.exe");
             try
             {
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OpenAL.exe", openALInstallerPath, "OpenAL Installer");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OpenAL.exe", openALInstallerPath, "OpenAL Installer");
                 UpdateStatus("Đang chạy OpenAL installer với lệnh /s...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo { FileName = openALInstallerPath, Arguments = "/s", UseShellExecute = true };
                 Process process = Process.Start(startInfo);

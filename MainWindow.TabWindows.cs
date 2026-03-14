@@ -2,6 +2,7 @@
 // MainWindow.TabWindows.cs
 // Chức năng: Xử lý checkbox và cài đặt cho Tab Windows - Microsoft
 // Cập nhật: 2026-03-10 - Xóa Win 10 20H2 2022 April - onedrive
+// Cập nhật: 2026-03-14 - Keep DownloadWithProgressAsync for archive.org (needs probe)
 // =======================================================================
 using System;
 using System.Diagnostics;

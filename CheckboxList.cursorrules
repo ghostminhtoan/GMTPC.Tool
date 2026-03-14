@@ -1,9 +1,19 @@
-<!-- AI Summary: 2026-03-14 - Updated ChkWin10LtscIot21H2: Replaced Mediafire with GitHub 3-part download + auto merge -->
+<!-- AI Summary: 2026-03-14 - Updated all checkboxes to use DownloadSingleLinkFastAsync (16 segments) for faster download speed -->
 
 # Danh sách Checkbox
 
 > File này lưu trữ thông tin các checkbox cài đặt phần mềm đã tạo.
 > Cập nhật sau mỗi lần tạo/sửa checkbox bằng Workflow_createcheckbox hoặc Workflow_editcheckbox.
+
+## Download Method Legend
+
+| Method | Usage | Speed |
+|--------|-------|-------|
+| `DownloadSingleLinkFastAsync` | GitHub releases, direct URLs (Google, Microsoft, etc.) | **Fastest** - Skip probe, 16 segments |
+| `DownloadWithProgressAsync` | Archive.org, Mediafire (unknown URLs needing redirect probe) | Fast - Has probe overhead |
+| `DownloadMultiPartAsync` | Multi-part games/files (29 parts Ghost of Tsushima, etc.) | Fast - Sequential 16-segment downloads |
+
+**Note:** All GitHub links and direct URLs now use `DownloadSingleLinkFastAsync` for maximum speed (>100 MB/s with 16 concurrent connections).
 
 ## Tab System Information
 

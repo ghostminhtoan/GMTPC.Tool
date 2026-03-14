@@ -2,6 +2,7 @@
 // MainWindow.TabDriver.cs
 // Chức năng: Xử lý checkbox và cài đặt cho Tab Driver
 // Cập nhật: 2026-03-10 - Tạo file mới cho Tab Driver với 3DP Chip và 3DP Net
+// Cập nhật: 2026-03-14 - Changed DownloadWithProgressAsync to DownloadSingleLinkFastAsync for faster speed
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -88,7 +89,7 @@ namespace GMTPC.Tool
             string driverNetPath = Path.Combine(GetGMTPCFolder(), "3DP_Net_v2101.exe");
             try
             {
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Net.exe", driverNetPath, "3DP Net Driver Installer");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/3DP.Net.exe", driverNetPath, "3DP Net Driver Installer");
                 UpdateStatus("Đang chạy 3DP Net với lệnh /y...", "Yellow");
                 ProcessStartInfo startInfo = new ProcessStartInfo { FileName = driverNetPath, Arguments = "/y", UseShellExecute = true };
                 Process process = Process.Start(startInfo);

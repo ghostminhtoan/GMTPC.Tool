@@ -3,6 +3,7 @@
 // Date: 2026-03-11
 // - Added InstallGhostOfTsushimaAsync() method for Ghost of Tsushima (29 parts)
 // - Added FolderBrowserDialog for selecting temp download location
+// Updated: 2026-03-14 - Changed League of Legends to DownloadSingleLinkFastAsync
 // =======================================================================
 using System;
 using System.Collections.Generic;
@@ -344,7 +345,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải League of Legends VN...", "Cyan");
                 string lolPath = Path.Combine(GetGMTPCFolder(), "LeagueOfLegendsVN.exe");
-                await DownloadWithProgressAsync("https://lol.secure.dyn.riotcdn.net/channels/public/x/installer/current/live.vn2.exe", lolPath, "League of Legends VN");
+                await DownloadSingleLinkFastAsync("https://lol.secure.dyn.riotcdn.net/channels/public/x/installer/current/live.vn2.exe", lolPath, "League of Legends VN");
 
                 Dispatcher.Invoke(() =>
                 {
