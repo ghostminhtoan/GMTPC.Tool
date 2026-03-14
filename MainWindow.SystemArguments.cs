@@ -1,3 +1,6 @@
+// =======================================================================
+// AI Summary: 2026-03-14 - Updated to use DownloadSingleLinkFastAsync (16 segments) for all GitHub links
+// =======================================================================
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -182,10 +185,10 @@ namespace GMTPC.Tool
             {
                 // Get isolated download folder: {Drive}:\temp\Zalo\
                 string taskFolder = DownloadConfiguration.GetTaskDownloadFolder("Zalo");
-                
+
                 UpdateStatus("Đang tải Zalo...", "Cyan");
                 string zaloPath = Path.Combine(taskFolder, "ZaloSetup.exe");
-                await DownloadWithProgressAsync(ZALO_DOWNLOAD_URL, zaloPath, "Zalo");
+                await DownloadSingleLinkFastAsync(ZALO_DOWNLOAD_URL, zaloPath, "Zalo");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -226,10 +229,10 @@ namespace GMTPC.Tool
             {
                 // Get isolated download folder: {Drive}:\temp\PowerISO\
                 string taskFolder = DownloadConfiguration.GetTaskDownloadFolder("PowerISO");
-                
+
                 UpdateStatus("Đang tải PowerISO...", "Cyan");
                 string powerISOPath = Path.Combine(taskFolder, "PowerISO.exe");
-                await DownloadWithProgressAsync(POWERISO_DOWNLOAD_URL, powerISOPath, "PowerISO");
+                await DownloadSingleLinkFastAsync(POWERISO_DOWNLOAD_URL, powerISOPath, "PowerISO");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -324,7 +327,7 @@ namespace GMTPC.Tool
             {
                 // Get isolated download folder: {Drive}:\temp\FolderSize\
                 string taskFolder = DownloadConfiguration.GetTaskDownloadFolder("FolderSize");
-                
+
                 UpdateStatus("Đang tải FolderSize...", "Cyan");
                 string folderSizePath = Path.Combine(taskFolder, "FolderSize-2.6-x64.msi");
                 await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FolderSize-2.6-x64.msi", folderSizePath, "FolderSize");

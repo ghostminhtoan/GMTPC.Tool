@@ -1,4 +1,7 @@
-﻿using System;
+﻿// =======================================================================
+// AI Summary: 2026-03-14 - Updated to use DownloadSingleLinkFastAsync (16 segments) for all GitHub links
+// =======================================================================
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,12 +23,6 @@ namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
-        /*
-         * AI Summary:
-         * Date: 2026-03-08
-         * - Added ChkGouenjiFonts_Click and InstallGouenjiFontsAsync
-         * - Added ChkNotepadPlusPlus_Click and InstallNotepadPlusPlusAsync
-         */
 
         private async void BtnActivateOffice_Click(object sender, RoutedEventArgs e)
         {
@@ -104,7 +101,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Office Tool Plus...", "Cyan");
                 string officeToolPlusPath = Path.Combine(GetGMTPCFolder(), "office.tool.plus.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/office.tool.plus.exe", officeToolPlusPath, "Office Tool Plus Installer");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/office.tool.plus.exe", officeToolPlusPath, "Office Tool Plus Installer");
 
                 // Đảm bảo progress bar reset sau khi tải
                 Dispatcher.Invoke(() =>
@@ -171,7 +168,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Office Softmaker...", "Cyan");
                 string officeSoftmakerPath = Path.Combine(GetGMTPCFolder(), "Office.Softmaker.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Office.Softmaker.exe", officeSoftmakerPath, "Office Softmaker Installer");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Office.Softmaker.exe", officeSoftmakerPath, "Office Softmaker Installer");
 
                 // Đảm bảo progress bar reset sau khi tải
                 Dispatcher.Invoke(() =>
@@ -261,7 +258,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Gouenji Fansub Fonts...", "Cyan");
                 string fontsPath = Path.Combine(GetGMTPCFolder(), "Gouenji.Fansub.Fonts.exe");
-                await DownloadWithProgressAsync(GOUENJI_FONTS_DOWNLOAD_URL, fontsPath, "Gouenji Fansub Fonts");
+                await DownloadSingleLinkFastAsync(GOUENJI_FONTS_DOWNLOAD_URL, fontsPath, "Gouenji Fansub Fonts");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -319,7 +316,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Notepad++...", "Cyan");
                 string notepadPlusPlusPath = Path.Combine(GetGMTPCFolder(), "npp.8.9.2.Installer.x64.msi");
-                await DownloadWithProgressAsync(NOTEPAD_PLUS_PLUS_DOWNLOAD_URL, notepadPlusPlusPath, "Notepad++");
+                await DownloadSingleLinkFastAsync(NOTEPAD_PLUS_PLUS_DOWNLOAD_URL, notepadPlusPlusPath, "Notepad++");
 
                 Dispatcher.Invoke(() =>
                 {

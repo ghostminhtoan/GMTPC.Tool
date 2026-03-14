@@ -1,4 +1,7 @@
-﻿using System;
+﻿// =======================================================================
+// AI Summary: 2026-03-14 - Updated to use DownloadSingleLinkFastAsync (16 segments) for all GitHub links
+// =======================================================================
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -33,7 +36,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải PotPlayer...", "Cyan");
                 string potPath = Path.Combine(GetGMTPCFolder(), "PotPlayerSetup64.exe");
-                await DownloadWithProgressAsync("https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup64.exe", potPath, "PotPlayer");
+                await DownloadSingleLinkFastAsync("https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup64.exe", potPath, "PotPlayer");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -72,7 +75,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải FastStone Capture...", "Cyan");
                 string fsPath = Path.Combine(GetGMTPCFolder(), "FastStone.Capture.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FastStone.Capture.exe", fsPath, "FastStone Capture");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/FastStone.Capture.exe", fsPath, "FastStone Capture");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -111,7 +114,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Foxit PDF Reader...", "Cyan");
                 string foxitPath = Path.Combine(GetGMTPCFolder(), "FoxitPDFReaderSetup.exe");
-                await DownloadWithProgressAsync("https://cdn01.foxitsoftware.com/product/reader/desktop/win/2025.2.0/FoxitPDFReader20252_L10N_Setup_Prom_x64.exe", foxitPath, "Foxit PDF Reader");
+                await DownloadSingleLinkFastAsync("https://cdn01.foxitsoftware.com/product/reader/desktop/win/2025.2.0/FoxitPDFReader20252_L10N_Setup_Prom_x64.exe", foxitPath, "Foxit PDF Reader");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -166,7 +169,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Bandiview...", "Cyan");
                 string bPath = Path.Combine(GetGMTPCFolder(), "Bandiview.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Bandiview.exe", bPath, "Bandiview");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Bandiview.exe", bPath, "Bandiview");
 
                 Dispatcher.Invoke(() =>
                 {

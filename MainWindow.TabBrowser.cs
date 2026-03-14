@@ -1,4 +1,7 @@
-﻿using System;
+﻿// =======================================================================
+// AI Summary: 2026-03-14 - Updated to use DownloadSingleLinkFastAsync (16 segments) for all GitHub links
+// =======================================================================
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -27,7 +30,7 @@ namespace GMTPC.Tool
             string cocCocInstallerPath = Path.Combine(GetGMTPCFolder(), "coccoc_standalone_vi.exe");
             try
             {
-                await DownloadWithProgressAsync(COCCOC_DOWNLOAD_URL, cocCocInstallerPath, "Cốc Cốc");
+                await DownloadSingleLinkFastAsync(COCCOC_DOWNLOAD_URL, cocCocInstallerPath, "Cốc Cốc");
 
                 // Reset progress UI after download
                 Dispatcher.Invoke(() =>
@@ -84,7 +87,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Microsoft Edge...", "Cyan");
                 string edgePath = Path.Combine(GetGMTPCFolder(), "MicrosoftEdgeSetup.exe");
-                await DownloadWithProgressAsync(EDGE_DOWNLOAD_URL, edgePath, "Microsoft Edge");
+                await DownloadSingleLinkFastAsync(EDGE_DOWNLOAD_URL, edgePath, "Microsoft Edge");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -168,7 +171,7 @@ namespace GMTPC.Tool
             string chromeInstallerPath = Path.Combine(GetGMTPCFolder(), "ChromeSetup.exe");
             try
             {
-                await DownloadWithProgressAsync(CHROME_DOWNLOAD_URL, chromeInstallerPath, "Google Chrome");
+                await DownloadSingleLinkFastAsync(CHROME_DOWNLOAD_URL, chromeInstallerPath, "Google Chrome");
 
                 // Reset progress UI after download
                 Dispatcher.Invoke(() =>

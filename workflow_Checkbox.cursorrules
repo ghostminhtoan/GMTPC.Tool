@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-13 - Added standardized download architecture with MainWindow.SystemDownload.cs -->
+<!-- AI Summary: 2026-03-13 - Updated all GitHub link checkboxes to use DownloadMultiSegmentFastAsync (16 segments) -->
 
 <system_context>
 Bạn là một AI Code Agent chuyên nghiệp, làm việc trên dự án "MMT Tools" (WPF, .NET 4.8, C# 7.3).
@@ -6,6 +6,10 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
 </system_context>
 
 <global_rules>
+*Quan trọng: 
+- Luôn build vào \bin\Release\net48\ sau khi code xong, nếu lỗi thì phải sửa đến khi không còn lỗi nữa thì mới ngưng.
+- Sau khi build xong luôn luôn phải tạo git push checkpoint.
+
 1. KHÔNG BAO GIỜ viết code vào `MainWindow.xaml.cs`.
 2. Luôn lưu file ở định dạng UTF-8.
 3. Luôn thêm/cập nhật khối comment "AI Summary" ở đầu MỌI file bạn chỉnh sửa (Ghi rõ ngày cập nhật và tóm tắt thao tác).
@@ -20,21 +24,21 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
         </description>
         
         <methods>
-            <method name="DownloadSingleLinkFastAsync" usage="CHO TẤT CẢ single-link downloads">
-                - Sử dụng cho: VPN1111, MMT Apps, Google Drive, DISM++, NetLimiter, etc.
-                - Đặc điểm: Bỏ qua ProbeAsync → tải ngay lập tức
+            <method name="DownloadSingleLinkFastAsync" usage="CHO TẤT CẢ single-link downloads (GitHub, direct URLs)">
+                - Sử dụng cho: VPN1111, MMT Apps, Google Drive, DISM++, NetLimiter, GitHub releases, etc.
+                - Đặc điểm: Skip ProbeAsync → tải ngay với 16 segments (DownloadMultiSegmentFastAsync)
                 - Ví dụ: await DownloadSingleLinkFastAsync(url, path, "Display Name");
             </method>
-            
-            <method name="DownloadWithProgressAsync" usage="CHO Archive.org, Mediafire">
-                - Sử dụng cho: File cần dò redirect (Win10/Win11 ISO, Mediafire links)
+
+            <method name="DownloadWithProgressAsync" usage="CHO Archive.org, Mediafire (unknown URLs)">
+                - Sử dụng cho: File cần dò redirect (Win10/Win11 ISO từ archive.org, Mediafire links)
                 - Đặc điểm: Có ProbeAsync (HEAD request) để tìm final URL
                 - Ví dụ: await DownloadWithProgressAsync(url, path, "Display Name");
             </method>
-            
-            <method name="DownloadMultiPartAsync" usage="CHO multi-part games">
-                - Sử dụng cho: Game nhiều parts (Ghost of Tsushima 29 parts, Samurai Maiden 4 parts)
-                - Đặc điểm: Tải tuần tự từng part vào cùng 1 thư mục
+
+            <method name="DownloadMultiPartAsync" usage="CHO multi-part games/files">
+                - Sử dụng cho: Game nhiều parts (Ghost of Tsushima 29 parts, Samurai Maiden 4 parts, LTSC IOT 3 parts)
+                - Đặc điểm: Tải tuần tự từng part với 16 segments vào cùng 1 thư mục
                 - Ví dụ: await DownloadMultiPartAsync(urls, paths, "Game Name");
             </method>
         </methods>

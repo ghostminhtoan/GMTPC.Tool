@@ -1,4 +1,7 @@
-﻿using System;
+﻿// =======================================================================
+// AI Summary: 2026-03-14 - Updated to use DownloadSingleLinkFastAsync (16 segments) for all GitHub links
+// =======================================================================
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -87,7 +90,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Ultraviewer...", "Cyan");
                 string ultraviewerPath = Path.Combine(GetGMTPCFolder(), "UltraViewer_setup.exe");
-                await DownloadWithProgressAsync("https://dl2.ultraviewer.net/UltraViewer_setup_6.6_vi.exe", ultraviewerPath, "Ultraviewer");
+                await DownloadSingleLinkFastAsync("https://dl2.ultraviewer.net/UltraViewer_setup_6.6_vi.exe", ultraviewerPath, "Ultraviewer");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -129,7 +132,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải TeamViewer QuickSupport...", "Cyan");
                 string tvqsPath = Path.Combine(GetGMTPCFolder(), "TeamViewerQS_x64.exe");
-                await DownloadWithProgressAsync("https://dl.teamviewer.com/download/TeamViewerQS_x64.exe", tvqsPath, "TeamViewer QuickSupport");
+                await DownloadSingleLinkFastAsync("https://dl.teamviewer.com/download/TeamViewerQS_x64.exe", tvqsPath, "TeamViewer QuickSupport");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -167,7 +170,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải TeamViewer Full...", "Cyan");
                 string tvFullPath = Path.Combine(GetGMTPCFolder(), "TeamViewer_Setup.exe");
-                await DownloadWithProgressAsync("https://tinyurl.com/teamviewerlatest", tvFullPath, "TeamViewer Full");
+                await DownloadSingleLinkFastAsync("https://tinyurl.com/teamviewerlatest", tvFullPath, "TeamViewer Full");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -205,7 +208,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải AnyDesk...", "Cyan");
                 string anydeskPath = Path.Combine(GetGMTPCFolder(), "AnyDesk.exe");
-                await DownloadWithProgressAsync("https://tinyurl.com/anydesk621", anydeskPath, "AnyDesk");
+                await DownloadSingleLinkFastAsync("https://tinyurl.com/anydesk621", anydeskPath, "AnyDesk");
 
                 Dispatcher.Invoke(() =>
                 {
@@ -257,7 +260,7 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải VMWare 16.2 lite...", "Cyan");
                 string vmwarePath = Path.Combine(GetGMTPCFolder(), "VMware_Workstation_16.2.2_Lite.exe");
-                await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/VMware_Workstation_16.2.2_Lite_Eng_._Rus.exe", vmwarePath, "VMWare 16.2 lite");
+                await DownloadSingleLinkFastAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/VMware_Workstation_16.2.2_Lite_Eng_._Rus.exe", vmwarePath, "VMWare 16.2 lite");
 
                 Dispatcher.Invoke(() =>
                 {
