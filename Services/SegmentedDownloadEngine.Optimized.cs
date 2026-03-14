@@ -1,5 +1,10 @@
 // =============================================================================
 // Services/SegmentedDownloadEngine.Optimized.cs
+// AI Summary:
+// Date: 2026-03-14
+// - Fixed progress bar freezing during pause/resume
+// - UI reporting task linked to cancellation token instead of manual cancellation
+// - Added 500ms delay after workers complete for final progress report
 // High-performance multi-thread segmented download engine
 // Optimizations: Async I/O, buffer pooling, connection tuning, minimal lock contention
 // UTF-8 with BOM – .NET Framework 4.8 / C# 7.3
@@ -429,7 +434,7 @@ namespace GMTPC.Tool.Services
             };
 
             // UI reporting task (throttled to 5Hz)
-            using (var uiCts = new CancellationTokenSource())
+            using (var uiCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
             {
                 var uiTask = Task.Run(async () =>
                 {
@@ -480,9 +485,14 @@ namespace GMTPC.Tool.Services
 
                     // Wait for ALL workers to complete (or cancel) simultaneously
                     await Task.WhenAll(workers);
+                    
+                    // After all workers complete, wait a moment for final progress report
+                    try { await Task.Delay(500, ct); } catch { }
                 }
                 finally
                 {
+                    // Cancel UI task - it will stop when CT is cancelled
+                    // UI task is linked to CT, so it will automatically stop on cancellation
                     uiCts.Cancel();
                     try { await uiTask.ConfigureAwait(false); } catch { }
                 }

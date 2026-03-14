@@ -164,18 +164,20 @@ namespace GMTPC.Tool
             {
                 if (int.TryParse(item.Content.ToString(), out int newCount))
                 {
-                    // Bước 1: Tạm dừng quá trình tải để sẵn sàng thay đổi
-                    DownloadRegistry.PauseAll();
-                    BtnPause.Content = "Resume";
-                    
                     UpdateStatus($"Đã chọn {newCount} luồng. Đang tạm dừng 2 giây để thay đổi luồng download...", "Yellow");
 
-                    // Bước 2: Sau 2 giây, tiếp tục tải với số segment mới
-                    // Download engine sẽ tự động sử dụng giá trị mới từ CboSegmentCount
-                    // vì nó được đọc trong DownloadWithProgressAsync()
+                    // Bước 1: Tạm dừng quá trình tải (PAUSE không CANCEL)
+                    DownloadRegistry.PauseAll();
+                    BtnPause.Content = "Resume";
+
+                    // Bước 2: Sau 2 giây, RESUME để tiếp tục với số segment mới
+                    // ENGINE sẽ đọc CboSegmentCount.SelectedItem để lấy số segment mới
                     Dispatcher.InvokeAsync(async () =>
                     {
                         await Task.Delay(2000); // Chờ 2 giây để pause hoàn toàn
+
+                        // RESUME: Download engine sẽ tiếp tục với số segment mới
+                        // vì nó được đọc từ CboSegmentCount mỗi khi bắt đầu chunk mới
                         DownloadRegistry.ResumeAll();
                         BtnPause.Content = "Pause";
                         UpdateStatus($"Đang tiếp tục tải với {newCount} luồng...", "Cyan");
