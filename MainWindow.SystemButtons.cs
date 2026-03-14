@@ -4,6 +4,7 @@
 //            SelectNoneAllTabs, Install, Pause, Resume, Refresh Color,
 //            BtnDownloadPage, DPI controls
 // Cập nhật gần đây:
+//   - 2026-03-14: Updated ChkWin10LtscIot21H2: GitHub 3-part links (replaced Mediafire)
 //   - 2026-03-11: Added ChkGhostOfTsushima to BtnSelectAll, BtnSelectNone,
 //                 BtnSelectNoneAllTabs, UpdateInstallButtonState, BtnInstall_Click
 //   - 2026-03-05: Thêm currentDPIScale, DPI_STEPS, ApplyDPIScale từ xaml.cs
@@ -695,7 +696,11 @@ namespace GMTPC.Tool
                 _cachedDownloadLinks.Add("https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso");
 
             if (ChkWin10LtscIot21H2?.IsChecked == true)
-                _cachedDownloadLinks.Add("https://www.mediafire.com/file/b54r3aup07dddhe/win_10_LTSC_IOT_21H2_-_2021%25E2%2580%259510_-_No_Defender_Office_-_MMTPC_3.0.iso/file");
+            {
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.001");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.002");
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.003");
+            }
 
             // Hiển thị tooltip với danh sách link
             string tooltipText;
@@ -1005,7 +1010,7 @@ namespace GMTPC.Tool
                         link = "https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso";
                         break;
                     case "ChkWin10LtscIot21H2":
-                        link = "https://www.mediafire.com/file/b54r3aup07dddhe/win_10_LTSC_IOT_21H2_-_2021%25E2%2580%259510_-_No_Defender_Office_-_MMTPC_3.0.iso/file";
+                        link = "GitHub (3 parts):\n- LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.001\n- LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.002\n- LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.003";
                         break;
                 }
 
