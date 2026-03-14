@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using GMTPC.Tool.Services;
 
 namespace GMTPC.Tool
 {
@@ -55,6 +56,24 @@ namespace GMTPC.Tool
                 Directory.CreateDirectory(tempPath);
 
             return tempPath;
+        }
+
+        // ===================== Download Temp Path Helper (uses selected drive) =====================
+        // AI Summary: 2026-03-14 - Added GetDownloadTempPath to use selected drive from CboDriveSelector
+        private string GetDownloadTempPath(string fileName = "")
+        {
+            // Lấy đường dẫn từ DownloadConfiguration (cái được chọn trong CboDriveSelector)
+            string basePath = DownloadConfiguration.TempBasePath ?? GetGMTPCFolder();
+            
+            // Tạo thư mục nếu chưa tồn tại
+            if (!Directory.Exists(basePath))
+                Directory.CreateDirectory(basePath);
+            
+            // Nếu có fileName, trả về đường dẫn đầy đủ
+            if (!string.IsNullOrWhiteSpace(fileName))
+                return Path.Combine(basePath, fileName);
+            
+            return basePath;
         }
 
         // ===================== Windows Defender Exclusion =====================
@@ -113,7 +132,7 @@ namespace GMTPC.Tool
         private void ActivateWindows()
         {
             UpdateStatus("Đang kích hoạt Windows...", "Cyan");
-            string activateWindowsCmdPath = Path.Combine(GetGMTPCFolder(), "ACTIVATE.WINDOWS.cmd");
+            string activateWindowsCmdPath = GetDownloadTempPath("ACTIVATE.WINDOWS.cmd");
             try
             {
                 using (System.Net.WebClient client = new System.Net.WebClient())
@@ -141,7 +160,7 @@ namespace GMTPC.Tool
         private void PauseWindowsUpdate()
         {
             UpdateStatus("Đang truy cập tính năng Pause Windows Update...", "Cyan");
-            string pauseUpdateScriptPath = Path.Combine(GetGMTPCFolder(), "pause.update.win.11.ps1");
+            string pauseUpdateScriptPath = GetDownloadTempPath("pause.update.win.11.ps1");
             try
             {
                 using (System.Net.WebClient client = new System.Net.WebClient())
@@ -177,7 +196,7 @@ namespace GMTPC.Tool
 
         private async Task InstallWinRARAsync()
         {
-            string winrarPath = Path.Combine(GetGMTPCFolder(), "WinRAR.exe");
+            string winrarPath = GetDownloadTempPath("WinRAR.exe");
             try
             {
                 // ===== Step 1: Download and Install WinRAR =====
@@ -196,8 +215,8 @@ namespace GMTPC.Tool
 
         private async Task InstallBIDAsync()
         {
-            string bidPath = Path.Combine(GetGMTPCFolder(), "bid_setup_x64.exe");
-            string bidActivatePath = Path.Combine(GetGMTPCFolder(), "Bulk.image.downloader.patch.exe");
+            string bidPath = GetDownloadTempPath("bid_setup_x64.exe");
+            string bidActivatePath = GetDownloadTempPath("Bulk.image.downloader.patch.exe");
             string bidExePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Bulk Image Downloader", "BID.exe");
             try
             {
@@ -302,8 +321,8 @@ namespace GMTPC.Tool
 
         private async Task InstallIDMAsync()
         {
-            string idmPath = Path.Combine(GetGMTPCFolder(), "idman625build3.exe");
-            string activatePath = Path.Combine(GetGMTPCFolder(), "IDM_6.4x_rabbit.exe");
+            string idmPath = GetDownloadTempPath("idman625build3.exe");
+            string activatePath = GetDownloadTempPath("IDM_6.4x_rabbit.exe");
             string idmExePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Internet Download Manager", "IDMan.exe");
             string idmBackupPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Internet Download Manager", "IDMan.exe.bak");
             string tempCheckPath = Path.Combine(Path.GetTempPath(), "IDM_Setup_Temp", "IDM0.tmp");
@@ -467,7 +486,7 @@ namespace GMTPC.Tool
         private async Task InstallVcredistAsync()
         {
             UpdateStatus("Đang tải Vcredist...", "Cyan");
-            string vcredistPath = Path.Combine(GetGMTPCFolder(), "vcredist.all.in.one.by.MMT.Windows.Tech.exe");
+            string vcredistPath = GetDownloadTempPath("vcredist.all.in.one.by.MMT.Windows.Tech.exe");
             try
             {
                 await DownloadWithProgressAsync(VCREDIST_DOWNLOAD_URL, vcredistPath, "Vcredist");
@@ -483,7 +502,7 @@ namespace GMTPC.Tool
         private async Task InstallDirectXAsync()
         {
             UpdateStatus("Đang tải DirectX...", "Cyan");
-            string directxPath = Path.Combine(GetGMTPCFolder(), "DirectX.exe");
+            string directxPath = GetDownloadTempPath("DirectX.exe");
             try
             {
                 await DownloadWithProgressAsync(DIRECTX_DOWNLOAD_URL, directxPath, "DirectX");
@@ -576,7 +595,7 @@ namespace GMTPC.Tool
         private async void BtnCrackIDM_Click(object sender, RoutedEventArgs e)
         {
             UpdateStatus("Đang tải và chạy IDM crack...", "Cyan");
-            string idmCrackPath = Path.Combine(GetGMTPCFolder(), "IDM_6.4x_Crack.exe");
+            string idmCrackPath = GetDownloadTempPath("IDM_6.4x_Crack.exe");
             try
             {
                 await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/activate/IDM_6.4x_Crack.exe", idmCrackPath, "IDM Crack");
@@ -587,7 +606,7 @@ namespace GMTPC.Tool
 
         private async void BtnRunBIDActivation_Click(object sender, RoutedEventArgs e)
         {
-            string bidActivatePath = Path.Combine(GetGMTPCFolder(), "Bulk.image.downloader.patch.exe");
+            string bidActivatePath = GetDownloadTempPath("Bulk.image.downloader.patch.exe");
             string bidExePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Bulk Image Downloader", "BID.exe");
             try
             {
@@ -638,7 +657,7 @@ namespace GMTPC.Tool
         private async void BtnDirectX_Click(object sender, RoutedEventArgs e)
         {
             UpdateStatus("Đang tải DirectX...", "Cyan");
-            string directXPath = Path.Combine(GetGMTPCFolder(), "directx_installer.exe");
+            string directXPath = GetDownloadTempPath("directx_installer.exe");
             try
             {
                 await DownloadWithProgressAsync("https://download.microsoft.com/download/1/7/1/1718CCC4-6315-4D8E-9543-8E28A4E99C9C/dxwebsetup.exe", directXPath, "DirectX Installer");
@@ -655,7 +674,7 @@ namespace GMTPC.Tool
         private async void BtnJava_Click(object sender, RoutedEventArgs e)
         {
             UpdateStatus("Đang tải Java...", "Cyan");
-            string javaInstallerPath = Path.Combine(GetGMTPCFolder(), "java_installer.exe");
+            string javaInstallerPath = GetDownloadTempPath("java_installer.exe");
             try
             {
                 await DownloadWithProgressAsync(JAVA_DOWNLOAD_URL, javaInstallerPath, "Java Installer");
@@ -677,7 +696,7 @@ namespace GMTPC.Tool
         private async void BtnOpenAL_Click(object sender, RoutedEventArgs e)
         {
             UpdateStatus("Đang tải OpenAL...", "Cyan");
-            string openALInstallerPath = Path.Combine(GetGMTPCFolder(), "OpenAL.exe");
+            string openALInstallerPath = GetDownloadTempPath("OpenAL.exe");
             try
             {
                 await DownloadWithProgressAsync("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/OpenAL.exe", openALInstallerPath, "OpenAL Installer");
