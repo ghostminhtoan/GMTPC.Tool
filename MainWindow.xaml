@@ -538,7 +538,8 @@
                                 <ComboBoxItem Content="2" />
                                 <ComboBoxItem Content="4" />
                                 <ComboBoxItem Content="8" />
-                                <ComboBoxItem Content="8" IsSelected="True" />
+                                <ComboBoxItem Content="16" />
+                                <ComboBoxItem Content="16" IsSelected="True" />
                             </ComboBox>
                         </StackPanel>
                         <!-- Connection trace bar fills the full width below -->

@@ -5,6 +5,7 @@
 // - Fixed CboSegmentCount: Disable segment change during download
 // - Users can only change segment BEFORE clicking Install, not during
 // - Prevents "complete all tasks" error by disallowing pause/resume with different segment count
+// - Fixed warnings CS0169: Marked _isReSegmenting and _pauseCts as unused (reserved for future use)
 // Chức năng: Xử lý progress bar, connection trace, và download UI
 // =======================================================================
 using System;
@@ -27,8 +28,10 @@ namespace GMTPC.Tool
         // Fields
         private double originalWidth;
         private double originalHeight;
+#pragma warning disable CS0169 // Fields reserved for future use
         private bool _isReSegmenting;
         private CancellationTokenSource _pauseCts;
+#pragma warning restore CS0169
         private ConcurrentQueue<DownloadRange> _remainingRanges = new ConcurrentQueue<DownloadRange>();
 
         private class DownloadRange
@@ -41,8 +44,10 @@ namespace GMTPC.Tool
 
         private class WorkerData
         {
+#pragma warning disable CS0649 // Fields reserved for future use
             public int Index;
             public ProgressBar ProgressBar;
+#pragma warning restore CS0649
         }
 
         public bool IsDownloading { get; private set; }
