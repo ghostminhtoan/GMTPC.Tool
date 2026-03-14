@@ -1,7 +1,7 @@
 // =======================================================================
 // MainWindow.SystemBar.cs
 // Chức năng: Xử lý progress bar, connection trace, và download UI
-// Cập nhật: 2026-03-14 - Fix đổi segment: Pause → Clear queue → Re-queue từ vị trí đã tải → Resume
+// Cập nhật: 2026-03-14 - Fix đổi segment: Restart loop để tạo lại workers
 // =======================================================================
 using System;
 using System.Collections.Concurrent;
@@ -282,9 +282,11 @@ namespace GMTPC.Tool
                             }
 
                             // Keep visualization state outside loop to persist through Pause/Resume
+                            bool shouldRestartLoop = false;
 
-                            while (!chunkQueue.IsEmpty)
+                            while (!chunkQueue.IsEmpty || shouldRestartLoop)
                             {
+                                shouldRestartLoop = false;
                                 await Task.Run(() => _pauseEvent.Wait(ct));
                                 ct.ThrowIfCancellationRequested();
 
@@ -304,40 +306,40 @@ namespace GMTPC.Tool
                                 {
                                     // Pause và đợi các worker dừng
                                     await Dispatcher.InvokeAsync(() => { UpdateStatus($"Đang tạm dừng để chia lại {numConnections} luồng...", "Cyan"); });
-                                    
+
                                     // Hủy _pauseCts để dừng các worker hiện tại
                                     if (_pauseCts != null && !_pauseCts.IsCancellationRequested)
                                         _pauseCts.Cancel();
-                                    
+
                                     // Đợi các worker dừng an toàn
                                     await Task.Delay(1000, ct);
-                                    
+
                                     // Tạo _pauseCts mới cho lần chạy tiếp theo
                                     _pauseCts = new CancellationTokenSource();
-                                    
+
                                     _isReSegmenting = false;
                                     lastNumConnectionsForUI = -1; // Force UI reset
-                                    
+
                                     // Clear chunk queue để tạo lại với segment mới
                                     chunkQueue.Clear();
                                     _remainingRanges.Clear();
-                                    
+
                                     // Tạo queue mới bắt đầu từ totalDownloaded
                                     long remainingStart = totalDownloaded;
                                     long remainingEnd = fileSize - 1;
-                                    
+
                                     if (remainingStart < remainingEnd)
                                     {
                                         long newRegionSize = (remainingEnd - remainingStart + 1) / numConnections;
                                         long[] newRegionStarts = new long[numConnections];
                                         long[] newRegionEnds = new long[numConnections];
-                                        
+
                                         for (int i = 0; i < numConnections; i++)
                                         {
                                             newRegionStarts[i] = remainingStart + (i * newRegionSize);
                                             newRegionEnds[i] = (i == numConnections - 1) ? remainingEnd : (remainingStart + (i + 1) * newRegionSize - 1);
                                         }
-                                        
+
                                         // Thêm các range mới vào queue
                                         bool hasWork = true;
                                         while (hasWork)
@@ -355,8 +357,12 @@ namespace GMTPC.Tool
                                             }
                                         }
                                     }
-                                    
+
                                     UpdateStatus($"Đang tải với {numConnections} luồng (đã tải: {FormatBytes(totalDownloaded)} / {FormatBytes(fileSize)})...", "Cyan");
+                                    
+                                    // Restart vòng lặp để tạo lại workers với sessionLinkedCts mới
+                                    shouldRestartLoop = true;
+                                    continue;
                                 }
 
                                 // Setup UI for Connections (now representing Regions)
@@ -826,19 +832,21 @@ namespace GMTPC.Tool
                 {
                     // Bước 1: Pause toàn bộ quá trình tải
                     DownloadRegistry.PauseAll();
-                    
+                    BtnPause.Content = "Resume";
+
                     // Bước 2: Đánh dấu để re-segment
                     _isReSegmenting = true;
-                    
+
                     UpdateStatus($"Đã chọn {newCount} luồng. Đang tạm dừng và chuẩn bị chia lại luồng...", "Cyan");
-                    
+
                     // Bước 3: Tự động resume sau khi pause
                     // Việc resume sẽ được thực hiện khi người dùng nhấn Resume button
                     // Hoặc có thể tự động resume sau 1 khoảng thời gian ngắn
                     Dispatcher.InvokeAsync(async () =>
                     {
-                        await Task.Delay(500);
+                        await Task.Delay(1500); // Đợi vòng lặp while restart và tạo lại workers
                         DownloadRegistry.ResumeAll();
+                        BtnPause.Content = "Pause";
                         UpdateStatus($"Đang tải với {newCount} luồng...", "Cyan");
                     });
                 }
