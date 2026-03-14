@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-14 - Updated all checkboxes to use DownloadSingleLinkFastAsync (16 segments) for faster download speed -->
+<!-- AI Summary: 2026-03-14 - Speed optimization: Win 11 archive.org now uses DownloadSingleLinkFastAsync (32 segments), SegmentedDownloadEngine boosted to 32 connections -->
 
 # Danh sách Checkbox
 

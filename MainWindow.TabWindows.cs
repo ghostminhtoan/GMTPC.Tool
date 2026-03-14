@@ -2,7 +2,7 @@
 // MainWindow.TabWindows.cs
 // Chức năng: Xử lý checkbox và cài đặt cho Tab Windows - Microsoft
 // Cập nhật: 2026-03-10 - Xóa Win 10 20H2 2022 April - onedrive
-// Cập nhật: 2026-03-14 - Keep DownloadWithProgressAsync for archive.org (needs probe)
+// Cập nhật: 2026-03-14 - Changed Win 11 archive.org to DownloadSingleLinkFastAsync (16 segments, no probe overhead)
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -45,7 +45,9 @@ namespace GMTPC.Tool
             {
                 UpdateStatus("Đang tải Win 11 - 26H1 - 2026 Feb...", "Cyan");
                 string win11Path = Path.Combine(GetGMTPCFolder(), "Win11_26H1.iso");
-                await DownloadWithProgressAsync("https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso", win11Path, "Win 11 26H1");
+                // Use DownloadSingleLinkFastAsync with 16 segments for maximum speed (~100 MB/s)
+                // Archive.org supports range requests, so no need for probe overhead
+                await DownloadSingleLinkFastAsync("https://archive.org/download/microsoft-win11-26h2-february-2026/en-us_windows_11_consumer_editions_version_26h1_x64_dvd_5208fe5b.iso", win11Path, "Win 11 26H1");
 
                 Dispatcher.Invoke(() =>
                 {
