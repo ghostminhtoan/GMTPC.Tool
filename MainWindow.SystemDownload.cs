@@ -19,6 +19,45 @@ namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
+        // Fields cho download
+        private CancellationTokenSource _cancellationTokenSource;
+        private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
+        private SemaphoreSlim _downloadSemaphore = new SemaphoreSlim(1);
+
+        // IsDownloading property đã có trong MainWindow.SystemBar.cs
+        // Các hàm FormatSpeed, FormatBytes cũng đã có trong MainWindow.SystemBar.cs
+
+        // ===================================================================
+        // DOWNLOAD WITH RETRY - For unstable connections
+        // ===================================================================
+        private async Task DownloadWithRetryAsync(string downloadUrl, string destinationPath, string displayName, int maxRetries = 5)
+        {
+            int retryCount = 0;
+            while (retryCount < maxRetries)
+            {
+                try
+                {
+                    await DownloadSingleLinkFastAsync(downloadUrl, destinationPath, displayName);
+                    return; // Success
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    retryCount++;
+                    if (retryCount >= maxRetries)
+                    {
+                        UpdateStatus($"Failed to download {displayName} after {maxRetries} attempts: {ex.Message}", "Red");
+                        throw;
+                    }
+                    UpdateStatus($"Download retry {retryCount}/{maxRetries} for {displayName}: {ex.Message}", "Yellow");
+                    await Task.Delay(1000 * retryCount);
+                }
+            }
+        }
+
         // ===================================================================
         // FAST SINGLE-LINK DOWNLOAD - "Golden Standard"
         // ===================================================================
@@ -243,36 +282,6 @@ namespace GMTPC.Tool
             }
         }
 
-        // ===================================================================
-        // HELPER: Format Speed (B/s, KB/s, MB/s, GB/s)
-        // ===================================================================
-        private string FormatSpeed(double bytesPerSecond)
-        {
-            if (bytesPerSecond < 1024)
-                return $"{bytesPerSecond:F2} B/s";
-            if (bytesPerSecond < 1024 * 1024)
-                return $"{bytesPerSecond / 1024:F2} KB/s";
-            if (bytesPerSecond < 1024 * 1024 * 1024)
-                return $"{bytesPerSecond / (1024 * 1024):F2} MB/s";
-            return $"{bytesPerSecond / (1024 * 1024 * 1024):F2} GB/s";
-        }
-
-        // ===================================================================
-        // HELPER: Format Bytes (B, KB, MB, GB, TB)
-        // ===================================================================
-        private string FormatBytes(long bytes)
-        {
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-            int order = 0;
-            double size = bytes;
-
-            while (size >= 1024 && order < sizes.Length - 1)
-            {
-                order++;
-                size /= 1024;
-            }
-
-            return $"{size:0.##} {sizes[order]}";
-        }
+        // FormatSpeed và FormatBytes đã có trong MainWindow.SystemBar.cs
     }
 }
