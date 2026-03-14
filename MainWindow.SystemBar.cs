@@ -1,7 +1,10 @@
 // =======================================================================
 // MainWindow.SystemBar.cs
+// AI Summary:
+// Date: 2026-03-14
+// - Fixed CboSegmentCount_SelectionChanged: Now pause for 2 seconds before resume
+// - Allows proper segment change during download without stopping
 // Chức năng: Xử lý progress bar, connection trace, và download UI
-// Cập nhật: 2026-03-14 - Fix đổi segment: Restart loop để tạo lại workers
 // =======================================================================
 using System;
 using System.Collections.Concurrent;
@@ -161,24 +164,21 @@ namespace GMTPC.Tool
             {
                 if (int.TryParse(item.Content.ToString(), out int newCount))
                 {
-                    // Bước 1: Pause toàn bộ quá trình tải
+                    // Bước 1: Tạm dừng quá trình tải để sẵn sàng thay đổi
                     DownloadRegistry.PauseAll();
                     BtnPause.Content = "Resume";
+                    
+                    UpdateStatus($"Đã chọn {newCount} luồng. Đang tạm dừng 2 giây để thay đổi luồng download...", "Yellow");
 
-                    // Bước 2: Đánh dấu để re-segment
-                    _isReSegmenting = true;
-
-                    UpdateStatus($"Đã chọn {newCount} luồng. Đang tạm dừng và chuẩn bị chia lại luồng...", "Cyan");
-
-                    // Bước 3: Tự động resume sau khi pause
-                    // Việc resume sẽ được thực hiện khi người dùng nhấn Resume button
-                    // Hoặc có thể tự động resume sau 1 khoảng thời gian ngắn
+                    // Bước 2: Sau 2 giây, tiếp tục tải với số segment mới
+                    // Download engine sẽ tự động sử dụng giá trị mới từ CboSegmentCount
+                    // vì nó được đọc trong DownloadWithProgressAsync()
                     Dispatcher.InvokeAsync(async () =>
                     {
-                        await Task.Delay(1500); // Đợi vòng lặp while restart và tạo lại workers
+                        await Task.Delay(2000); // Chờ 2 giây để pause hoàn toàn
                         DownloadRegistry.ResumeAll();
                         BtnPause.Content = "Pause";
-                        UpdateStatus($"Đang tải với {newCount} luồng...", "Cyan");
+                        UpdateStatus($"Đang tiếp tục tải với {newCount} luồng...", "Cyan");
                     });
                 }
             }
