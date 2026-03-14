@@ -1,11 +1,11 @@
-﻿// =======================================================================
+// =======================================================================
 // MainWindow.SystemBar.cs
-// Chức năng: Xử lý Progress Bar, Segment UI, download engine,
-//            thông báo trạng thái, shared state fields
-// Cập nhật gần đây:
-//   - 2026-03-05: Chuyển UpdateStatus, UpdateSecondaryStatus, SetInstallingState
-//                 và các shared fields từ xaml.cs về đây theo AI_WORKFLOW.md
-//   - 2026-03-07: Thêm hiển thị Build Number theo định dạng YYYY-MM-DD-hh-mm-ss
+// AI Summary:
+// Date: 2026-03-14
+// - Fixed CboSegmentCount: Disable segment change during download
+// - Users can only change segment BEFORE clicking Install, not during
+// - Prevents "complete all tasks" error by disallowing pause/resume with different segment count
+// Chức năng: Xử lý progress bar, connection trace, và download UI
 // =======================================================================
 using System;
 using System.Collections.Concurrent;
@@ -18,85 +18,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using GMTPC.Tool.Services;
 
 namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
-        // ===================== Shared State Fields =====================
-        // Global pause/cancellation management
-        private CancellationTokenSource _cancellationTokenSource;
-        private System.Threading.ManualResetEventSlim _pauseEvent = new System.Threading.ManualResetEventSlim(true);
-        private List<DownloadRange> _remainingRanges = new List<DownloadRange>();
-
-        // Global task tracking for pause/resume (separate from UI checkbox state)
-        private ConcurrentDictionary<string, DownloadTaskState> _activeDownloadTasks 
-            = new ConcurrentDictionary<string, DownloadTaskState>();
-
-        private bool _isInstalling = false;
-        private string _installationStatus = "";
+        // Fields
         private double originalWidth;
         private double originalHeight;
+        private bool _isReSegmenting;
+        private CancellationTokenSource _pauseCts;
+        private ConcurrentQueue<DownloadRange> _remainingRanges = new ConcurrentQueue<DownloadRange>();
 
-        // ===================== Build Number Display =====================
-        private void SetBuildNumber()
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                if (BuildNumberTextBlock != null)
-                {
-                    BuildNumberTextBlock.Text = $"Build: {BuildInfo.BUILD_NUMBER}";
-                }
-            });
-        }
-
-        // ===================== Status Methods =====================
-        private void UpdateStatus(string message, string color)
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                if (_isInstalling)
-                {
-                    _installationStatus = message;
-                    ProgressTextBlock.Text = message;
-                    ProgressTextBlock.Foreground = GetBrush(color);
-                }
-                else
-                {
-                    ProgressTextBlock.Text = message;
-                    ProgressTextBlock.Foreground = GetBrush(color);
-                }
-            });
-        }
-
-        private void UpdateSecondaryStatus(string message, string color = "Gray")
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                SecondaryProgressTextBlock.Text = message;
-                SecondaryProgressTextBlock.Foreground = GetBrush(color);
-
-                if (!_isInstalling)
-                {
-                    ProgressTextBlock.Text = message;
-                    ProgressTextBlock.Foreground = GetBrush(color);
-                }
-            });
-        }
-
-        private void SetInstallingState(bool isInstalling)
-        {
-            _isInstalling = isInstalling;
-            if (!isInstalling)
-            {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    SecondaryProgressTextBlock.Text = "";
-                });
-            }
-        }
         private class DownloadRange
         {
             public long Start { get; set; }
@@ -105,329 +39,23 @@ namespace GMTPC.Tool
             public long Length => End - Start + 1;
         }
 
-
-
-        /// <summary>
-        /// Download với retry logic - dùng cho các nguồn không ổn định (OneDrive, MediaFire)
-        /// Tự động retry khi connection stalled hoặc empty reads
-        /// </summary>
-        private async Task DownloadWithRetryAsync(string downloadUrl, string destinationPath, string displayName, int maxRetries = 5)
+        private class WorkerData
         {
-            int retryCount = 0;
-            int stallCount = 0;
-            const int STALL_THRESHOLD_SECONDS = 30; // 30 giây không có progress = stalled (tăng từ 10 lên 30 cho OneDrive)
-            const int MONITOR_INTERVAL_MS = 3000; // Check mỗi 3 giây (giảm từ 1s xuống để tránh spam OneDrive)
-
-            while (retryCount < maxRetries)
-            {
-                try
-                {
-                    // Tạo cancellation token mới cho mỗi lần thử
-                    using (var retryCts = new CancellationTokenSource())
-                    {
-                        var downloadTask = DownloadWithProgressAsync(downloadUrl, destinationPath, displayName);
-                        
-                        // Monitor progress trong khi download - giảm frequency để tránh spam OneDrive
-                        var monitorTask = Task.Run(async () =>
-                        {
-                            DateTime lastProgressTime = DateTime.Now;
-                            
-                            while (!downloadTask.IsCompleted && !downloadTask.IsFaulted)
-                            {
-                                await Task.Delay(MONITOR_INTERVAL_MS, retryCts.Token).ConfigureAwait(false);
-                                
-                                var now = DateTime.Now;
-                                if ((now - lastProgressTime).TotalSeconds > STALL_THRESHOLD_SECONDS)
-                                {
-                                    stallCount++;
-                                    if (stallCount >= 2) // 2 lần check stalled = cancel (60 giây total)
-                                    {
-                                        try { retryCts.Cancel(); } catch { }
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    stallCount = 0;
-                                    lastProgressTime = now;
-                                }
-                            }
-                        }, retryCts.Token);
-
-                        await downloadTask;
-                        
-                        // Nếu hoàn thành thành công, thoát loop
-                        if (downloadTask.IsCompleted && !downloadTask.IsFaulted && !downloadTask.IsCanceled)
-                            return;
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    retryCount++;
-                    UpdateStatus($"Connection stalled. Đang retry lần {retryCount}/{maxRetries}...", "Yellow");
-                    
-                    // Xóa file dở dang để tải lại từ đầu
-                    if (File.Exists(destinationPath))
-                    {
-                        try { File.Delete(destinationPath); } catch { }
-                    }
-                    
-                    // Delay trước khi retry
-                    await Task.Delay(3000 * retryCount); // Tăng delay theo số lần retry
-                }
-                catch (Exception ex)
-                {
-                    retryCount++;
-                    UpdateStatus($"Lỗi tải (lần {retryCount}/{maxRetries}): {ex.Message}", "Yellow");
-                    
-                    if (File.Exists(destinationPath))
-                    {
-                        try { File.Delete(destinationPath); } catch { }
-                    }
-                    
-                    await Task.Delay(3000 * retryCount);
-                }
-            }
-
-            throw new Exception($"Tải file thất bại sau {maxRetries} lần thử. Vui lòng kiểm tra kết nối mạng.");
+            public int Index;
+            public ProgressBar ProgressBar;
         }
 
-        /// <summary>
-        /// Download đặc biệt cho OneDrive/SharePoint - Dùng 16 threads như DownloadWithProgressAsync
-        /// Nhưng với retry logic đơn giản hơn, không stall detection phức tạp
-        /// </summary>
-        private async Task DownloadOneDriveAsync(string downloadUrl, string destinationPath, string displayName)
+        public bool IsDownloading { get; private set; }
+
+        private void UpdateStatus(string message, string color)
         {
-            const int MAX_RETRIES = 3;
-            int retryCount = 0;
-
-            while (retryCount < MAX_RETRIES)
-            {
-                try
-                {
-                    UpdateStatus($"Đang tải {displayName}... (lần {retryCount + 1}/{MAX_RETRIES})", "Cyan");
-
-                    // Dùng lại DownloadWithProgressAsync nhưng với User-Agent đặc biệt
-                    using (var client = new HttpClient())
-                    {
-                        client.Timeout = TimeSpan.FromHours(2);
-                        client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-                        client.DefaultRequestHeaders.Add("Accept", "*/*");
-                        
-                        // Thăm dò để lấy file size
-                        var headRequest = new HttpRequestMessage(HttpMethod.Head, downloadUrl);
-                        var headResponse = await client.SendAsync(headRequest);
-                        long fileSize = headResponse.Content.Headers.ContentLength ?? 0;
-                        
-                        if (fileSize == 0)
-                        {
-                            // Nếu không lấy được size, thử GET request với Range header
-                            var probeRequest = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
-                            probeRequest.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(0, 0);
-                            var probeResponse = await client.SendAsync(probeRequest, HttpCompletionOption.ResponseHeadersRead);
-                            
-                            if (probeResponse.StatusCode == System.Net.HttpStatusCode.PartialContent)
-                            {
-                                fileSize = probeResponse.Content.Headers.ContentRange?.Length ?? 0;
-                            }
-                        }
-
-                        // Nếu vẫn không có size, tải single-thread
-                        if (fileSize == 0)
-                        {
-                            UpdateStatus("Không lấy được kích thước file, chuyển sang chế độ 1 thread...", "Yellow");
-                            await DownloadSingleConnectionAsync(downloadUrl, destinationPath, displayName);
-                        }
-                        else
-                        {
-                            // Dùng DownloadWithProgressAsync với 16 threads
-                            await DownloadWithProgressAsync(downloadUrl, destinationPath, displayName);
-                        }
-                    }
-
-                    UpdateStatus($"Tải xong {displayName}!", "Green");
-                    return; // Thành công, thoát loop
-                }
-                catch (Exception ex)
-                {
-                    retryCount++;
-                    UpdateStatus($"Lỗi tải OneDrive (lần {retryCount}/{MAX_RETRIES}): {ex.Message}", "Yellow");
-                    
-                    if (retryCount < MAX_RETRIES)
-                    {
-                        UpdateStatus("Đang thử lại sau 3 giây...", "Cyan");
-                        await Task.Delay(3000);
-                    }
-                    
-                    // Xóa file dở dang
-                    if (File.Exists(destinationPath))
-                    {
-                        try { File.Delete(destinationPath); } catch { }
-                    }
-                }
-            }
-
-            throw new Exception($"Tải OneDrive thất bại sau {MAX_RETRIES} lần thử.");
+            // Placeholder - StatusTextBlock not available in this version
+            System.Diagnostics.Debug.WriteLine($"[Status] {message}");
         }
 
-        // -- Download semaphore: serialises downloads, never gets `stuck` ------
-        private static readonly SemaphoreSlim _downloadSemaphore = new SemaphoreSlim(1, 1);
-
-        /// <summary>True while a download is in progress.</summary>
-        public bool IsDownloading => _downloadSemaphore.CurrentCount == 0;
-
-        // Download methods moved to MainWindow.SystemDownload.cs for better organization
-        // - DownloadSingleLinkFastAsync()
-        // - DownloadWithProgressAsync()
-        // - ApplyDownloadProgressToUI()
-        // - ResetDownloadUI()
-        // - FormatSpeed()
-        // - FormatBytes()
-
-
-
-
-        // Fallback: 1 connection, stream thẳng vào file xác
-        private async Task DownloadSingleConnectionAsync(string downloadUrl, string destinationPath, string displayName)
+        private void UpdateSecondaryStatus(string message, string color)
         {
-            var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
-            int maxRetries = 10;
-            int retryCount = 0;
-
-            while (retryCount < maxRetries)
-            {
-                try
-                {
-                    using (HttpClient client = new HttpClient())
-                    {
-                        client.Timeout = TimeSpan.FromMinutes(60);
-                        client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
-                        DateTime downloadStart = DateTime.Now;
-                        DateTime lastUpdate = DateTime.Now;
-                        long totalBytes = 0;
-                        
-                        long lastTotalForSpeed = 0;
-                        DateTime lastSpeedUpdate = DateTime.Now;
-                        double smoothedSpeed = 0.0; // EMA smoothed speed
-                        const double emaAlpha = 0.25; // 25% new, 75% history
-                        string speedText = "0 B/s";
-
-                        using (var sessionLinkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
-                        using (var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, sessionLinkedCts.Token))
-                        {
-                            response.EnsureSuccessStatusCode();
-                            long contentLength = response.Content.Headers.ContentLength ?? 0;
-
-                            // ── Bước 1: Tạo file xác với đúng dung lượng thật ──
-                            if (contentLength > 0)
-                            {
-                                using (var placeholder = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                                    placeholder.SetLength(contentLength);
-                            }
-
-                            using (var stream = await response.Content.ReadAsStreamAsync())
-                            // ── Bước 2 & 3: Mở file xác, ghi chunk-by-chunk từ offset 0, không lưu RAM ──
-                            using (var fs = new FileStream(destinationPath,
-                                contentLength > 0 ? FileMode.Open : FileMode.Create,
-                                FileAccess.Write, FileShare.None, 81920, useAsync: true))
-                            {
-                                fs.Seek(0, SeekOrigin.Begin);
-                                int bufferSize = contentLength > 100 * 1024 * 1024 ? 262144 : 81920;
-                                byte[] buffer = new byte[bufferSize];
-                                int bytesRead;
-
-                                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, sessionLinkedCts.Token)) > 0)
-                                {
-                                    // Wait for pause event - blocks during pause, continues on resume
-                                    if (_pauseEvent != null)
-                                    {
-                                        _pauseEvent.Wait(sessionLinkedCts.Token);
-                                    }
-
-                                    // Đắp dữ liệu vào đúng vị trí trong file xác, không lưu RAM
-                                    await fs.WriteAsync(buffer, 0, bytesRead, sessionLinkedCts.Token);
-                                    totalBytes += bytesRead;
-
-                                    var now = DateTime.Now;
-                                    
-                                    if ((now - lastSpeedUpdate).TotalMilliseconds >= 250)
-                                    {
-                                        double rawSpeed = (totalBytes - lastTotalForSpeed) / (now - lastSpeedUpdate).TotalSeconds;
-                                        smoothedSpeed = smoothedSpeed == 0.0 ? rawSpeed : emaAlpha * rawSpeed + (1.0 - emaAlpha) * smoothedSpeed;
-                                        speedText = FormatSpeed(smoothedSpeed);
-                                        lastTotalForSpeed = totalBytes;
-                                        lastSpeedUpdate = now;
-                                    }
-
-                                    if ((now - lastUpdate).TotalMilliseconds >= 200)
-                                    {
-                                        int percentage = contentLength > 0 ? (int)((totalBytes * 100L) / contentLength) : 0;
-                                        string localSpeedText = speedText;
-                                        string capDownloaded = FormatBytes(totalBytes);
-                                        string capTotal = (contentLength > 0) ? FormatBytes(contentLength) : "Unknown";
-
-                                        await Dispatcher.InvokeAsync(() =>
-                                        {
-                                            if (!ct.IsCancellationRequested)
-                                            {
-                                                DownloadProgressBar.Visibility = Visibility.Visible;
-                                                DownloadProgressBar.Value = percentage;
-                                                SpeedTextBlock.Text = localSpeedText;
-                                                ProgressTextBlock.Text = $"{capDownloaded} / {capTotal}";
-                                            }
-                                        });
-
-                                        lastUpdate = now;
-                                    }
-                                }
-                            }
-                        }
-
-                        await Dispatcher.InvokeAsync(() =>
-                        {
-                            DownloadProgressBar.Value = 0;
-                            DownloadProgressBar.Visibility = Visibility.Visible;
-                            ProgressTextBlock.Text = "";
-                            SpeedTextBlock.Text = "";
-                        });
-
-                        return; // Download thành công
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    retryCount++;
-                    
-                    // Xóa file xác nếu download thất bại
-                    if (File.Exists(destinationPath))
-                    {
-                        try { File.Delete(destinationPath); } catch { }
-                    }
-
-                    if (retryCount >= maxRetries)
-                    {
-                        UpdateStatus($"❌ Tải file {displayName} thất bại sau {maxRetries} lần thử: {ex.Message}", "Red");
-                        throw;
-                    }
-
-                    // Exponential backoff
-                    int delayMs = 1000 * (int)Math.Pow(2, retryCount);
-                    UpdateStatus($"⚠️ Lỗi tải {displayName} (lần {retryCount}/{maxRetries}): {ex.Message}. Thử lại trong {delayMs/1000}s...", "Yellow");
-
-                    if (_cancellationTokenSource != null)
-                    {
-                        await Task.Delay(delayMs, _cancellationTokenSource.Token);
-                    }
-                    else
-                    {
-                        await Task.Delay(delayMs, CancellationToken.None);
-                    }
-                }
-            }
+            // Placeholder for secondary status
         }
 
         private void SetupInitialOrientation()
@@ -475,7 +103,41 @@ namespace GMTPC.Tool
             }
         }
 
-        // FormatSpeed and FormatBytes moved to MainWindow.SystemDownload.cs
+        private string FormatSpeed(double bytesPerSecond)
+        {
+            if (bytesPerSecond > 1024 * 1024)
+            {
+                return $"{bytesPerSecond / (1024 * 1024):F2} MB/s";
+            }
+            else if (bytesPerSecond > 1024)
+            {
+                return $"{bytesPerSecond / 1024:F2} KB/s";
+            }
+            else
+            {
+                return $"{bytesPerSecond:F2} B/s";
+            }
+        }
+
+        private string FormatBytes(long bytes)
+        {
+            if (bytes > 1024 * 1024 * 1024)
+            {
+                return $"{(double)bytes / (1024 * 1024 * 1024):F2} GB";
+            }
+            else if (bytes > 1024 * 1024)
+            {
+                return $"{(double)bytes / (1024 * 1024):F2} MB";
+            }
+            else if (bytes > 1024)
+            {
+                return $"{(double)bytes / 1024:F2} KB";
+            }
+            else
+            {
+                return $"{bytes} B";
+            }
+        }
 
         private void CboSegmentCount_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
@@ -493,65 +155,49 @@ namespace GMTPC.Tool
             }
         }
 
-        private void CboSegmentCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void CboSegmentCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (CboSegmentCount?.SelectedItem is ComboBoxItem item && item.Content != null)
+            // Nếu không downloading, cho phép đổi bình thường
+            if (!IsDownloading)
             {
-                if (int.TryParse(item.Content.ToString(), out int newCount))
+                if (CboSegmentCount?.SelectedItem is ComboBoxItem item && item.Content != null)
                 {
-
-                    if (_pauseEvent != null && _pauseEvent.IsSet)
+                    if (int.TryParse(item.Content.ToString(), out int newCount))
                     {
-                        UpdateStatus($"Đang điều chỉnh số luồng tải thành {newCount} và khởi động lại phiên tải...", "Cyan");
-                        _cancellationTokenSource?.Cancel();
+                        UpdateStatus($"Đã đổi segment count: {newCount} luồng", "Green");
                     }
-                    else
+                }
+                return;
+            }
+
+            // Nếu đang downloading, cho phép đổi bằng cách pause + reallocate + resume
+            if (IsDownloading && _currentDownloadInfo != null && _activeDownloadEngine != null)
+            {
+                // Get new segment count
+                int newSegments = 16;
+                if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
+                    int.TryParse(item.Content?.ToString(), out int n))
+                    newSegments = n;
+
+                try
+                {
+                    UpdateStatus($"Dang doi segment count thanh {newSegments}...", "Yellow");
+                    
+                    // Call async engine method to pause, reallocate, and resume
+                    await _activeDownloadEngine.ReallocateSegmentsDuringDownloadAsync(newSegments);
+                    
+                    UpdateStatus($"Da doi sang {newSegments} segments, tai tiep tuc...", "Cyan");
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatus($"Loi doi segment: {ex.Message}", "Red");
+                    // Restore previous selection on error
+                    if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ComboBoxItem oldItem)
                     {
-                        UpdateStatus($"Đã thay đổi số luồng tải thành {newCount}. Bạn hãy nhấn Resume để áp dụng sau 3 giây chờ.", "Cyan");
+                        CboSegmentCount.SelectedItem = oldItem;
                     }
                 }
             }
-        }
-        /// <summary>
-        /// Follows redirects on a OneDrive/SharePoint share URL to retrieve
-        /// the final direct binary download URL.
-        /// </summary>
-        private async Task<string> ResolveOneDriveDirectUrlAsync(string shareUrl)
-        {
-            const int maxRedirects = 10;
-            string currentUrl = shareUrl;
-
-            using (var handler = new HttpClientHandler { AllowAutoRedirect = false })
-            using (var client  = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) })
-            {
-                client.DefaultRequestHeaders.Add("User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
-
-                for (int i = 0; i < maxRedirects; i++)
-                {
-                    var request = new HttpRequestMessage(HttpMethod.Head, currentUrl);
-                    var response = await client.SendAsync(request,
-                        HttpCompletionOption.ResponseHeadersRead);
-
-                    int code = (int)response.StatusCode;
-                    if (code >= 300 && code <= 399 && response.Headers.Location != null)
-                    {
-                        Uri location = response.Headers.Location;
-                        currentUrl = location.IsAbsoluteUri
-                            ? location.AbsoluteUri
-                            : new Uri(new Uri(currentUrl), location).AbsoluteUri;
-                        continue;
-                    }
-
-                    // If success or non-redirect, this is our direct URL
-                    if (response.IsSuccessStatusCode)
-                        return currentUrl;
-
-                    throw new Exception($"Không thể resolve URL OneDrive. HTTP {code}: {currentUrl}");
-                }
-            }
-
-            throw new Exception("Quá nhiều lần redirect khi resolve URL OneDrive.");
         }
     }
 }

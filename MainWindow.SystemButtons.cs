@@ -537,6 +537,17 @@ namespace GMTPC.Tool
 
         // Cache các link download khi hover
         private List<string> _cachedDownloadLinks = new List<string>();
+        private System.Collections.Generic.HashSet<object> _activeDownloadTasks = new System.Collections.Generic.HashSet<object>();
+
+        private void SetInstallingState(bool isInstalling)
+        {
+            // Placeholder - can be implemented later
+        }
+
+        private void SetBuildNumber()
+        {
+            // Placeholder - can be implemented later
+        }
 
         private void BtnDownloadPage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {

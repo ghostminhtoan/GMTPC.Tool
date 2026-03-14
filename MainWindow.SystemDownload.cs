@@ -22,6 +22,61 @@ namespace GMTPC.Tool
     public partial class MainWindow
     {
         // ===================================================================
+        // Current Download Info - Để track download hiện tại cho việc restart
+        // ===================================================================
+        private class CurrentDownloadInfo
+        {
+            public string DownloadUrl { get; set; }
+            public string DestinationPath { get; set; }
+            public string DisplayName { get; set; }
+            public bool UseProbe { get; set; }  // true = DownloadWithProgressAsync, false = DownloadSingleLinkFastAsync
+        }
+
+        private CurrentDownloadInfo _currentDownloadInfo = null;
+
+        // Track the active download engine so UI can call ReallocateSegmentsDuringDownload()
+        private SegmentedDownloadEngineOptimized _activeDownloadEngine = null;
+
+        // Fields cho download
+        private CancellationTokenSource _cancellationTokenSource;
+        private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
+        private SemaphoreSlim _downloadSemaphore = new SemaphoreSlim(1);
+
+        // IsDownloading property đã có trong MainWindow.SystemBar.cs
+        // Các hàm FormatSpeed, FormatBytes cũng đã có trong MainWindow.SystemBar.cs
+
+        // ===================================================================
+        // DOWNLOAD WITH RETRY - For unstable connections
+        // ===================================================================
+        private async Task DownloadWithRetryAsync(string downloadUrl, string destinationPath, string displayName, int maxRetries = 5)
+        {
+            int retryCount = 0;
+            while (retryCount < maxRetries)
+            {
+                try
+                {
+                    await DownloadSingleLinkFastAsync(downloadUrl, destinationPath, displayName);
+                    return; // Success
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    retryCount++;
+                    if (retryCount >= maxRetries)
+                    {
+                        UpdateStatus($"Failed to download {displayName} after {maxRetries} attempts: {ex.Message}", "Red");
+                        throw;
+                    }
+                    UpdateStatus($"Download retry {retryCount}/{maxRetries} for {displayName}: {ex.Message}", "Yellow");
+                    await Task.Delay(1000 * retryCount);
+                }
+            }
+        }
+
+        // ===================================================================
         // FAST SINGLE-LINK DOWNLOAD - "Golden Standard"
         // ===================================================================
         // Sử dụng cho: TẤT CẢ checkbox tải đơn link (1 file .exe, .msi)
@@ -102,6 +157,15 @@ namespace GMTPC.Tool
             await _downloadSemaphore.WaitAsync();
             try
             {
+                // LƯU download info để có thể restart nếu user đổi segment
+                _currentDownloadInfo = new CurrentDownloadInfo
+                {
+                    DownloadUrl = downloadUrl,
+                    DestinationPath = destinationPath,
+                    DisplayName = displayName,
+                    UseProbe = true  // Đây là DownloadWithProgressAsync (có probe)
+                };
+
                 var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
 
                 int segments = 16; // Default to 16 segments for optimal performance
@@ -142,13 +206,14 @@ namespace GMTPC.Tool
                 try
                 {
                     // Use optimized download engine with probe (for Archive.org, Mediafire)
-                    var engine = new SegmentedDownloadEngineOptimized();
-                    await engine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct, _pauseEvent);
+                    _activeDownloadEngine = new SegmentedDownloadEngineOptimized();
+                    await _activeDownloadEngine.DownloadAsync(downloadUrl, destinationPath, segments, uiProgress, ct, _pauseEvent);
 
                     await Dispatcher.InvokeAsync(() => ResetDownloadUI());
                 }
                 finally
                 {
+                    _activeDownloadEngine = null;
                     DownloadRegistry.Unregister(destinationPath);
                 }
                 return;
@@ -246,36 +311,6 @@ namespace GMTPC.Tool
             }
         }
 
-        // ===================================================================
-        // HELPER: Format Speed (B/s, KB/s, MB/s, GB/s)
-        // ===================================================================
-        private string FormatSpeed(double bytesPerSecond)
-        {
-            if (bytesPerSecond < 1024)
-                return $"{bytesPerSecond:F2} B/s";
-            if (bytesPerSecond < 1024 * 1024)
-                return $"{bytesPerSecond / 1024:F2} KB/s";
-            if (bytesPerSecond < 1024 * 1024 * 1024)
-                return $"{bytesPerSecond / (1024 * 1024):F2} MB/s";
-            return $"{bytesPerSecond / (1024 * 1024 * 1024):F2} GB/s";
-        }
-
-        // ===================================================================
-        // HELPER: Format Bytes (B, KB, MB, GB, TB)
-        // ===================================================================
-        private string FormatBytes(long bytes)
-        {
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-            int order = 0;
-            double size = bytes;
-
-            while (size >= 1024 && order < sizes.Length - 1)
-            {
-                order++;
-                size /= 1024;
-            }
-
-            return $"{size:0.##} {sizes[order]}";
-        }
+        // FormatSpeed và FormatBytes đã có trong MainWindow.SystemBar.cs
     }
 }
