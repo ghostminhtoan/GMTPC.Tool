@@ -19,6 +19,19 @@ namespace GMTPC.Tool
 {
     public partial class MainWindow
     {
+        // ===================================================================
+        // Current Download Info - Để track download hiện tại cho việc restart
+        // ===================================================================
+        private class CurrentDownloadInfo
+        {
+            public string DownloadUrl { get; set; }
+            public string DestinationPath { get; set; }
+            public string DisplayName { get; set; }
+            public bool UseProbe { get; set; }  // true = DownloadWithProgressAsync, false = DownloadSingleLinkFastAsync
+        }
+
+        private CurrentDownloadInfo _currentDownloadInfo = null;
+
         // Fields cho download
         private CancellationTokenSource _cancellationTokenSource;
         private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
@@ -138,6 +151,15 @@ namespace GMTPC.Tool
             await _downloadSemaphore.WaitAsync();
             try
             {
+                // LƯU download info để có thể restart nếu user đổi segment
+                _currentDownloadInfo = new CurrentDownloadInfo
+                {
+                    DownloadUrl = downloadUrl,
+                    DestinationPath = destinationPath,
+                    DisplayName = displayName,
+                    UseProbe = true  // Đây là DownloadWithProgressAsync (có probe)
+                };
+
                 var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
 
                 int segments = 16; // Default to 16 segments for optimal performance

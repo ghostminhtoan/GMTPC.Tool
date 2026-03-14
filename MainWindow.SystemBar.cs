@@ -155,28 +155,115 @@ namespace GMTPC.Tool
             }
         }
 
-        private void CboSegmentCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void CboSegmentCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Không cho phép đổi segment khi đang tải
-            // Chỉ có thể đổi segment TRƯỚC khi nhấn Install
-            if (IsDownloading)
+            // Nếu không downloading, cho phép đổi bình thường
+            if (!IsDownloading)
             {
-                UpdateStatus("⚠️ Không thể đổi segment trong lúc download. Vui lòng nhấn Stop rồi thử lại.", "Orange");
-                
-                // Khôi phục lại giá trị cũ
-                if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ComboBoxItem oldItem)
+                if (CboSegmentCount?.SelectedItem is ComboBoxItem item && item.Content != null)
                 {
-                    CboSegmentCount.SelectedItem = oldItem;
+                    if (int.TryParse(item.Content.ToString(), out int newCount))
+                    {
+                        UpdateStatus($"Đã đổi segment count: {newCount} luồng", "Green");
+                    }
                 }
                 return;
             }
 
-            // Nếu không downloading, cho phép đổi bình thường
-            if (CboSegmentCount?.SelectedItem is ComboBoxItem item && item.Content != null)
+            // Nếu đang downloading, cho user chọn: Dừng và restart với segment mới hay không
+            if (IsDownloading && _currentDownloadInfo != null)
             {
-                if (int.TryParse(item.Content.ToString(), out int newCount))
+                var result = MessageBox.Show(
+                    "Thay đổi segment sẽ dừng download hiện tại và bắt đầu lại.\n\nBạn có chắc chắn không?",
+                    "Thay đổi Segment Count",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.No)
                 {
-                    UpdateStatus($"Đã đổi segment count: {newCount} luồng", "Green");
+                    // Khôi phục lại giá trị cũ
+                    if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ComboBoxItem oldItem)
+                    {
+                        CboSegmentCount.SelectedItem = oldItem;
+                    }
+                    return;
+                }
+
+                // Get new segment count
+                int newSegments = 16;
+                if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
+                    int.TryParse(item.Content?.ToString(), out int n))
+                    newSegments = n;
+
+                // Stop current download
+                UpdateStatus("Dang dung download de thay doi segment...", "Orange");
+                _cancellationTokenSource?.Cancel();
+
+                // Wait for download to fully stop
+                try { await Task.Delay(500); } catch { }
+
+                // Reset UI and download state
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    ResetDownloadUI();
+                    IsDownloading = false;
+                });
+
+                // Restart with new segment count
+                try
+                {
+                    UpdateStatus($"Tai lai voi {newSegments} segments...", "Cyan");
+
+                    _cancellationTokenSource = new CancellationTokenSource();
+                    var ct = _cancellationTokenSource.Token;
+
+                    Progress<DownloadProgressInfo> uiProgress = null;
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        ResetDownloadUI();
+                        uiProgress = new Progress<DownloadProgressInfo>(info =>
+                        {
+                            if (!ct.IsCancellationRequested)
+                                ApplyDownloadProgressToUI(info);
+                        });
+                    });
+
+                    // Create new context with updated segment count
+                    var taskContext = new DownloadTaskContext
+                    {
+                        TaskName = _currentDownloadInfo.DisplayName,
+                        DestinationPath = _currentDownloadInfo.DestinationPath,
+                        CancellationTokenSource = _cancellationTokenSource,
+                        PauseEvent = _pauseEvent,
+                        StartTime = DateTime.Now,
+                        IsPaused = false
+                    };
+
+                    DownloadRegistry.Register(_currentDownloadInfo.DestinationPath, taskContext);
+
+                    // Restart download with new segment count
+                    var engine = new SegmentedDownloadEngineOptimized();
+                    await engine.DownloadAsync(
+                        _currentDownloadInfo.DownloadUrl,
+                        _currentDownloadInfo.DestinationPath,
+                        newSegments,
+                        uiProgress,
+                        ct,
+                        _pauseEvent);
+
+                    UpdateStatus($"Tai xong {_currentDownloadInfo.DisplayName}", "Lime");
+                }
+                catch (OperationCanceledException)
+                {
+                    UpdateStatus("Dung tai (user dung segment change)", "Orange");
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatus($"Loi tai: {ex.Message}", "Red");
+                }
+                finally
+                {
+                    await Dispatcher.InvokeAsync(() => IsDownloading = false);
                 }
             }
         }
