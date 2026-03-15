@@ -565,8 +565,8 @@ namespace GMTPC.Tool.Services
 
         // ── Optimized Segmented Download ─────────────────────────────────────
         /// <summary>
-        /// Downloads file using parallel segments with simultaneous connection firing
-        /// All segments start at the same time via Task.WhenAll (no sequential ramp-up)
+        /// Downloads file using parallel segments with INSTANT simultaneous firing
+        /// All segments fire at exactly the same time via Task.WhenAll (zero ramp-up delay)
         /// Supports pause/resume via ManualResetEventSlim
         /// Supports dynamic segment count changes via ReallocateSegmentsDuringDownload()
         /// If fileSize is 0, will discover it from first response Content-Length header
@@ -602,7 +602,7 @@ namespace GMTPC.Tool.Services
             _currentDownloadedBytes = 0;
             _currentSegments = segments;
             _pauseEvent = pauseEvent;
-            
+
             long regionSize = fileSize / segments;
             var regionProgress = new long[segments];
             var regionStarts = new long[segments];
@@ -646,14 +646,26 @@ namespace GMTPC.Tool.Services
                 Lock = new object()
             };
 
-            // UI reporting task (throttled to 5Hz)
+            // CRITICAL: Create ALL worker tasks FIRST, then start them simultaneously
+            var workers = new Task[segments];
+            for (int i = 0; i < segments; i++)
+            {
+                int workerIndex = i;
+                workers[i] = Task.Run(async () =>
+                {
+                    await ProcessChunksAsync(url, destinationPath, _chunkQueue, _retryQueue,
+                        workerIndex, regionProgress, progressState, ct, pauseEvent);
+                }, ct);
+            }
+
+            // UI reporting task (throttled to 10Hz for responsive display)
             using (var uiCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
             {
                 var uiTask = Task.Run(async () =>
                 {
                     while (!uiCts.Token.IsCancellationRequested)
                     {
-                        try { await Task.Delay(200, uiCts.Token); } catch { break; }
+                        try { await Task.Delay(100, uiCts.Token); } catch { break; }
 
                         long done;
                         double spd;
@@ -683,29 +695,15 @@ namespace GMTPC.Tool.Services
 
                 try
                 {
-                    // CRITICAL: Fire ALL 16 segments SIMULTANEOUSLY with Task.WhenAll
-                    // No sequential ramp-up - all HTTP GET requests start at once
-                    var workers = new Task[segments];
-                    for (int i = 0; i < segments; i++)
-                    {
-                        int workerIndex = i;
-                        workers[i] = Task.Run(async () =>
-                        {
-                            await ProcessChunksAsync(url, destinationPath, _chunkQueue, _retryQueue,
-                                workerIndex, regionProgress, progressState, ct, pauseEvent);
-                        }, ct);
-                    }
-
                     // Wait for ALL workers to complete (or cancel) simultaneously
                     await Task.WhenAll(workers);
-                    
+
                     // After all workers complete, wait a moment for final progress report
-                    try { await Task.Delay(500, ct); } catch { }
+                    try { await Task.Delay(200, ct); } catch { }
                 }
                 finally
                 {
                     // Cancel UI task - it will stop when CT is cancelled
-                    // UI task is linked to CT, so it will automatically stop on cancellation
                     uiCts.Cancel();
                     try { await uiTask.ConfigureAwait(false); } catch { }
                 }
@@ -727,7 +725,7 @@ namespace GMTPC.Tool.Services
         /// Each worker opens its own FileStream with RandomAccess for lock-free parallel writes
         /// Each segment writes directly to its pre-allocated offset without global file lock
         /// Waits on pauseEvent during pause - resumes when event is set
-        /// PAUSE 2 GIÂY KHI ĐỔI SEGMENT - Gộp chunks đã tải dở
+        /// ZERO FLUSH OVERHEAD - Async I/O handles buffering automatically
         /// </summary>
         private async Task ProcessChunksAsync(string url, string destinationPath,
             ConcurrentQueue<ChunkRange> chunkQueue, ConcurrentQueue<ChunkRange> retryQueue,
@@ -754,8 +752,6 @@ namespace GMTPC.Tool.Services
 
                     try
                     {
-                        ChunkRange lastChunk = null; // Track last chunk for pause logic
-
                         while (!ct.IsCancellationRequested)
                         {
                             // WAIT ON PAUSE EVENT - non-blocking async wait during pause, continues when resumed
@@ -773,19 +769,10 @@ namespace GMTPC.Tool.Services
                                     break; // No more work
                             }
 
-                            // Handle segment transitions efficiently
-                            // Flush any pending writes to ensure data consistency during segment change
-                            if (lastChunk != null && chunk.Start > lastChunk.End)
-                            {
-                                // Flush buffers immediately - no artificial delays
-                                // Delays cause massive throughput loss with 32 concurrent workers
-                                await fs.FlushAsync(ct);
-                            }
-
                             try
                             {
                                 string currentUrl = url;
-                                
+
                                 // Handle redirects
                                 for (int redirect = 0; redirect < MaxRedirects; redirect++)
                                 {
@@ -821,7 +808,6 @@ namespace GMTPC.Tool.Services
                                                 fs.Seek(chunk.Start + chunk.Downloaded, SeekOrigin.Begin);
 
                                                 int read;
-                                                int emptyReads = 0;
 
                                                 while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, cts.Token)) > 0)
                                                 {
@@ -837,10 +823,10 @@ namespace GMTPC.Tool.Services
                                                         _currentDownloadedBytes += read;  // Track for dynamic segment reallocation
                                                         regionProgress[regionIndex] += read;
 
-                                                        // Speed calculation
+                                                        // Speed calculation - update every 0.1s for responsive display
                                                         var now = DateTime.Now;
                                                         double elapsed = (now - progressState.LastSpeedTime).TotalSeconds;
-                                                        if (elapsed >= 0.2)
+                                                        if (elapsed >= 0.1)
                                                         {
                                                             double rawSpeed = (progressState.TotalDownloaded - progressState.LastSpeedBytes) / elapsed;
                                                             progressState.SmoothedSpeed = progressState.SmoothedSpeed == 0
@@ -850,19 +836,6 @@ namespace GMTPC.Tool.Services
                                                             progressState.LastSpeedTime = now;
                                                         }
                                                     }
-
-                                                    emptyReads = 0;
-                                                }
-
-                                                // Handle stalled connections
-                                                if (emptyReads >= 2 && chunk.Downloaded < chunk.Length)
-                                                {
-                                                    _retryQueue.Enqueue(new ChunkRange
-                                                    {
-                                                        Start = chunk.Start + chunk.Downloaded,
-                                                        End = chunk.End,
-                                                        Downloaded = 0
-                                                    });
                                                 }
                                             }
                                         }
@@ -877,16 +850,13 @@ namespace GMTPC.Tool.Services
                             catch
                             {
                                 // Re-queue failed chunk
-                                _retryQueue.Enqueue(new ChunkRange
+                                retryQueue.Enqueue(new ChunkRange
                                 {
                                     Start = chunk.Start + chunk.Downloaded,
                                     End = chunk.End,
                                     Downloaded = 0
                                 });
                             }
-
-                            // Lưu lại chunk đã hoàn thành để theo dõi pause khi đổi segment
-                            lastChunk = chunk;
                         }
                     }
                     finally
