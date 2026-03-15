@@ -20,7 +20,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using GMTPC.Tool.Services;
 
 namespace GMTPC.Tool
 {

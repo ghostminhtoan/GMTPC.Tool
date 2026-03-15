@@ -22,7 +22,6 @@ using System.Windows.Input;
 using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
-using GMTPC.Tool.Services;
 
 namespace GMTPC.Tool
 {

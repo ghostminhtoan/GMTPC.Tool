@@ -1,4 +1,5 @@
-<!-- AI Summary: 2026-03-13 - Updated all GitHub link checkboxes to use DownloadMultiSegmentFastAsync (16 segments) -->
+<!-- AI Summary: 2026-03-15 - Merged all Services into MainWindow.*.cs files, deleted Services folder -->
+<!-- Previous: 2026-03-13 - Updated all GitHub link checkboxes to use DownloadMultiSegmentFastAsync (16 segments) -->
 
 <system_context>
 Bạn là một AI Code Agent chuyên nghiệp, làm việc trên dự án "MMT Tools" (WPF, .NET 4.8, C# 7.3).
@@ -6,7 +7,7 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
 </system_context>
 
 <global_rules>
-*Quan trọng: 
+*Quan trọng:
 - Luôn build vào \bin\Release\net48\ sau khi code xong, nếu lỗi thì phải sửa đến khi không còn lỗi nữa thì mới ngưng.
 - Sau khi build xong luôn luôn phải tạo git push checkpoint.
 
@@ -14,6 +15,85 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
 2. Luôn lưu file ở định dạng UTF-8.
 3. Luôn thêm/cập nhật khối comment "AI Summary" ở đầu MỌI file bạn chỉnh sửa (Ghi rõ ngày cập nhật và tóm tắt thao tác).
 </global_rules>
+
+<file_structure_reference>
+    <!-- Kiến trúc Partial Classes của dự án (UPDATED 2026-03-15) -->
+
+    <file name="MainWindow.xaml">
+        - Định nghĩa giao diện UI
+        - Khai báo các control: Button, CheckBox, StatusBar, TabControl
+    </file>
+
+    <file name="MainWindow.xaml.cs">
+        - Constructor và InitializeComponent()
+        - KHÔNG thêm code logic vào file này
+    </file>
+
+    <file name="MainWindow.DriveSelector.cs">
+        - DriveInfoEx class - Drive information wrapper
+        - DriveScannerService methods (merged from Services/DriveScannerService.cs)
+        - ScanDrivesAsync(), GetFriendlyDriveName(), EnsureTempFolder(), ValidateDriveForDownload()
+        - InitializeDriveScanner(), ScanAndPopulateDrivesAsync()
+        - CboDriveSelector_SelectionChanged() - Auto path routing
+        - DownloadConfiguration.SetTempBasePath() integration
+        - Multi-task queue: CollectSelectedTasks(), ExecuteTaskQueueAsync()
+    </file>
+
+    <file name="MainWindow.SystemDownload.cs">
+        - DownloadConfiguration class - Global download path configuration (merged from Services/DownloadConfiguration.cs)
+        - DownloadTaskContext class - Download task state tracking
+        - DownloadRegistry class - Global registry for all active downloads (merged from Services/DownloadRegistry.cs)
+        - DownloadProgressInfo class - Progress reporting structure
+        - SegmentedDownloadEngineOptimized class - High-performance download engine (merged from Services/SegmentedDownloadEngine.cs & .Optimized.cs)
+        - DownloadSingleLinkFastAsync() - "Golden Standard" cho single-link downloads
+        - DownloadWithProgressAsync() - Cho Archive.org, Mediafire (có probe)
+        - DownloadMultiPartAsync() - Cho multi-part games
+        - DownloadWithRetryAsync() - Retry logic cho unstable connections
+        - ApplyDownloadProgressToUI(), ResetDownloadUI() - UI helpers
+    </file>
+
+    <file name="MainWindow.SystemArguments.cs">
+        - Khai báo tất cả hằng số DOWNLOAD_URL và INSTALL_ARGUMENTS
+        - Phương thức DownloadWithProgressAsync, DownloadWithRetryAsync (wrapper calls to SystemDownload)
+        - Phương thức Install*Async methods với MessageBox, argument logic
+    </file>
+
+    <file name="MainWindow.SystemBar.cs">
+        - Phương thức UpdateStatus() để hiển thị trạng thái
+        - Progress Bar và Connection Trace UI handling
+        - UpdateConnectionTraceOrientation()
+        - IsDownloading property, FormatSpeed(), FormatBytes() helper methods
+    </file>
+
+    <file name="MainWindow.SystemButtons.cs">
+        - Xử lý sự kiện các Button: BtnInstall, BtnSelectAll, BtnSelectNone
+        - Phương thức UpdateInstallButtonState()
+        - Phương thức Checkbox_MouseEnter()
+        - Phương thức BtnDownloadPage_MouseRightButtonUp()
+    </file>
+
+    <file name="MainWindow.Tab*.cs">
+        - TabPopular.cs, TabOffice.cs, TabBrowser.cs, TabMultimedia.cs, TabGaming.cs, TabInfo.cs, etc.
+        - Khai báo và xử lý checkbox cho từng Tab
+        - Phương thức Install*Async() specific to each tab
+    </file>
+
+    <file name="CheckboxList.cursorrules">
+        - Tài liệu danh sách tất cả checkbox
+        - Cập nhật sau mỗi lần tạo/sửa checkbox
+    </file>
+
+    <note>
+        **Services folder DELETED on 2026-03-15:**
+        - All code from Services/*.cs has been merged into MainWindow.DriveSelector.cs and MainWindow.SystemDownload.cs
+        - Services/DriveScannerService.cs → MainWindow.DriveSelector.cs
+        - Services/DownloadConfiguration.cs → MainWindow.SystemDownload.cs
+        - Services/DownloadRegistry.cs → MainWindow.SystemDownload.cs
+        - Services/DownloadTaskManager.cs → MainWindow.SystemDownload.cs (not used, removed)
+        - Services/SegmentedDownloadEngine.cs → MainWindow.SystemDownload.cs
+        - Services/SegmentedDownloadEngine.Optimized.cs → MainWindow.SystemDownload.cs
+    </note>
+</file_structure_reference>
 
 <download_architecture>
     <!-- ==================== DOWNLOAD METHODS ==================== -->

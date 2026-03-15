@@ -24,7 +24,6 @@ using Microsoft.Win32;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using GMTPC.Tool.Services;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Net.Http;
