@@ -547,7 +547,38 @@ namespace GMTPC.Tool
 
         private void SetBuildNumber()
         {
-            // Placeholder - can be implemented later
+            // Hiển thị thời gian build từ BuildInfo.BUILD_NUMBER
+            // Format: YYYY-mm-dd / hh:mm:ss (ví dụ: 2026-03-15 / 14:30:00)
+            if (BuildNumberTextBlock != null)
+            {
+                try
+                {
+                    string buildNumber = BuildInfo.BUILD_NUMBER;
+                    // Parse build number: "2026-03-15-09-21-46" → "2026-03-15 / 09:21:46"
+                    if (!string.IsNullOrEmpty(buildNumber))
+                    {
+                        string[] parts = buildNumber.Split('-');
+                        if (parts.Length >= 6)
+                        {
+                            string date = $"{parts[0]}-{parts[1]}-{parts[2]}";
+                            string time = $"{parts[3]}:{parts[4]}:{parts[5]}";
+                            BuildNumberTextBlock.Text = $"Build: {date} / {time}";
+                        }
+                        else
+                        {
+                            BuildNumberTextBlock.Text = $"Build: {buildNumber}";
+                        }
+                    }
+                    else
+                    {
+                        BuildNumberTextBlock.Text = "Build: ----";
+                    }
+                }
+                catch
+                {
+                    BuildNumberTextBlock.Text = "Build: ----";
+                }
+            }
         }
 
         private void BtnDownloadPage_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)

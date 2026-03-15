@@ -1,11 +1,10 @@
 // =======================================================================
 // MainWindow.SystemBar.cs
 // AI Summary:
-// Date: 2026-03-14
-// - Fixed CboSegmentCount: Disable segment change during download
-// - Users can only change segment BEFORE clicking Install, not during
-// - Prevents "complete all tasks" error by disallowing pause/resume with different segment count
-// - Fixed warnings CS0169: Marked _isReSegmenting and _pauseCts as unused (reserved for future use)
+// Date: 2026-03-15
+// - Added SetBuildNumber(): Hiển thị thời gian build từ BuildInfo.BUILD_NUMBER
+// - Format: YYYY-mm-dd / hh:mm:ss (ví dụ: 2026-03-15 / 14:30:00)
+// Previous: 2026-03-14 - Fixed CboSegmentCount segment change handling
 // Chức năng: Xử lý progress bar, connection trace, và download UI
 // =======================================================================
 using System;

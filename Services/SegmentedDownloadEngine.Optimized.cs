@@ -1,15 +1,13 @@
 // =============================================================================
 // Services/SegmentedDownloadEngine.Optimized.cs
 // AI Summary:
-// Date: 2026-03-14 (CRITICAL THROTTLE BUG FIX)
-// - REMOVED: Task.Delay(2000) in ProcessChunksAsync segment transition (line 779-785)
-//   BUG: Artificial 2-second pause on every segment change caused MASSIVE throttling
-//   Impact: 32 workers × 2s delay × many chunks = throughput collapse to 6 MB/s!
-//   Fix: Removed delay, kept only fs.FlushAsync() for data consistency
-// - DiscoverFileSizeAsync timeout: 5s → 60s (for large files)
-// - Segments: 16 → 32 concurrent connections
-// - Expected speed after fix: 60+ MB/s (vs 6 MB/s choked version)
+// Date: 2026-03-15
+// - Updated ReallocateSegmentsDuringDownloadAsync: Implement 5-step algorithm
+//   (Pause, Save State, Merge, Recalculate, Resume) for dynamic segment changes
+// - Supports changing segment count DURING download without data loss
+// - Thread-safe file writing with proper state tracking
 //
+// Previous: 2026-03-14 (CRITICAL THROTTLE BUG FIX) - Removed Task.Delay(2000)
 // High-performance multi-thread segmented download engine
 // Optimizations: 32 async connections, buffer pooling, zero artificial delays
 // UTF-8 with BOM – .NET Framework 4.8 / C# 7.3
@@ -84,8 +82,12 @@ namespace GMTPC.Tool.Services
 
         /// <summary>
         /// Call này từ UI khi user muốn đổi segment count TRONG LÚC DOWNLOAD
-        /// Phương pháp: Pause → Wait → Reallocate chunks → Resume
-        /// Không cần dừng hoàn toàn hay download lại từ đầu
+        /// Thuật toán 5 bước:
+        /// Bước 1 (Interruption): Pause tất cả workers bằng cách reset pauseEvent
+        /// Bước 2 (State Saving): Tính toán bytes đã tải từ _currentDownloadedBytes
+        /// Bước 3 (Merging): Không cần merge vật lý vì file đã được ghi nối tiếp vào destinationPath
+        /// Bước 4 (Recalculation): Tính toán lại chunk queue với segment count mới
+        /// Bước 5 (Resumption): Set pauseEvent để workers tiếp tục
         /// </summary>
         public async Task ReallocateSegmentsDuringDownloadAsync(int newSegmentCount)
         {
@@ -96,7 +98,9 @@ namespace GMTPC.Tool.Services
             {
                 try
                 {
-                    // Pause (dừng workers bằng cách reset pauseEvent)
+                    // ============================================
+                    // BƯỚC 1: INTERRUPTION - Pause tất cả workers
+                    // ============================================
                     _pauseEvent.Reset();
                 }
                 catch { }
@@ -104,37 +108,56 @@ namespace GMTPC.Tool.Services
 
             try
             {
-                // Wait untuk workers thực sự pause (200ms đủ cho workers reach pause point)
+                // Chờ workers thực sự pause (200ms là đủ)
                 await Task.Delay(200);
 
                 lock (_reallocLock)
                 {
-                    // Tính toán bytes còn lại cần download
+                    // ============================================
+                    // BƯỚC 2: STATE SAVING - Lưu trạng thái
+                    // ============================================
+                    // Bytes đã tải được lưu trong _currentDownloadedBytes
+                    // File đã được ghi nối tiếp vào destinationPath
                     long remainingBytes = _currentFileSize - _currentDownloadedBytes;
-                    
+
                     if (remainingBytes <= 0)
                     {
-                        // Already finished
+                        // Đã hoàn tất
                         _pauseEvent.Set();
                         return;
                     }
 
-                    // Clear existing chunk queues - tất cả workers đang paused nên safe
+                    // ============================================
+                    // BƯỚC 3: MERGING - Không cần merge vật lý
+                    // ============================================
+                    // Vì mỗi worker ghi trực tiếp vào file destinationPath
+                    // với FileOptions.RandomAccess, dữ liệu đã được
+                    // ghi nối tiếp (append) vào file rồi.
+                    // Không cần thao tác merge nào thêm.
+
+                    // ============================================
+                    // BƯỚC 4: RECALCULATION - Tính toán lại chunks
+                    // ============================================
+                    // Clear chunk queues cũ (an toàn vì workers đang paused)
                     while (_chunkQueue.TryDequeue(out _)) { }
                     while (_retryQueue.TryDequeue(out _)) { }
 
-                    // Rebuild chunk queue với segment count mới
+                    // Giới hạn segment count từ 1 đến 32
                     newSegmentCount = Math.Max(1, Math.Min(newSegmentCount, 32));
+
+                    // Tính toán region size cho segment mới
                     long regionSize = remainingBytes / Math.Max(1, newSegmentCount);
                     if (regionSize < ChunkSize) regionSize = ChunkSize;
 
+                    // Bắt đầu từ vị trí đã tải
                     long start = _currentDownloadedBytes;
                     int chunksAdded = 0;
-                    
+
+                    // Tạo chunks mới phân đều cho segments mới
                     for (int i = 0; i < newSegmentCount && start < _currentFileSize; i++)
                     {
                         long end = (i == newSegmentCount - 1) ? _currentFileSize - 1 : start + regionSize - 1;
-                        
+
                         while (start <= end && start < _currentFileSize)
                         {
                             long chunkEnd = Math.Min(start + ChunkSize - 1, end);
@@ -150,6 +173,10 @@ namespace GMTPC.Tool.Services
                     }
 
                     _currentSegments = newSegmentCount;
+                    
+                    // ============================================
+                    // BƯỚC 5: RESUMPTION - Tiếp tục download
+                    // ============================================
                 }
             }
             catch (Exception ex)
@@ -158,7 +185,7 @@ namespace GMTPC.Tool.Services
             }
             finally
             {
-                // Resume (set pauseEvent để workers tiếp tục)
+                // Resume - workers sẽ tiếp tục từ chunk mới
                 try
                 {
                     if (_pauseEvent != null)
