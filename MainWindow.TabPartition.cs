@@ -1,4 +1,10 @@
-﻿using System;
+﻿// =======================================================================
+// MainWindow.TabPartition.cs
+// Chức năng: Xử lý checkbox và công cụ partition (DiskGenius, AOMEI)
+// Cập nhật: 2026-03-10 - Tạo file mới cho Tab Partition
+// Cập nhật: 2026-03-14 - Updated to use DownloadSingleLinkFastAsync (16 segments)
+// =======================================================================
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;

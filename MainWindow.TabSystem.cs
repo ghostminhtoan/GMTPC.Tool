@@ -1,4 +1,10 @@
-﻿using System;
+﻿// =======================================================================
+// MainWindow.TabSystem.cs
+// Chức năng: Xử lý checkbox hệ thống (PowerISO, TeraCopy, VPN1111, Google Drive, etc.)
+// Cập nhật: 2026-03-10 - Tạo file mới cho Tab System
+// Cập nhật: 2026-03-14 - Updated to use DownloadSingleLinkFastAsync (16 segments)
+// =======================================================================
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;

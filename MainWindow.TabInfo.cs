@@ -1,3 +1,8 @@
+// =======================================================================
+// MainWindow.TabInfo.cs
+// Chức năng: Hiển thị thông tin hệ thống (OS, CPU, RAM, Disk)
+// Cập nhật: 2026-03-10 - Tạo file mới cho Tab Info
+// =======================================================================
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

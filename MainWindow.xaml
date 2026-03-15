@@ -1,4 +1,11 @@
-﻿<Window x:Class="GMTPC.Tool.MainWindow"
+﻿<!-- =======================================================================
+// MainWindow.xaml
+// Chức năng: Định nghĩa giao diện UI chính của ứng dụng GMTPC Tools
+// Bao gồm: TabControl, CheckBox, Button, StatusBar, ProgressBar
+// Cập nhật: 2026-03-15 - Refactored for cleaner UI structure
+// =======================================================================
+-->
+<Window x:Class="GMTPC.Tool.MainWindow"
          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
          Title="GMTPC Tools" SizeToContent="WidthAndHeight" MinHeight="180" MinWidth="900" MaxHeight="800" MaxWidth="1000"
