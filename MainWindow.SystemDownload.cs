@@ -84,7 +84,7 @@ namespace GMTPC.Tool
         // Ví dụ: VPN1111, MMT Apps, Google Drive, DISM++, NetLimiter, etc.
         //
         // Tại sao nhanh? Bỏ qua ProbeAsync (HEAD request) → tải ngay lập tức
-        // Dùng 16 segments để tăng tốc độ tải
+        // Số segment: Lấy từ CboSegmentCount (user chọn)
         // ===================================================================
         private async Task DownloadSingleLinkFastAsync(string downloadUrl, string destinationPath, string displayName)
         {
@@ -92,6 +92,15 @@ namespace GMTPC.Tool
             try
             {
                 var ct = _cancellationTokenSource?.Token ?? CancellationToken.None;
+
+                // Get segment count from CboSegmentCount (user selection)
+                int segments = 16; // Default to 16 segments for optimal performance
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    if (CboSegmentCount?.SelectedItem is ComboBoxItem item &&
+                        int.TryParse(item.Content?.ToString(), out int n))
+                        segments = n;
+                });
 
                 Progress<DownloadProgressInfo> uiProgress = null;
                 await Dispatcher.InvokeAsync(() =>
@@ -104,7 +113,7 @@ namespace GMTPC.Tool
                     });
                 });
 
-                UpdateStatus($"Đang tải {displayName}...", "Cyan");
+                UpdateStatus($"Đang tải {displayName}... ({segments} threads)", "Cyan");
 
                 // Create download context for global registry
                 var taskContext = new DownloadTaskContext
@@ -122,9 +131,9 @@ namespace GMTPC.Tool
 
                 try
                 {
-                    // FAST PATH + MULTI-SEGMENT: Skip probe, download with 32 segments (max performance)
+                    // FAST PATH + MULTI-SEGMENT: Skip probe, download with selected segments
                     var engine = new SegmentedDownloadEngineOptimized();
-                    await engine.DownloadMultiSegmentFastAsync(downloadUrl, destinationPath, 32, uiProgress, ct, _pauseEvent);
+                    await engine.DownloadMultiSegmentFastAsync(downloadUrl, destinationPath, segments, uiProgress, ct, _pauseEvent);
 
                     await Dispatcher.InvokeAsync(() => ResetDownloadUI());
                 }
