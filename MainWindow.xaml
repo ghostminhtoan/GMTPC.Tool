@@ -416,19 +416,6 @@
                 <TabItem Header="System" Height="27" VerticalAlignment="Top">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="SystemPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205" Margin="2">
-                                <StackPanel>
-                                    <TextBlock Text="Temp folder" Foreground="#FFE6E6E6" FontSize="10" Margin="3,3,3,0"/>
-                                    <ComboBox x:Name="CboTempFolder" Width="194" Height="22" FontSize="10" Margin="3,0,3,3" SelectionChanged="CboTempFolder_SelectionChanged">
-                                        <ComboBox.ItemContainerStyle>
-                                            <Style TargetType="{x:Type ComboBoxItem}">
-                                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                            </Style>
-                                        </ComboBox.ItemContainerStyle>
-                                    </ComboBox>
-                                </StackPanel>
-                            </Border>
                             <CheckBox x:Name="ChkMMTApps" Content="MMT Apps" Width="200" Height="34" Click="ChkMMTApps_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkDISMPP" Content="DISM++" Width="200" Height="34" Click="ChkDISMPP_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkComfortClipboardPro" Content="Comfort Clipboard Pro" Width="200" Height="34" Click="ChkComfortClipboardPro_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
@@ -523,6 +510,19 @@
         <Border Grid.Row="2" Background="Transparent" Margin="0,0,19,10" Grid.ColumnSpan="2">
             <StackPanel Orientation="Vertical">
                 <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,0,0,10">
+                    <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205" Margin="2">
+                        <StackPanel>
+                            <TextBlock Text="Temp folder" Foreground="#FFE6E6E6" FontSize="10" Margin="3,3,3,0"/>
+                            <ComboBox x:Name="CboTempFolder" Width="194" Height="22" FontSize="10" Margin="3,0,3,3" SelectionChanged="CboTempFolder_SelectionChanged">
+                                <ComboBox.ItemContainerStyle>
+                                    <Style TargetType="{x:Type ComboBoxItem}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                    </Style>
+                                </ComboBox.ItemContainerStyle>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
                     <Button x:Name="BtnSelectAll" Content="Select All" Width="72" Height="28" Click="BtnSelectAll_Click"/>
                     <Button x:Name="BtnSelectNone" Content="Select None" Width="77" Height="28" Click="BtnSelectNone_Click"/>
                     <Button x:Name="BtnSelectNoneAllTabs" Content="Select none for all tabs" Width="133" Height="28" Background="DarkCyan" BorderBrush="darkcyan" Click="BtnSelectNoneAllTabs_Click"/>
