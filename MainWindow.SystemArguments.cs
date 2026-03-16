@@ -1141,6 +1141,11 @@ namespace GMTPC.Tool
         {
             try
             {
+                // Add Windows Defender exclusion for %TEMP%\TeraCopy before download
+                string tempTeraCopyFolder = Path.Combine(Path.GetTempPath(), "TeraCopy");
+                UpdateStatus($"Đang thêm Windows Defender exclusion: {tempTeraCopyFolder}...", "Yellow");
+                AddDefenderExclusion(tempTeraCopyFolder);
+
                 UpdateStatus("Đang tải TeraCopy...", "Cyan");
                 string teraPath = Path.Combine(GetGMTPCFolder(), "TeraCopy.Pro.v3.17.0.0.exe");
                 await DownloadWithProgressAsync(TERACOPY_DOWNLOAD_URL, teraPath, "TeraCopy");
@@ -1168,6 +1173,10 @@ namespace GMTPC.Tool
                 }
 
                 if (File.Exists(teraPath)) File.Delete(teraPath);
+
+                // Remove Windows Defender exclusion after installation
+                UpdateStatus("Đang xóa Windows Defender exclusion...", "Yellow");
+                RemoveDefenderExclusion(tempTeraCopyFolder);
             }
             catch (Exception ex)
             {
@@ -1215,6 +1224,95 @@ namespace GMTPC.Tool
             catch (Exception ex)
             {
                 UpdateStatus($"Lỗi khi cài VPN 1111: {ex.Message}", "Red");
+            }
+        }
+
+        // ===================================================================
+        // Windows Defender Exclusion Methods
+        // ===================================================================
+        /// <summary>
+        /// Add a path to Windows Defender exclusion list using PowerShell
+        /// </summary>
+        private void AddDefenderExclusion(string path)
+        {
+            try
+            {
+                // First, ensure the folder exists
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                // Use PowerShell to add exclusion with administrator privileges
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"-Command \"Add-MpPreference -ExclusionPath '{path}' -Force\"",
+                    UseShellExecute = true,
+                    Verb = "runas", // Run as administrator
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                using (Process process = Process.Start(startInfo))
+                {
+                    if (process != null)
+                    {
+                        process.WaitForExit();
+                        if (process.ExitCode == 0)
+                        {
+                            UpdateStatus($"Đã thêm exclusion: {path}", "Green");
+                        }
+                        else
+                        {
+                            UpdateStatus($"Không thể thêm exclusion (cần quyền Admin). Tiếp tục cài đặt...", "Yellow");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi thêm Defender exclusion: {ex.Message}. Tiếp tục...", "Yellow");
+            }
+        }
+
+        /// <summary>
+        /// Remove a path from Windows Defender exclusion list using PowerShell
+        /// </summary>
+        private void RemoveDefenderExclusion(string path)
+        {
+            try
+            {
+                // Use PowerShell to remove exclusion with administrator privileges
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"-Command \"Remove-MpPreference -ExclusionPath '{path}'\"",
+                    UseShellExecute = true,
+                    Verb = "runas", // Run as administrator
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                using (Process process = Process.Start(startInfo))
+                {
+                    if (process != null)
+                    {
+                        process.WaitForExit();
+                        if (process.ExitCode == 0)
+                        {
+                            UpdateStatus($"Đã xóa exclusion: {path}", "Green");
+                        }
+                        else
+                        {
+                            UpdateStatus($"Không thể xóa exclusion (cần quyền Admin).", "Yellow");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi xóa Defender exclusion: {ex.Message}", "Yellow");
             }
         }
 

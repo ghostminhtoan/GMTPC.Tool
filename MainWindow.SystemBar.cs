@@ -34,9 +34,9 @@ namespace GMTPC.Tool
         private string _installationStatus = "";
         private double originalWidth;
         private double originalHeight;
-        
-        // Folder selection for Ghost of Tsushima
-        private string _ghostOfTsushimaTempFolder = null;
+
+        // Temp folder selection
+        private string _selectedTempDrivePath = null;
 
         // ===================== Build Number Display =====================
         private void SetBuildNumber()
@@ -666,5 +666,101 @@ namespace GMTPC.Tool
 
             throw new Exception("Quá nhiều lần redirect khi resolve URL OneDrive.");
         }
+
+        // ===================== Temp Folder ComboBox =====================
+        /// <summary>
+        /// Populate the Temp folder ComboBox with all available drives (excluding CD-ROM)
+        /// </summary>
+        private void PopulateTempFolderComboBox()
+        {
+            try
+            {
+                if (CboTempFolder == null) return;
+
+                CboTempFolder.Items.Clear();
+
+                // Add default option (C:\Temp Folder)
+                string defaultPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
+                CboTempFolder.Items.Add(new ComboBoxItem
+                {
+                    Content = $"Mặc định (C:) - {defaultPath}",
+                    Tag = defaultPath
+                });
+
+                // Add all drives except CD-ROM
+                foreach (DriveInfo drive in DriveInfo.GetDrives())
+                {
+                    if (drive.DriveType != DriveType.CDRom && drive.IsReady)
+                    {
+                        string drivePath = Path.Combine(drive.Name.TrimEnd('\\'), "Temp Folder");
+                        string displayText = $"{drive.Name} ({FormatBytes(drive.TotalFreeSpace)} free)";
+                        
+                        CboTempFolder.Items.Add(new ComboBoxItem
+                        {
+                            Content = displayText,
+                            Tag = drivePath
+                        });
+                    }
+                }
+
+                // Select default (first) item
+                if (CboTempFolder.Items.Count > 0)
+                {
+                    CboTempFolder.SelectedIndex = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi tải danh sách ổ cứng: {ex.Message}", "Red");
+            }
+        }
+
+        /// <summary>
+        /// Handle Temp folder ComboBox selection changed
+        /// </summary>
+        private void CboTempFolder_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (CboTempFolder.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    _selectedTempDrivePath = selectedItem.Tag as string;
+
+                    if (!string.IsNullOrEmpty(_selectedTempDrivePath))
+                    {
+                        // Create the folder if it doesn't exist
+                        if (!Directory.Exists(_selectedTempDrivePath))
+                        {
+                            Directory.CreateDirectory(_selectedTempDrivePath);
+                        }
+
+                        UpdateStatus($"Temp folder: {_selectedTempDrivePath}", "Green");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi chọn folder: {ex.Message}", "Red");
+            }
+        }
+
+        /// <summary>
+        /// Get the selected temp folder path
+        /// </summary>
+        private string GetSelectedTempFolderPath()
+        {
+            if (!string.IsNullOrEmpty(_selectedTempDrivePath))
+            {
+                if (!Directory.Exists(_selectedTempDrivePath))
+                {
+                    Directory.CreateDirectory(_selectedTempDrivePath);
+                }
+                return _selectedTempDrivePath;
+            }
+
+            // Default to LocalAppData if nothing selected
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
+        }
+
     }
 }

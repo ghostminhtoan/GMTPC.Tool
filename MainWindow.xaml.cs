@@ -43,6 +43,7 @@ namespace GMTPC.Tool
             SetupInitialOrientation();
             SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
             try { PopulateSystemInfo(); } catch { }
+            PopulateTempFolderComboBox();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

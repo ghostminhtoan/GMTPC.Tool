@@ -294,6 +294,7 @@ namespace GMTPC.Tool
                 else if (tabHeader == "Windows Mod MMT")
                 {
                     ChkWin10LtscIot21H2.IsChecked = true;
+                    ChkWin10_22H2_2024_December.IsChecked = true;
                 }
             }
 
@@ -407,6 +408,7 @@ namespace GMTPC.Tool
                 else if (tabHeader == "Windows Mod MMT")
                 {
                     ChkWin10LtscIot21H2.IsChecked = false;
+                    ChkWin10_22H2_2024_December.IsChecked = false;
                 }
             }
 
@@ -488,6 +490,7 @@ namespace GMTPC.Tool
 
             // Bỏ chọn checkbox trong tab Windows Mod MMT
             ChkWin10LtscIot21H2.IsChecked = false;
+            ChkWin10_22H2_2024_December.IsChecked = false;
 
             UpdateInstallButtonState();
         }
@@ -563,6 +566,7 @@ namespace GMTPC.Tool
             if (ChkVMWare162Lite.IsChecked == true) tasks.Add((InstallVMWare162LiteAsync, ChkVMWare162Lite));
             if (ChkWin11_26H1.IsChecked == true) tasks.Add((InstallWin11_26H1Async, ChkWin11_26H1));
             if (ChkWin10LtscIot21H2.IsChecked == true) tasks.Add((InstallWin10LtscIot21H2Async, ChkWin10LtscIot21H2));
+            if (ChkWin10_22H2_2024_December.IsChecked == true) tasks.Add((InstallWin10_22H2_2024_DecemberAsync, ChkWin10_22H2_2024_December));
 
             CheckBox currentTaskCheckBox = null;
             try
@@ -915,7 +919,7 @@ namespace GMTPC.Tool
                 ChkThrottlestop, ChkMSIAfterburner, ChkLeagueOfLegends, ChkPorofessor,
                 ChkSamuraiMaiden, ChkChrome, ChkCocCoc, ChkEdge,
                 ChkUltraviewer, ChkTeamViewerQS, ChkTeamViewerFull, ChkAnyDesk, ChkVMWare162Lite,
-                ChkWin11_26H1, ChkWin10LtscIot21H2,
+                ChkWin11_26H1, ChkWin10LtscIot21H2, ChkWin10_22H2_2024_December,
                 // ChkWin10ProWorkstations22H2 removed
             };
 
@@ -1080,9 +1084,17 @@ namespace GMTPC.Tool
                         break;
                     case "ChkWin10LtscIot21H2":
                         link = "GitHub (3 parts):\n" +
-                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.001\n" +
-                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.002\n" +
-                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.003";
+                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.iso.001\n" +
+                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.iso.002\n" +
+                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.iso.003";
+                        break;
+                    case "ChkWin10_22H2_2024_December":
+                        link = "GitHub (5 parts):\n" +
+                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.001\n" +
+                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.002\n" +
+                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.003\n" +
+                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.004\n" +
+                               "https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.005";
                         break;
                 }
 

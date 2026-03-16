@@ -9,6 +9,7 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
 1. KHÔNG BAO GIỜ viết code vào `MainWindow.xaml.cs`.
 2. Luôn lưu file ở định dạng UTF-8.
 3. Luôn thêm/cập nhật khối comment "AI Summary" ở đầu MỌI file bạn chỉnh sửa (Ghi rõ ngày cập nhật và tóm tắt thao tác).
+4. Luôn luôn taskkill /im GMTPC.Tool.exe /F rồi build vào \bin\Release\, khi gặp lỗi và warning thì tự động sửa lỗi cho đến khi nào hết lỗi và warning thì mới được ngưng. Sau khi build xong thì git push.
 </global_rules>
 
 <workflow_definitions>

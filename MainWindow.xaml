@@ -8,8 +8,8 @@
     <Window.Resources>
         <Style TargetType="CheckBox">
             <Setter Property="Foreground" Value="#FFE6E6E6"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Height" Value="34"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Height" Value="29"/>
             <Setter Property="Margin" Value="3,2"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
@@ -173,7 +173,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Margin="0,0,20,0">
                     <TextBlock Text="GMTPC Tools"
-                                FontSize="24"
+                                FontSize="22"
                                 FontWeight="Bold"
                                 Foreground="Yellow"
                                 Margin="0,0,10,5" Height="29" Width="164"/>
@@ -239,7 +239,7 @@
                     <Style TargetType="TabItem">
                         <Setter Property="Background" Value="#FF2B2B2B"/>
                         <Setter Property="Foreground" Value="NavajoWhite"/>
-                        <Setter Property="FontSize" Value="9"/>
+                        <Setter Property="FontSize" Value="11"/>
                         <Setter Property="Padding" Value="6,2"/>
                         <Setter Property="MinHeight" Value="22"/>
                         <Setter Property="MinWidth" Value="50"/>
@@ -416,6 +416,19 @@
                 <TabItem Header="System" Height="27" VerticalAlignment="Top">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="SystemPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
+                            <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205" Margin="2">
+                                <StackPanel>
+                                    <TextBlock Text="Temp folder" Foreground="#FFE6E6E6" FontSize="10" Margin="3,3,3,0"/>
+                                    <ComboBox x:Name="CboTempFolder" Width="194" Height="22" FontSize="10" Margin="3,0,3,3" SelectionChanged="CboTempFolder_SelectionChanged">
+                                        <ComboBox.ItemContainerStyle>
+                                            <Style TargetType="{x:Type ComboBoxItem}">
+                                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </ComboBox.ItemContainerStyle>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Border>
                             <CheckBox x:Name="ChkMMTApps" Content="MMT Apps" Width="200" Height="34" Click="ChkMMTApps_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkDISMPP" Content="DISM++" Width="200" Height="34" Click="ChkDISMPP_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkComfortClipboardPro" Content="Comfort Clipboard Pro" Width="200" Height="34" Click="ChkComfortClipboardPro_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
@@ -456,10 +469,7 @@
                             <CheckBox x:Name="ChkLeagueOfLegends" Content="League of Legends VN" Width="200" Height="34" Click="ChkLeagueOfLegends_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkPorofessor" Content="Porofessor" Width="200" Height="34" Click="ChkPorofessor_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkSamuraiMaiden" Content="Samurai Maiden" Width="200" Height="34" Click="ChkSamuraiMaiden_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
-                            <StackPanel Orientation="Horizontal" Margin="2">
-                                <CheckBox x:Name="ChkGhostOfTsushima" Content="Ghost of Tsushima" Width="200" Height="34" Click="ChkGhostOfTsushima_Click" MouseEnter="Checkbox_MouseEnter"/>
-                                <Button x:Name="BtnGhostOfTsushima_Temp" Content="Temp" Width="50" Height="34" Margin="4,0,0,0" Click="BtnGhostOfTsushima_Temp_Click" ToolTip="Chọn folder tạm thời"/>
-                            </StackPanel>
+                            <CheckBox x:Name="ChkGhostOfTsushima" Content="Ghost of Tsushima" Width="200" Height="34" Click="ChkGhostOfTsushima_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -502,6 +512,7 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="WindowsModPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
                             <CheckBox x:Name="ChkWin10LtscIot21H2" Content="Win 10 LTSC IoT 21H2 - No Defender - Office - MMTPC 3.0" Width="420" Height="34" Click="ChkWin10LtscIot21H2_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkWin10_22H2_2024_December" Content="Win 10 22h2 2024 DECEMBER - Office.365 - win 10 MMTPC 4.0" Width="420" Height="34" Click="ChkWin10_22H2_2024_December_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -528,7 +539,7 @@
         <Border Grid.Row="3" Background="#FF1F1F1F" CornerRadius="6" Padding="10" Margin="0,0,19,10" Grid.ColumnSpan="2">
             <StackPanel>
                 <ProgressBar x:Name="DownloadProgressBar" x:FieldModifier="public" Height="20" Margin="0,0,0,10" Style="{StaticResource RoundedProgressBarStyle}" Background="#FF3E3E3E" Foreground="#FF005FB8"/>
-                <TextBlock x:Name="SpeedTextBlock" FontSize="15" FontWeight="Bold" Foreground="Cyan" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                <TextBlock x:Name="SpeedTextBlock" FontSize="13" FontWeight="Bold" Foreground="Cyan" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                 <TextBlock x:Name="ProgressTextBlock" FontSize="13" Foreground="#FFCCCCCC" HorizontalAlignment="Center" Margin="0,0,0,5" FontWeight="Bold"/>
                 <TextBlock x:Name="SecondaryProgressTextBlock" FontSize="12" Foreground="#FF999999" HorizontalAlignment="Center" Margin="0,0,0,10" FontStyle="Italic"/>
                 <!-- Connection trace canvas: shows per-connection segments and active connection count -->
@@ -536,8 +547,8 @@
                     <StackPanel>
                         <!-- Build number (left) | Segments (center) -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
-                            <TextBlock x:Name="BuildNumberTextBlock" Text="Build: ----" FontSize="11" Foreground="#FFF0F0F0" VerticalAlignment="Center" Margin="0,0,16,0"/>
-                            <TextBlock Text="|" FontSize="11" Foreground="#FF666666" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                            <TextBlock x:Name="BuildNumberTextBlock" Text="Build: ----" FontSize="12" Foreground="#FFF0F0F0" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                            <TextBlock Text="|" FontSize="12" Foreground="#FF666666" VerticalAlignment="Center" Margin="0,0,16,0"/>
                             <TextBlock Text="Segments:" FontSize="11" Foreground="#FFF0F0F0" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <ComboBox x:Name="CboSegmentCount" Width="72" Height="20" FontSize="11" SelectedValuePath="Content" PreviewMouseWheel="CboSegmentCount_PreviewMouseWheel" SelectionChanged="CboSegmentCount_SelectionChanged">
                                 <ComboBoxItem Content="1" />

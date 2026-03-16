@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-16 - Added ChkInstallNeatDM checkbox for Neat Download Manager -->
+<!-- AI Summary: 2026-03-17 - Added ChkWin10_22H2_2024_December, updated ChkWin10LtscIot21H2 links, removed Ghost of Tsushima Temp button, added Temp folder combobox, added TeraCopy Defender exclusion -->
 
 # Danh sách Checkbox
 
@@ -121,11 +121,12 @@
 
 | Tên Checkbox | Link Download | Argument |
 |-------------|---------------|----------|
-| ChkWin10LtscIot21H2 | GitHub (3 parts - auto merge):<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.001<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.002<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.boot.windowsRE.iso.003 | *(ISO image - 3-part download, auto merge)* |
+| ChkWin10LtscIot21H2 | GitHub (3 parts - auto merge):<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.iso.001<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.iso.002<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/LTSC.IOT.21H2.-.2021.10.-.gaming.-.Office.365.-.win.10.MMTPC.3.0.iso.003 | *(ISO image - 3-part download, auto merge)* |
+| ChkWin10_22H2_2024_December | GitHub (5 parts - auto merge):<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.001<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.002<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.003<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.004<br>https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.005 | *(ISO image - 5-part download, auto merge)* |
 
 ---
 
-**Tổng số:** 49 checkboxes
+**Tổng số:** 50 checkboxes
 
 **Ghi chú:**
 - Các checkbox được phân loại theo Tab tương ứng trong giao diện (MainWindow.xaml)
