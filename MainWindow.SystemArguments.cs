@@ -46,6 +46,10 @@ namespace GMTPC.Tool
         private const string BID_DOWNLOAD_URL = "https://bulkimagedownloader.com/files/bid_6_62_setup_x64.exe";
         private const string BID_INSTALL_ARGUMENTS = "";
 
+        // Neat Download Manager
+        private const string NEATDM_DOWNLOAD_URL = "https://neatdownloadmanager.com/file/NeatDM_setup.exe";
+        private const string NEATDM_INSTALL_ARGUMENTS = "/silent";
+
         // Activate Windows
         // Vcredist
         private const string VCREDIST_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/vcredist.all.in.one.by.MMT.Windows.Tech.exe";
@@ -213,6 +217,67 @@ namespace GMTPC.Tool
             catch (Exception ex)
             {
                 UpdateStatus($"Lỗi khi cài đặt Zalo: {ex.Message}", "Red");
+            }
+        }
+
+        private async Task InstallNeatDMAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang tải Neat Download Manager...", "Cyan");
+                string neatDMPath = Path.Combine(GetGMTPCFolder(), "NeatDM_setup.exe");
+                await DownloadWithProgressAsync(NEATDM_DOWNLOAD_URL, neatDMPath, "Neat Download Manager");
+
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                UpdateStatus("Đang cài đặt Neat Download Manager (silent)...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = neatDMPath,
+                    Arguments = NEATDM_INSTALL_ARGUMENTS,
+                    UseShellExecute = true
+                };
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("Cài đặt Neat Download Manager hoàn tất!", "Green");
+                }
+
+                if (File.Exists(neatDMPath))
+                {
+                    File.Delete(neatDMPath);
+                }
+
+                UpdateStatus("Đang mở Neat Download Manager...", "Cyan");
+                string neatDMExePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Neat Download Manager", "NeatDM.exe");
+                if (File.Exists(neatDMExePath))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = neatDMExePath,
+                        UseShellExecute = true
+                    });
+                }
+
+                UpdateStatus("Đang mở trang extension Neat Download Manager...", "Cyan");
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "cmd",
+                    Arguments = $"/c start https://chromewebstore.google.com/detail/neatdownloadmanager-exten/cpcifbdmkopohnnofedkjghjiclmhdah",
+                    UseShellExecute = true,
+                    CreateNoWindow = true
+                });
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài đặt Neat Download Manager: {ex.Message}", "Red");
             }
         }
 
@@ -457,6 +522,7 @@ namespace GMTPC.Tool
         {
             // Kiểm tra xem có ít nhất một checkbox nào được chọn không
             bool hasChecked = ChkInstallIDM.IsChecked == true ||
+                             ChkInstallNeatDM.IsChecked == true ||
                              ChkActivateWindows.IsChecked == true ||
                              ChkActivateOffice.IsChecked == true ||
                              ChkOfficeToolPlus.IsChecked == true ||

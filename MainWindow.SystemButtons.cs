@@ -201,6 +201,7 @@ namespace GMTPC.Tool
                 {
                     // Chọn tất cả các checkbox trong tab Popular
                     ChkInstallIDM.IsChecked = true;
+                    ChkInstallNeatDM.IsChecked = true;
                     ChkActivateWindows.IsChecked = true;
                     ChkPauseWindowsUpdate.IsChecked = true;
                     ChkInstallWinRAR.IsChecked = true;
@@ -313,6 +314,7 @@ namespace GMTPC.Tool
                 {
                     // Bỏ chọn tất cả các checkbox trong tab Popular
                     ChkInstallIDM.IsChecked = false;
+                    ChkInstallNeatDM.IsChecked = false;
                     ChkActivateWindows.IsChecked = false;
                     ChkPauseWindowsUpdate.IsChecked = false;
                     ChkInstallWinRAR.IsChecked = false;
@@ -509,6 +511,7 @@ namespace GMTPC.Tool
             var tasks = new List<(Func<Task> Action, CheckBox CheckBox)>();
 
             if (ChkInstallIDM.IsChecked == true) tasks.Add((() => RunAutomatedProcessAsync(), ChkInstallIDM));
+            if (ChkInstallNeatDM.IsChecked == true) tasks.Add((InstallNeatDMAsync, ChkInstallNeatDM));
             if (ChkActivateWindows.IsChecked == true) tasks.Add((() => Task.Run(() => ActivateWindows()), ChkActivateWindows));
             if (ChkActivateOffice.IsChecked == true) tasks.Add((() => Task.Run(() => ActivateOffice()), ChkActivateOffice));
             if (ChkOfficeToolPlus.IsChecked == true) tasks.Add((InstallOfficeToolPlusAsync, ChkOfficeToolPlus)); // Thêm task cho Office Tool Plus
@@ -933,6 +936,9 @@ namespace GMTPC.Tool
                 {
                     case "ChkInstallIDM":
                         link = "https://tinyurl.com/idmhcmvn";
+                        break;
+                    case "ChkInstallNeatDM":
+                        link = "https://neatdownloadmanager.com/file/NeatDM_setup.exe";
                         break;
                     case "ChkInstallWinRAR":
                         link = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.7.13.exe";

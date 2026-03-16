@@ -338,6 +338,11 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
+                            <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="206">
+                                <StackPanel>
+                                    <CheckBox x:Name="ChkInstallNeatDM" Content="Neat Download Manager" Width="175" Height="34" Click="ChkInstallNeatDM_Click" Margin="3" MouseEnter="Checkbox_MouseEnter"/>
+                                </StackPanel>
+                            </Border>
                             <CheckBox x:Name="ChkInstallWinRAR" Content="Winrar" Width="200" Height="34" Click="ChkInstallWinRAR_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205">
                                 <StackPanel>
@@ -467,7 +472,7 @@
                 <TabItem Header="Windows Mod MMT">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <WrapPanel x:Name="WindowsModPanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
-                            <CheckBox x:Name="ChkWin10LtscIot21H2" Content="Win 10 LTSC IoT 21H2 - No Defender - Office - MMTPC 3.0 - mediafire" Width="420" Height="34" Click="ChkWin10LtscIot21H2_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkWin10LtscIot21H2" Content="Win 10 LTSC IoT 21H2 - No Defender - Office - MMTPC 3.0" Width="420" Height="34" Click="ChkWin10LtscIot21H2_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>

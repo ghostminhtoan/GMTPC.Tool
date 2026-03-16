@@ -36,6 +36,21 @@ namespace GMTPC.Tool
         }
 
 
+        private void ChkInstallNeatDM_Click(object sender, RoutedEventArgs e)
+        {
+            if (ChkInstallNeatDM.IsChecked == true)
+            {
+                UpdateStatus("Đã chọn: Neat Download Manager", "Green");
+            }
+            else
+            {
+                UpdateStatus("Đã hủy chọn: Neat Download Manager", "Yellow");
+            }
+
+            UpdateInstallButtonState();
+        }
+
+
         private void ChkInstallWinRAR_Click(object sender, RoutedEventArgs e)
         {
             if (ChkInstallWinRAR.IsChecked == true)

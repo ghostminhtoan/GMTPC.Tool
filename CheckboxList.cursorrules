@@ -1,9 +1,14 @@
-<!-- AI Summary: 2026-03-15 - Updated ChkWin10LtscIot21H2 from Mediafire to GitHub (3-part download) -->
+<!-- AI Summary: 2026-03-16 - Added ChkInstallNeatDM checkbox for Neat Download Manager -->
 
 # Danh sách Checkbox
 
 > File này lưu trữ thông tin các checkbox cài đặt phần mềm đã tạo.
 > Cập nhật sau mỗi lần tạo/sửa checkbox bằng Workflow_createcheckbox hoặc Workflow_editcheckbox.
+
+## Related Files
+
+- `@Services/SegmentedDownloadEngine.cs` - Download engine: multi-thread segmented (chunk-based)
+- `@MainWindow.RestoredMethods.cs` - Helper methods, shared methods for the entire application
 
 ## Tab System Information
 
@@ -16,6 +21,7 @@
 | Tên Checkbox | Link Download | Argument |
 |-------------|---------------|----------|
 | ChkInstallIDM | https://tinyurl.com/idmhcmvn | `/s /a /u /o /quiet /skipdlgst` |
+| ChkInstallNeatDM | https://neatdownloadmanager.com/file/NeatDM_setup.exe | `/silent` |
 | ChkInstallWinRAR | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/WinRAR.exe | `/silent /I /EN` |
 | ChkInstallBID | https://bulkimagedownloader.com/files/bid_6_62_setup_x64.exe | *(không có)* |
 | ChkActivateWindows | (Built-in Windows Activation) | `slmgr /ipk ...` |
@@ -119,7 +125,7 @@
 
 ---
 
-**Tổng số:** 48 checkboxes
+**Tổng số:** 49 checkboxes
 
 **Ghi chú:**
 - Các checkbox được phân loại theo Tab tương ứng trong giao diện (MainWindow.xaml)
