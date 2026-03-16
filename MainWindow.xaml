@@ -235,24 +235,27 @@
         <Border Grid.Row="1" Background="#FF1F1F1F" CornerRadius="6" Padding="10" Margin="0,0,19,10" Grid.ColumnSpan="2">
             <TabControl x:Name="MainTabControl" Background="Yellow" BorderBrush="#FF7A7A7A">
                 <TabControl.Resources>
-                    <!-- Style cho TabItem để đảm bảo nền tối -->
+                    <!-- Style cho TabItem - nhỏ gọn, 1 hàng -->
                     <Style TargetType="TabItem">
                         <Setter Property="Background" Value="#FF2B2B2B"/>
                         <Setter Property="Foreground" Value="NavajoWhite"/>
-                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="FontSize" Value="9"/>
+                        <Setter Property="Padding" Value="6,2"/>
+                        <Setter Property="MinHeight" Value="22"/>
+                        <Setter Property="MinWidth" Value="50"/>
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="TabItem">
                                     <Border Name="Border" Background="{TemplateBinding Background}"
                                             BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="1,1,1,0"
-                                            CornerRadius="4,4,0,0"
+                                            CornerRadius="3,3,0,0"
                                             Margin="0,0,-1,0">
                                         <ContentPresenter x:Name="ContentSite"
                                                           VerticalAlignment="Center"
                                                           HorizontalAlignment="Center"
                                                           ContentSource="Header"
-                                                          Margin="10,5"/>
+                                                          Margin="6,2"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
@@ -268,6 +271,35 @@
                         </Setter>
                     </Style>
                 </TabControl.Resources>
+                <TabControl.Template>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel x:Name="HeaderPanel"
+                                      Grid.Row="0"
+                                      Panel.ZIndex="1"
+                                      IsItemsHost="True"
+                                      KeyboardNavigation.TabIndex="1"
+                                      Background="Transparent"/>
+                            <Border x:Name="ContentPanel"
+                                    Grid.Row="1"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    KeyboardNavigation.TabIndex="2"
+                                    KeyboardNavigation.TabNavigation="Local"
+                                    KeyboardNavigation.DirectionalNavigation="Contained">
+                                <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                  ContentSource="SelectedContent"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  ContentTemplate="{TemplateBinding SelectedContentTemplate}"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </TabControl.Template>
                 <TabItem Header="System Information">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
                         <StackPanel Margin="8">
@@ -339,14 +371,14 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
-                            <CheckBox x:Name="ChkInstallNeatDM" Content="Neat Download Manager" Width="200" Height="34" Click="ChkInstallNeatDM_Click" MouseEnter="Checkbox_MouseEnter"/>
-                            <CheckBox x:Name="ChkInstallWinRAR" Content="Winrar" Width="200" Height="34" Click="ChkInstallWinRAR_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205">
                                 <StackPanel>
                                     <CheckBox x:Name="ChkInstallBID" Content="Bulk Image Downloader" Width="175" Height="34" Click="ChkInstallBID_Click" Margin="3" MouseEnter="Checkbox_MouseEnter"/>
                                     <Button x:Name="BtnRunBIDActivation" Content="Run BID Activation" Width="155" Height="22" Click="BtnRunBIDActivation_Click" Margin="9,0,3,3"/>
                                 </StackPanel>
                             </Border>
+                            <CheckBox x:Name="ChkInstallNeatDM" Content="Neat Download Manager" Width="200" Height="34" Click="ChkInstallNeatDM_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkInstallWinRAR" Content="Winrar" Width="200" Height="34" Click="ChkInstallWinRAR_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkActivateWindows" Content="Tự động kích hoạt Windows" Width="200" Height="34" Click="ChkActivateWindows_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkPauseWindowsUpdate" Content="Pause Windows Update" Width="200" Height="34" Click="ChkPauseWindowsUpdate_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkVcredist" Content="Vcredist 2005-2022" Width="200" Height="34" Click="ChkVcredist_Click" MouseEnter="Checkbox_MouseEnter"/>
