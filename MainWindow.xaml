@@ -239,18 +239,19 @@
                     <Style TargetType="TabItem">
                         <Setter Property="Background" Value="#FF2B2B2B"/>
                         <Setter Property="Foreground" Value="NavajoWhite"/>
+                        <Setter Property="FontSize" Value="11"/>
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="TabItem">
-                                    <Border Name="Border" Background="{TemplateBinding Background}" 
-                                            BorderBrush="{TemplateBinding BorderBrush}" 
-                                            BorderThickness="1,1,1,0" 
-                                            CornerRadius="4,4,0,0" 
+                                    <Border Name="Border" Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="1,1,1,0"
+                                            CornerRadius="4,4,0,0"
                                             Margin="0,0,-1,0">
-                                        <ContentPresenter x:Name="ContentSite" 
-                                                          VerticalAlignment="Center" 
-                                                          HorizontalAlignment="Center" 
-                                                          ContentSource="Header" 
+                                        <ContentPresenter x:Name="ContentSite"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Center"
+                                                          ContentSource="Header"
                                                           Margin="10,5"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
