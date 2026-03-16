@@ -17,7 +17,7 @@
   <!-- Generate Build Number file before build -->
   <Target Name="GenerateBuildNumber" BeforeTargets="BeforeBuild">
     <PropertyGroup>
-      <BuildNumber>$([System.DateTime]::Now.ToString(yyyy-MM-dd-HH-mm-ss))</BuildNumber>
+      <BuildNumber>$([System.DateTime]::Now.ToString(yyyy-MM-dd / HH:mm:ss))</BuildNumber>
     </PropertyGroup>
     <Exec Command="echo // Auto-generated build number&gt; &quot;$(ProjectDir)Generated\BuildNumber.cs&quot; &amp;&amp; echo namespace GMTPC.Tool&gt;&gt; &quot;$(ProjectDir)Generated\BuildNumber.cs&quot; &amp;&amp; echo {&gt;&gt; &quot;$(ProjectDir)Generated\BuildNumber.cs&quot; &amp;&amp; echo     public static class BuildInfo&gt;&gt; &quot;$(ProjectDir)Generated\BuildNumber.cs&quot; &amp;&amp; echo     {&gt;&gt; &quot;$(ProjectDir)Generated\BuildNumber.cs&quot; &amp;&amp; echo         public const string BUILD_NUMBER = &quot;$(BuildNumber)&quot;;&gt;&gt; &quot;$(ProjectDir)Generated\BuildNumber.cs&quot; &amp;&amp; echo     }&gt;&gt; &quot;$(ProjectDir)Generated\BuildNumber.cs&quot; &amp;&amp; echo }&gt;&gt; &quot;$(ProjectDir)Generated\BuildNumber.cs&quot;" />
   </Target>

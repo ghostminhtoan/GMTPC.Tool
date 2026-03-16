@@ -338,11 +338,7 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
-                            <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="206">
-                                <StackPanel>
-                                    <CheckBox x:Name="ChkInstallNeatDM" Content="Neat Download Manager" Width="175" Height="34" Click="ChkInstallNeatDM_Click" Margin="3" MouseEnter="Checkbox_MouseEnter"/>
-                                </StackPanel>
-                            </Border>
+                            <CheckBox x:Name="ChkInstallNeatDM" Content="Neat Download Manager" Width="200" Height="34" Click="ChkInstallNeatDM_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkInstallWinRAR" Content="Winrar" Width="200" Height="34" Click="ChkInstallWinRAR_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205">
                                 <StackPanel>
