@@ -9,6 +9,7 @@
 //   - 2026-03-07: Removed Zalo installation support
 //   - 2026-03-10: Fix IDM download - use DownloadWithProgressAsync (multi-segment)
 //                 instead of DownloadSingleConnectionAsync
+//   - 2026-03-17: Updated GetGMTPCFolder() to use _selectedTempDrivePath
 // =======================================================================
 using System;
 using System.Diagnostics;
@@ -45,8 +46,22 @@ namespace GMTPC.Tool
         }
 
         // ===================== GMTPC Folder Helper =====================
+        /// <summary>
+        /// Get the GMTPC folder path - returns the selected temp folder path
+        /// This ensures all downloads use the user-selected temp folder
+        /// </summary>
         private string GetGMTPCFolder()
         {
+            // Use the selected temp folder path if available
+            if (!string.IsNullOrEmpty(_selectedTempDrivePath))
+            {
+                if (!Directory.Exists(_selectedTempDrivePath))
+                    Directory.CreateDirectory(_selectedTempDrivePath);
+
+                return _selectedTempDrivePath;
+            }
+
+            // Default to LocalAppData if nothing selected
             string tempPath = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "GMTPC", "GMTPC Tools");
