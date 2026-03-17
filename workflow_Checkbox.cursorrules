@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-17 - Added Windows Defender exclusion management for temp folders, updated GetGMTPCFolder() to use selected temp path, Windows Mod MMT tab always downloads to C:\ and never deletes files -->
+<!-- AI Summary: 2026-03-17 - Added 3 installation mechanisms: SystemInstallDefault (basic), SystemInstallPrompt (Yes/No dialog), SystemInstallMultipart (auto merge & delete split files) -->
 
 <system_context>
 Bạn là một AI Code Agent chuyên nghiệp, làm việc trên dự án "MMT Tools" (WPF, .NET 4.8, C# 7.3).
@@ -17,6 +17,73 @@ nếu chọn ổ D thì sẽ tự tạo  defender exclusion cho D:\Temp Folder, 
 </global_rules>
 
 <file_architecture>
+    <!-- ==================== INSTALL MECHANISMS ==================== -->
+    <file name="MainWindow.SystemInstallDefault.cs">
+        <description>
+        Cơ chế cài đặt cơ bản - tải file và chạy với argument.
+        Sử dụng cho các checkbox cài đặt phần mềm thông thường (IDM, WinRAR, BID, v.v.)
+        </description>
+        <methods>
+            - InstallWithDefaultAsync(downloadUrl, filePath, installArguments, displayName): Tải và cài với argument
+            - InstallWithDefaultAndRetryAsync(...): Có retry logic (max 3 lần)
+        </methods>
+        <example>
+            // TabPopular.cs - InstallIDMAsync
+            string idmPath = Path.Combine(GetGMTPCFolder(), "idman.exe");
+            await InstallWithDefaultAsync(IDM_DOWNLOAD_URL, idmPath, "/s /quiet", "IDM");
+        </example>
+    </file>
+
+    <file name="MainWindow.SystemInstallPrompt.cs">
+        <description>
+        Cơ chế cài đặt có hộp thoại Yes/No - hỏi người dùng muốn cài tự động hay thủ công.
+        Chọn Yes: chạy với lệnh /s để cài tự động
+        Chọn No: mở file để cài thủ công
+        Sử dụng cho MMT Apps, Office Tool Plus, v.v.
+        </description>
+        <methods>
+            - InstallWithPromptAsync(downloadUrl, filePath, silentArguments, displayName): Tải và hỏi Yes/No
+            - InstallWithPromptAndRetryAsync(...): Có retry logic (max 3 lần)
+        </methods>
+        <example>
+            // TabSystem.cs - InstallMMTAppsAsync
+            string mmtAppsPath = Path.Combine(GetGMTPCFolder(), "MMT.Apps.exe");
+            await InstallWithPromptAsync(MMT_APPS_DOWNLOAD_URL, mmtAppsPath, "/s", "MMT Apps");
+        </example>
+    </file>
+
+    <file name="MainWindow.SystemInstallMultipart.cs">
+        <description>
+        Cơ chế cài đặt Multi-part - tải nhiều split file (.001, .002, .003...), TỰ ĐỘNG GỘP và XÓA split files.
+        BẮT BUỘC: Sau khi tải xong phải ghép lại thành 1 file hoàn chỉnh.
+        BẮT BUỘC: Sau khi ghép xong phải xóa TOÀN BỘ split files.
+        Sử dụng cho Ghost of Tsushima, Samurai Maiden, Win 10 ISO, v.v.
+        </description>
+        <methods>
+            - InstallWithMultipartAsync(downloadUrls, outputFilePath, displayName, runAfterMerge, deleteAfterMerge): Tải nhiều parts, ghép và xóa
+            - MergeSplitFilesAsync(partPaths, outputPath): Gộp các split files
+            - InstallWithMultipartAndRetryAsync(...): Có retry logic (max 3 lần)
+        </methods>
+        <requirements>
+            1. Tải tuần tự tất cả parts (.001, .002, .003...) vào folder tạm
+            2. Gộp tất cả parts thành 1 file hoàn chỉnh (BẮT BUỘC)
+            3. XÓA TOÀN BỘ split files sau khi ghép (BẮT BUỘC)
+            4. Xóa folder tạm sau khi hoàn tất
+            5. Chạy file kết quả (nếu runAfterMerge = true)
+        </requirements>
+        <example>
+            // TabGaming.cs - InstallGhostOfTsushimaAsync
+            string[] downloadUrls = new string[]
+            {
+                "https://github.com/.../Ghost.of.Tsushima.part01.exe",
+                "https://github.com/.../Ghost.of.Tsushima.part02.rar",
+                // ... 29 parts
+            };
+            string outputPath = Path.Combine(GetGMTPCFolder(), "Ghost.of.Tsushima.iso");
+            await InstallWithMultipartAsync(downloadUrls, outputPath, "Ghost of Tsushima");
+        </example>
+    </file>
+
     <!-- ==================== PARTIAL CLASS FILES ==================== -->
     <file name="MainWindow.SystemBar.cs">
         <description>
@@ -345,67 +412,53 @@ nếu chọn ổ D thì sẽ tự tạo  defender exclusion cho D:\Temp Folder, 
 
 <file_structure_reference>
     <!-- Kiến trúc Partial Classes của dự án -->
-    
+
     <file name="MainWindow.xaml">
         - Định nghĩa giao diện UI
         - Khai báo các control: Button, CheckBox, StatusBar, TabControl
     </file>
-    
+
     <file name="MainWindow.xaml.cs">
         - Constructor và InitializeComponent()
         - KHÔNG thêm code logic vào file này
     </file>
-    
+
+    <!-- ==================== INSTALL MECHANISMS ==================== -->
+    <file name="MainWindow.SystemInstallDefault.cs">
+        - Cơ chế cài đặt cơ bản - tải file và chạy với argument
+        - Methods: InstallWithDefaultAsync(), InstallWithDefaultAndRetryAsync()
+    </file>
+
+    <file name="MainWindow.SystemInstallPrompt.cs">
+        - Cơ chế cài đặt có hộp thoại Yes/No
+        - Methods: InstallWithPromptAsync(), InstallWithPromptAndRetryAsync()
+    </file>
+
+    <file name="MainWindow.SystemInstallMultipart.cs">
+        - Cơ chế cài đặt Multi-part - tải nhiều split files, tự động ghép và xóa
+        - Methods: InstallWithMultipartAsync(), MergeSplitFilesAsync(), InstallWithMultipartAndRetryAsync()
+    </file>
+
+    <!-- ==================== SYSTEM FILES ==================== -->
     <file name="MainWindow.SystemArguments.cs">
         - Khai báo tất cả hằng số DOWNLOAD_URL và INSTALL_ARGUMENTS
         - Phương thức DownloadWithProgressAsync, DownloadWithRetryAsync
-        - Phương thức InstallZaloAsync (nếu thuộc về System)
+        - Phương thức UpdateInstallButtonState()
     </file>
-    
+
     <file name="MainWindow.SystemBar.cs">
         - Phương thức UpdateStatus() để hiển thị trạng thái
         - Phương thức UpdateProgress() để cập nhật progress bar
     </file>
-    
+
     <file name="MainWindow.SystemButtons.cs">
         - Xử lý sự kiện các Button: BtnInstall, BtnSelectAll, BtnSelectNone
         - Phương thức UpdateInstallButtonState()
         - Phương thức Checkbox_MouseEnter()
         - Phương thức BtnDownloadPage_MouseRightButtonUp()
     </file>
-    
-    <file name="MainWindow.TabPopular.cs">
-        - Khai báo và xử lý checkbox cho Tab Popular
-        - Phương thức InstallIDMAsync, InstallWinRARAsync, InstallBIDAsync
+
+    <file name="MainWindow.SystemTempFolder.cs">
+        - Quản lý Temp Folder cho toàn bộ ứng dụng
+        - Methods: PopulateTempFolderComboBox(), CboTempFolder_SelectionChanged(), GetSelectedTempFolderPath()
     </file>
-    
-    <file name="MainWindow.TabOffice.cs">
-        - Khai báo và xử lý checkbox cho Tab Office
-        - Phương thức InstallGouenjiFontsAsync, InstallNotepadPlusPlusAsync
-    </file>
-    
-    <file name="MainWindow.TabBrowser.cs">
-        - Khai báo và xử lý checkbox cho Tab Browser
-        - Phương thức InstallChromeAsync, InstallCocCocAsync, InstallEdgeAsync
-    </file>
-    
-    <file name="MainWindow.TabMultimedia.cs">
-        - Khai báo và xử lý checkbox cho Tab Multimedia
-        - Phương thức InstallVcredistAsync, InstallDirectXAsync, InstallJavaAsync, InstallOpenALAsync
-    </file>
-    
-    <file name="MainWindow.TabGaming.cs">
-        - Khai báo và xử lý checkbox cho Tab Gaming
-        - Phương thức InstallDPChipAsync, InstallDPNetAsync, InstallRevoAsync
-    </file>
-    
-    <file name="MainWindow.TabInfo.cs">
-        - Khai báo và xử lý checkbox cho Tab Info
-        - Hiển thị thông tin hệ thống
-    </file>
-    
-    <file name="CheckboxList.cursorrules">
-        - Tài liệu danh sách tất cả checkbox
-        - Cập nhật sau mỗi lần tạo/sửa checkbox
-    </file>
-</file_structure_reference>
