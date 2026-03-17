@@ -66,28 +66,25 @@ namespace GMTPC.Tool
 
                 UpdateStatus("Tải xong 3 phần! Đang gộp file...", "Cyan");
 
-                // Merge the 3 parts into final ISO
-                await MergeIsoPartsAsync(part1Path, part2Path, part3Path, finalIsoPath);
+                // Merge the 3 parts into final ISO and delete parts after merging
+                await MergeIsoPartsAsync(part1Path, part2Path, part3Path, finalIsoPath, deleteParts: true);
 
                 UpdateStatus("Gộp file thành công! Đang mở thư mục và file ISO...", "Green");
                 
                 // Open folder with the final ISO
                 Process.Start("explorer.exe", $"/select,{finalIsoPath}");
-                
+
                 // Mount/open the ISO
                 Process.Start(new ProcessStartInfo { FileName = finalIsoPath, UseShellExecute = true });
             }
             catch (OperationCanceledException)
             {
                 UpdateStatus("Đã hủy tải Win 10 LTSC IoT 21H2.", "Yellow");
-                // Cleanup partial downloads
-                CleanupPartialDownloads(part1Path, part2Path, part3Path, finalIsoPath);
                 throw;
             }
             catch (Exception ex)
             {
                 UpdateStatus($"Lỗi tải Win 10 LTSC IoT 21H2: {ex.Message}", "Red");
-                CleanupPartialDownloads(part1Path, part2Path, part3Path, finalIsoPath);
                 throw;
             }
         }
@@ -95,10 +92,10 @@ namespace GMTPC.Tool
         /// <summary>
         /// Merge 3 ISO parts into a single ISO file.
         /// </summary>
-        private async Task MergeIsoPartsAsync(string part1Path, string part2Path, string part3Path, string outputPath)
+        private async Task MergeIsoPartsAsync(string part1Path, string part2Path, string part3Path, string outputPath, bool deleteParts = true)
         {
             string[] parts = { part1Path, part2Path, part3Path };
-            
+
             using (var outputFs = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 foreach (string partPath in parts)
@@ -111,33 +108,21 @@ namespace GMTPC.Tool
             }
 
             // Delete the 3 part files after successful merge
-            foreach (string partPath in parts)
+            if (deleteParts)
             {
-                if (File.Exists(partPath))
+                foreach (string partPath in parts)
                 {
-                    try
+                    if (File.Exists(partPath))
                     {
-                        File.Delete(partPath);
-                        UpdateStatus($"Đã xóa file {Path.GetFileName(partPath)}", "Gray");
+                        try
+                        {
+                            File.Delete(partPath);
+                            UpdateStatus($"Đã xóa file {Path.GetFileName(partPath)}", "Gray");
+                        }
+                        catch { /* Ignore delete errors */ }
                     }
-                    catch { /* Ignore delete errors */ }
                 }
-            }
-
-            UpdateStatus("Đã xóa 3 file tạm sau khi gộp!", "Green");
-        }
-
-        /// <summary>
-        /// Cleanup partial download files on error or cancellation.
-        /// </summary>
-        private void CleanupPartialDownloads(params string[] paths)
-        {
-            foreach (string path in paths)
-            {
-                if (File.Exists(path))
-                {
-                    try { File.Delete(path); } catch { }
-                }
+                UpdateStatus("Đã xóa 3 file split sau khi gộp!", "Green");
             }
         }
 
@@ -176,8 +161,8 @@ namespace GMTPC.Tool
 
                 UpdateStatus("Tải xong 5 phần! Đang gộp file...", "Cyan");
 
-                // Merge the 5 parts into final ISO
-                await MergeIsoPartsAsync(part1Path, part2Path, part3Path, part4Path, part5Path, finalIsoPath);
+                // Merge the 5 parts into final ISO and delete parts after merging
+                await MergeIsoPartsAsync(part1Path, part2Path, part3Path, part4Path, part5Path, finalIsoPath, deleteParts: true);
 
                 UpdateStatus("Gộp file thành công! Đang mở thư mục và file ISO...", "Green");
 
@@ -190,14 +175,11 @@ namespace GMTPC.Tool
             catch (OperationCanceledException)
             {
                 UpdateStatus("Đã hủy tải Win 10 22H2 2024 DECEMBER.", "Yellow");
-                // Cleanup partial downloads
-                CleanupPartialDownloads(part1Path, part2Path, part3Path, part4Path, part5Path, finalIsoPath);
                 throw;
             }
             catch (Exception ex)
             {
                 UpdateStatus($"Lỗi tải Win 10 22H2 2024 DECEMBER: {ex.Message}", "Red");
-                CleanupPartialDownloads(part1Path, part2Path, part3Path, part4Path, part5Path, finalIsoPath);
                 throw;
             }
         }
@@ -205,7 +187,7 @@ namespace GMTPC.Tool
         /// <summary>
         /// Merge 5 ISO parts into a single ISO file.
         /// </summary>
-        private async Task MergeIsoPartsAsync(string part1Path, string part2Path, string part3Path, string part4Path, string part5Path, string outputPath)
+        private async Task MergeIsoPartsAsync(string part1Path, string part2Path, string part3Path, string part4Path, string part5Path, string outputPath, bool deleteParts = true)
         {
             string[] parts = { part1Path, part2Path, part3Path, part4Path, part5Path };
 
@@ -221,20 +203,22 @@ namespace GMTPC.Tool
             }
 
             // Delete the 5 part files after successful merge
-            foreach (string partPath in parts)
+            if (deleteParts)
             {
-                if (File.Exists(partPath))
+                foreach (string partPath in parts)
                 {
-                    try
+                    if (File.Exists(partPath))
                     {
-                        File.Delete(partPath);
-                        UpdateStatus($"Đã xóa file {Path.GetFileName(partPath)}", "Gray");
+                        try
+                        {
+                            File.Delete(partPath);
+                            UpdateStatus($"Đã xóa file {Path.GetFileName(partPath)}", "Gray");
+                        }
+                        catch { /* Ignore delete errors */ }
                     }
-                    catch { /* Ignore delete errors */ }
                 }
+                UpdateStatus("Đã xóa 5 file split sau khi gộp!", "Green");
             }
-
-            UpdateStatus("Đã xóa 5 file tạm sau khi gộp!", "Green");
         }
     }
 }

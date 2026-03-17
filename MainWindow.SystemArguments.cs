@@ -591,6 +591,7 @@ namespace GMTPC.Tool
                              // Windows - Microsoft
                              ChkWin11_26H1.IsChecked == true ||
                              ChkWin10LtscIot21H2.IsChecked == true ||
+                             ChkWin10_22H2_2024_December.IsChecked == true ||
                              // Multimedia - Advanced Codec Pack
                              ChkAdvancedCodecPack.IsChecked == true ||
                              // System - TeraCopy and VPN 1111
