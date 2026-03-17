@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-11 - Added Workflow_createcheckbox_multipart for multi-part games with folder selection -->
+<!-- AI Summary: 2026-03-17 - Added Windows Defender exclusion management for temp folders, updated GetGMTPCFolder() to use selected temp path, Windows Mod MMT tab always downloads to C:\ and never deletes files -->
 
 <system_context>
 Bạn là một AI Code Agent chuyên nghiệp, làm việc trên dự án "MMT Tools" (WPF, .NET 4.8, C# 7.3).
@@ -10,7 +10,40 @@ Mục tiêu của bạn là tuân thủ TUYỆT ĐỐI kiến trúc Partial Clas
 2. Luôn lưu file ở định dạng UTF-8.
 3. Luôn thêm/cập nhật khối comment "AI Summary" ở đầu MỌI file bạn chỉnh sửa (Ghi rõ ngày cập nhật và tóm tắt thao tác).
 4. Luôn luôn taskkill /im GMTPC.Tool.exe /F rồi build vào \bin\Release\, khi gặp lỗi và warning thì tự động sửa lỗi cho đến khi nào hết lỗi và warning thì mới được ngưng. Sau khi build xong thì git push.
+5. Temp folder mặc định là %LocalAppdata%\GMTPC\GMTPC Tools\ là (folder hệ thống), nếu đổi temp folder thì sẽ không bao giờ bị xóa. Còn nếu ở thư mục của ổ khác thì bị xóa. Ví dụ như khi tôi đang ở ổ C, chọn ổ D thì sẽ không xóa (folder hệ thống) rồi tạo ổ D:\Tempfolder, nếu đang ổ D:\ mà chọn ổ E:\ thì sẽ xóa D:\Temp Folder rồi tạo E:\Temp Folder.
+6. Defender exclusion luôn được tạo cho %LocalAppdata%\GMTPC\GMTPC Tools\, còn các thư mục khác thì làm theo VÍ DỤ:
+nếu chọn ổ D thì sẽ tự tạo  defender exclusion cho D:\Temp Folder, khi đang ở ổ D:\ và chọn ổ E:\ thì sẽ xóa defender exclusion D:\Temp Folder rồi tạo E:\Temp Folder và tạo defender exclusion cho E:\Temp Folder. Trong toàn bộ trường hợp đổi qua đổi lại sẽ không bao giờ xóa defender exclusion của %LocalAppdata%\GMTPC\GMTPC Tools\
+7. File trong tab Windows Mod MMT luôn luôn tải file về ổ C:\ và sẽ không bao giờ bị xóa kể cả sau khi tắt project.
 </global_rules>
+
+<file_architecture>
+    <!-- ==================== PARTIAL CLASS FILES ==================== -->
+    <file name="MainWindow.SystemBar.cs">
+        <description>
+        Xử lý Temp folder ComboBox - cho phép người dùng chọn ổ cứng để tải file, quản lý Windows Defender exclusions.
+        </description>
+        <fields>
+            - _selectedTempDrivePath: Lưu path của temp folder đang chọn
+            - _previousTempFolderPath: Lưu path của folder cũ để xóa khi đổi ổ
+            - _systemTempFolderPath: Lưu path của folder hệ thống (%LocalAppData%\GMTPC\GMTPC Tools\) - không bao giờ xóa
+        </fields>
+        <methods>
+            - PopulateTempFolderComboBox(): Điền danh sách ổ cứng vào ComboBox (loại trừ CD-ROM)
+            - CboTempFolder_SelectionChanged(): Xử lý khi đổi ổ - tạo folder mới, xóa folder cũ, quản lý Defender exclusions
+            - GetSelectedTempFolderPath(): Lấy path của temp folder đang chọn
+            - AddDefenderExclusionAsync(): Thêm Windows Defender exclusion cho folder
+            - RemoveDefenderExclusionAsync(): Xóa Windows Defender exclusion khỏi folder
+            - IsDefenderExclusionExistsAsync(): Kiểm tra xem folder có trong Defender exclusion list không
+            - IsRunningAsAdministrator(): Kiểm tra xem ứng dụng đang chạy với quyền admin không
+        </methods>
+        <notes>
+            - Mặc định: %LocalAppData%\GMTPC\GMTPC Tools\ (ổ C:) - folder hệ thống, không bao giờ xóa
+            - Các ổ khác: D:\Temp Folder, E:\Temp Folder, ... - bị xóa khi đổi ổ
+            - Khi đổi ổ: tự động xóa folder cũ (trừ system folder), xóa Defender exclusion cũ, tạo Defender exclusion mới
+            - Defender exclusion của system folder luôn được giữ lại, không bao giờ xóa
+        </notes>
+    </file>
+</file_architecture>
 
 <workflow_definitions>
     <!-- ==================== CREATE CHECKBOX ==================== -->
