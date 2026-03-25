@@ -11,6 +11,8 @@ namespace GMTPC.Tool
 {
     /*
  * AI Summary:
+ * Date: 2026-03-25
+ * - Added THEME_REGISTRY_PATH and THEME_REGISTRY_VALUE constants for Theme Toggle
  * Date: 2026-03-11
  * - Added GHOST_OF_TSUSHIMA_PART01_URL to PART29_URL constants for Ghost of Tsushima
  * Date: 2026-03-09
@@ -74,6 +76,10 @@ namespace GMTPC.Tool
         // Zalo
         private const string ZALO_DOWNLOAD_URL = "https://zalo.me/download/zalo-pc?utm=90000";
         private const string ZALO_INSTALL_ARGUMENTS = "/s";
+
+        // Theme Toggle
+        private const string THEME_REGISTRY_PATH = @"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+        private const string THEME_REGISTRY_VALUE = "AppsUseLightTheme";
 
         // ===================================================================
         // TabGaming — Ghost of Tsushima

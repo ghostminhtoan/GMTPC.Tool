@@ -387,6 +387,14 @@
                             <CheckBox x:Name="ChkOpenAL" Content="OpenAL" Width="200" Height="34" Click="ChkOpenAL_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkRevoUninstaller" Content="Revo Uninstaller" Width="200" Height="34" Click="ChkRevoUninstaller_Click" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkInstallZalo" Content="Zalo" Width="200" Height="34" Click="ChkInstallZalo_Click" MouseEnter="Checkbox_MouseEnter"/>
+                            <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="205">
+                                <StackPanel>
+                                    <TextBlock Text="Theme" Foreground="#FFE6E6E6" FontSize="11" Margin="6,6,0,2" FontWeight="Bold"/>
+                                    <ToggleButton x:Name="TglTheme" Content="Dark Theme" Width="180" Height="28" 
+                                                  FontSize="10" Margin="6,0,6,6" 
+                                                  Click="TglTheme_Click"/>
+                                </StackPanel>
+                            </Border>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>

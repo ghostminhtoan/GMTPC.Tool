@@ -3,6 +3,8 @@
 // Chức năng: CHỈ chứa lifecycle hooks (constructor, Window events)
 //            KHÔNG được thêm logic vào file này.
 // Cập nhật gần đây:
+//   - 2026-03-25: Added UpdateThemeToggleButtonState() call in Window_Loaded
+//                 to initialize Theme Toggle Button state
 //   - 2026-03-05: Tái cấu trúc theo AI_WORKFLOW.md — xóa toàn bộ logic,
 //                 chuyển sang các partial class phù hợp
 // =======================================================================
@@ -44,6 +46,9 @@ namespace GMTPC.Tool
             SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
             try { PopulateSystemInfo(); } catch { }
             PopulateTempFolderComboBox();
+            
+            // Khởi tạo trạng thái Theme Toggle Button
+            UpdateThemeToggleButtonState();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
