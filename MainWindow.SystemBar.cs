@@ -3,6 +3,8 @@
 // Chức năng: Xử lý Progress Bar, Segment UI, download engine,
 //            thông báo trạng thái, shared state fields
 // Cập nhật gần đây:
+//   - 2026-03-26: Fixed Temp Folder - only show C: with %LocalAppData%\GMTPC\GMTPC Tools\
+//                 Fixed Defender Exclusion path (add missing \)
 //   - 2026-03-05: Chuyển UpdateStatus, UpdateSecondaryStatus, SetInstallingState
 //                 và các shared fields từ xaml.cs về đây theo AI_WORKFLOW.md
 //   - 2026-03-07: Thêm hiển thị Build Number theo định dạng YYYY-MM-DD-hh-mm-ss
@@ -39,7 +41,7 @@ namespace GMTPC.Tool
         // Temp folder selection
         private string _selectedTempDrivePath = null;
         private string _previousTempFolderPath = null; // Track previous temp folder for cleanup
-        private string _systemTempFolderPath = null; // System folder path (LocalAppData) - never delete exclusion
+        private string _systemTempFolderPath = null; // System folder path (LocalAppData) - never delete
 
         // ===================== Build Number Display =====================
         private void SetBuildNumber()
@@ -672,7 +674,8 @@ namespace GMTPC.Tool
 
         // ===================== Temp Folder ComboBox =====================
         /// <summary>
-        /// Populate the Temp folder ComboBox with all available drives (excluding CD-ROM)
+        /// Populate the Temp folder ComboBox with ONLY system folder (C:\%LocalAppData%\GMTPC\GMTPC Tools\)
+        /// This is the only folder used for temp storage.
         /// </summary>
         private void PopulateTempFolderComboBox()
         {
@@ -682,31 +685,15 @@ namespace GMTPC.Tool
 
                 CboTempFolder.Items.Clear();
 
-                // Add default option (C:\Temp Folder)
-                string defaultPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
+                // Add ONLY system folder option (C:\%LocalAppData%\GMTPC\GMTPC Tools\)
+                string systemPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
                 CboTempFolder.Items.Add(new ComboBoxItem
                 {
-                    Content = $"Mặc định (C:) - {defaultPath}",
-                    Tag = defaultPath
+                    Content = $"Mặc định (C:) - {systemPath}",
+                    Tag = systemPath
                 });
 
-                // Add all drives except CD-ROM
-                foreach (DriveInfo drive in DriveInfo.GetDrives())
-                {
-                    if (drive.DriveType != DriveType.CDRom && drive.IsReady)
-                    {
-                        string drivePath = Path.Combine(drive.Name.TrimEnd('\\'), "Temp Folder");
-                        string displayText = $"{drive.Name} ({FormatBytes(drive.TotalFreeSpace)} free)";
-
-                        CboTempFolder.Items.Add(new ComboBoxItem
-                        {
-                            Content = displayText,
-                            Tag = drivePath
-                        });
-                    }
-                }
-
-                // Select default (first) item
+                // Select default (first and only) item
                 if (CboTempFolder.Items.Count > 0)
                 {
                     CboTempFolder.SelectedIndex = 0;
@@ -714,14 +701,14 @@ namespace GMTPC.Tool
             }
             catch (Exception ex)
             {
-                UpdateStatus($"Lỗi khi tải danh sách ổ cứng: {ex.Message}", "Red");
+                UpdateStatus($"Lỗi khi tải danh sách folder: {ex.Message}", "Red");
             }
         }
 
         /// <summary>
         /// Handle Temp folder ComboBox selection changed
-        /// Auto-create folder, delete old temp folder (except system folder)
-        /// and manage Windows Defender exclusions
+        /// Auto-create folder and manage Windows Defender exclusions
+        /// System folder (%LocalAppData%\GMTPC\GMTPC Tools\) is always used and never deleted
         /// </summary>
         private async void CboTempFolder_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -737,34 +724,13 @@ namespace GMTPC.Tool
                         if (_systemTempFolderPath == null)
                         {
                             _systemTempFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
-                            
+
                             // Always ensure system folder has defender exclusion (never remove it)
                             await AddDefenderExclusionAsync(_systemTempFolderPath);
                         }
 
-                        // Remove defender exclusion from previous temp folder if it's not the system folder
-                        if (!string.IsNullOrEmpty(_previousTempFolderPath) &&
-                            _previousTempFolderPath != newTempPath &&
-                            !_previousTempFolderPath.Equals(_systemTempFolderPath, StringComparison.OrdinalIgnoreCase))
-                        {
-                            await RemoveDefenderExclusionAsync(_previousTempFolderPath);
-
-                            // Delete previous temp folder if it's not the system folder
-                            try
-                            {
-                                if (Directory.Exists(_previousTempFolderPath))
-                                {
-                                    Directory.Delete(_previousTempFolderPath, true);
-                                    UpdateStatus($"Đã xóa folder tạm: {_previousTempFolderPath}", "Gray");
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                UpdateStatus($"Không thể xóa folder cũ ({_previousTempFolderPath}): {ex.Message}", "Yellow");
-                            }
-                        }
-
-                        // Create new temp folder
+                        // Since we only have one folder now (system folder), just ensure it exists
+                        // and has defender exclusion
                         if (!Directory.Exists(newTempPath))
                         {
                             try
@@ -779,13 +745,10 @@ namespace GMTPC.Tool
                             }
                         }
 
-                        // Add defender exclusion for new temp folder (skip if it's the system folder - already added)
-                        if (!newTempPath.Equals(_systemTempFolderPath, StringComparison.OrdinalIgnoreCase))
-                        {
-                            await AddDefenderExclusionAsync(newTempPath);
-                        }
+                        // Always ensure defender exclusion for system folder
+                        await AddDefenderExclusionAsync(newTempPath);
 
-                        // Update status and track previous path
+                        // Update status and track path
                         _previousTempFolderPath = newTempPath;
                         _selectedTempDrivePath = newTempPath;
                         UpdateStatus($"Temp folder: {newTempPath}", "Green");
