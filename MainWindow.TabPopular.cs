@@ -129,7 +129,6 @@ namespace GMTPC.Tool
                 {
                     bool isDarkTheme = IsDarkThemeEnabled();
                     TglTheme.IsChecked = isDarkTheme;
-                    TglTheme.Content = isDarkTheme ? "Dark Theme" : "Light Theme";
                 }
             }
             catch { }

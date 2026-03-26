@@ -4,6 +4,8 @@
 //            SelectNoneAllTabs, Install, Pause, Resume, Refresh Color,
 //            BtnDownloadPage, DPI controls
 // Cập nhật gần đây:
+//   - 2026-03-26: Added ChkJumpForce and ChkWintoHDD to BtnSelectAll, 
+//                 BtnSelectNone, BtnSelectNoneAllTabs, BtnInstall_Click
 //   - 2026-03-11: Added ChkGhostOfTsushima to BtnSelectAll, BtnSelectNone,
 //                 BtnSelectNoneAllTabs, UpdateInstallButtonState, BtnInstall_Click
 //   - 2026-03-05: Thêm currentDPIScale, DPI_STEPS, ApplyDPIScale từ xaml.cs
@@ -255,6 +257,7 @@ namespace GMTPC.Tool
                     ChkPorofessor.IsChecked = true;
                     ChkSamuraiMaiden.IsChecked = true;
                     ChkGhostOfTsushima.IsChecked = true;
+                    ChkJumpForce.IsChecked = true;
                 }
                 // Nếu tab là "Browser"
                 else if (tabHeader == "Browser")
@@ -369,6 +372,7 @@ namespace GMTPC.Tool
                     ChkPorofessor.IsChecked = false;
                     ChkSamuraiMaiden.IsChecked = false;
                     ChkGhostOfTsushima.IsChecked = false;
+                    ChkJumpForce.IsChecked = false;
                 }
                 // Nếu tab là "Browser"
                 else if (tabHeader == "Browser")
@@ -466,6 +470,7 @@ namespace GMTPC.Tool
             ChkPorofessor.IsChecked = false;
             ChkSamuraiMaiden.IsChecked = false;
             ChkGhostOfTsushima.IsChecked = false;
+            ChkJumpForce.IsChecked = false;
 
             // Bỏ chọn checkbox trong tab Remote Desktop
             ChkUltraviewer.IsChecked = false;
@@ -558,6 +563,7 @@ namespace GMTPC.Tool
             if (ChkPorofessor.IsChecked == true) tasks.Add((InstallPorofessorAsync, ChkPorofessor));
             if (ChkSamuraiMaiden.IsChecked == true) tasks.Add((InstallSamuraiMaidenAsync, ChkSamuraiMaiden));
             if (ChkGhostOfTsushima.IsChecked == true) tasks.Add((InstallGhostOfTsushimaAsync, ChkGhostOfTsushima));
+            if (ChkJumpForce.IsChecked == true) tasks.Add((InstallJumpForceAsync, ChkJumpForce));
             if (ChkAomeiPartitionAssistant.IsChecked == true) tasks.Add((InstallAomeiPartitionAssistantAsync, ChkAomeiPartitionAssistant));
             if (ChkUltraviewer.IsChecked == true) tasks.Add((InstallUltraviewerAsync, ChkUltraviewer));
             if (ChkTeamViewerQS.IsChecked == true) tasks.Add((InstallTeamViewerQuickSupportAsync, ChkTeamViewerQS));
@@ -567,6 +573,7 @@ namespace GMTPC.Tool
             if (ChkWin11_26H1.IsChecked == true) tasks.Add((InstallWin11_26H1Async, ChkWin11_26H1));
             if (ChkWin10LtscIot21H2.IsChecked == true) tasks.Add((InstallWin10LtscIot21H2Async, ChkWin10LtscIot21H2));
             if (ChkWin10_22H2_2024_December.IsChecked == true) tasks.Add((InstallWin10_22H2_2024_DecemberAsync, ChkWin10_22H2_2024_December));
+            if (ChkWintoHDD.IsChecked == true) tasks.Add((InstallWintoHDDAsync, ChkWintoHDD));
 
             CheckBox currentTaskCheckBox = null;
             try

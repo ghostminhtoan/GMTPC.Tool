@@ -82,6 +82,32 @@ namespace GMTPC.Tool
         private const string THEME_REGISTRY_VALUE = "AppsUseLightTheme";
 
         // ===================================================================
+        // TabWinModMMT — WintoHDD
+        // TabItem Header: "Windows Mod MMT"
+        // Checkbox: ChkWintoHDD
+        // ===================================================================
+        private const string WINTOHDD_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/WinPE/wintohdd.exe";
+        private const string WINTOHDD_INSTALL_ARGUMENTS = "/S";
+
+        // ===================================================================
+        // TabGaming — Jump Force (11 parts)
+        // TabItem Header: "Gaming"
+        // Checkbox: ChkJumpForce
+        // ===================================================================
+        private const string JUMP_FORCE_PART01_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part01.exe";
+        private const string JUMP_FORCE_PART02_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part02.rar";
+        private const string JUMP_FORCE_PART03_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part03.rar";
+        private const string JUMP_FORCE_PART04_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part04.rar";
+        private const string JUMP_FORCE_PART05_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part05.rar";
+        private const string JUMP_FORCE_PART06_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part06.rar";
+        private const string JUMP_FORCE_PART07_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part07.rar";
+        private const string JUMP_FORCE_PART08_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part08.rar";
+        private const string JUMP_FORCE_PART09_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part09.rar";
+        private const string JUMP_FORCE_PART10_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part10.rar";
+        private const string JUMP_FORCE_PART11_URL = "https://github.com/ghostminhtoan/MMT/releases/download/game/JUMP.FORCE_LinkNeverDie.Com.part11.rar";
+        private const string JUMP_FORCE_FINAL_NAME = "JUMP.FORCE_LinkNeverDie.Com.iso";
+
+        // ===================================================================
         // TabGaming — Ghost of Tsushima
         // TabItem Header: "Gaming"
         // Checkbox: ChkGhostOfTsushima

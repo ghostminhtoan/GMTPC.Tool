@@ -213,6 +213,20 @@ namespace GMTPC.Tool
             UpdateInstallButtonState();
         }
 
+        private void ChkJumpForce_Click(object sender, RoutedEventArgs e)
+        {
+            if (ChkJumpForce.IsChecked == true)
+            {
+                UpdateStatus("Đã chọn: Jump Force (11 parts)", "Green");
+            }
+            else
+            {
+                UpdateStatus("Đã hủy chọn: Jump Force", "Yellow");
+            }
+
+            UpdateInstallButtonState();
+        }
+
         private async Task InstallProcessLassoAsync()
         {
             try
@@ -704,6 +718,81 @@ namespace GMTPC.Tool
             catch (Exception ex)
             {
                 UpdateStatus($"Lỗi khi cài đặt Ghost of Tsushima: {ex.Message}", "Red");
+            }
+        }
+
+        // ===================================================================
+        // Jump Force - 11 parts multi-part installer
+        // ===================================================================
+        private async Task InstallJumpForceAsync()
+        {
+            string gmtPCFolder = GetGMTPCFolder();
+            string tempFolder = Path.Combine(gmtPCFolder, "JumpForce_Temp_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+
+            UpdateStatus("Đang tải về 11 file parts...", "Cyan");
+
+            try
+            {
+                // Create temp folder
+                if (!Directory.Exists(tempFolder))
+                {
+                    Directory.CreateDirectory(tempFolder);
+                }
+
+                // Download all 11 parts sequentially with progress
+                string[] partUrls = new string[]
+                {
+                    JUMP_FORCE_PART01_URL, JUMP_FORCE_PART02_URL, JUMP_FORCE_PART03_URL,
+                    JUMP_FORCE_PART04_URL, JUMP_FORCE_PART05_URL, JUMP_FORCE_PART06_URL,
+                    JUMP_FORCE_PART07_URL, JUMP_FORCE_PART08_URL, JUMP_FORCE_PART09_URL,
+                    JUMP_FORCE_PART10_URL, JUMP_FORCE_PART11_URL
+                };
+
+                string[] partPaths = new string[11];
+                for (int i = 0; i < partUrls.Length; i++)
+                {
+                    string partFileName = $"JUMP.FORCE_LinkNeverDie.Com.part{(i + 1):D2}.{(i == 0 ? "exe" : "rar")}";
+                    partPaths[i] = Path.Combine(tempFolder, partFileName);
+
+                    UpdateStatus($"Đang tải phần {i + 1}/11...", "Cyan");
+                    await DownloadWithProgressAsync(partUrls[i], partPaths[i], $"Jump Force - Part {i + 1}");
+                    Dispatcher.Invoke(() => { DownloadProgressBar.Value = 0; ProgressTextBlock.Text = ""; SpeedTextBlock.Text = ""; });
+                }
+
+                // Run part01.exe
+                UpdateStatus("Đang chạy JUMP.FORCE_LinkNeverDie.Com.part01.exe...", "Yellow");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = partPaths[0],
+                    UseShellExecute = true,
+                    WorkingDirectory = tempFolder
+                };
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("Jump Force đã hoàn tất!", "Green");
+                }
+
+                // Delete temp folder after installation
+                UpdateStatus("Đang xóa file tạm thời...", "Cyan");
+                try
+                {
+                    if (Directory.Exists(tempFolder))
+                    {
+                        Directory.Delete(tempFolder, true);
+                        UpdateStatus($"Đã xóa folder tạm: {tempFolder}", "Green");
+                    }
+                }
+                catch (Exception exDelete)
+                {
+                    UpdateStatus($"Không thể xóa folder tạm: {exDelete.Message}", "Yellow");
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài đặt Jump Force: {ex.Message}", "Red");
             }
         }
 

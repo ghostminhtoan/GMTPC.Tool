@@ -317,7 +317,7 @@ namespace GMTPC.Tool
             catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
-                UpdateStatus($"Loi tai: {ex.Message}", "Red");
+                UpdateStatus($"Loi tai: {ex.Message}", "Cyan");
                 throw;
             }
             finally
