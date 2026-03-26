@@ -32,12 +32,93 @@ namespace GMTPC.Tool
         private const string WIN10_22H2_2024_DEC_PART5_URL = "https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.005";
         private const string WIN10_22H2_2024_DEC_FINAL_NAME = "win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso";
 
-        // WintoHDD - Use InstallWithPromptAsync for Yes/No dialog
+        // WintoHDD - Use InstallWithPromptAsync for Yes/No dialog with NTFS Compression check
         private async Task InstallWintoHDDAsync()
         {
+            // Check and enable NTFS Compression before installation (only if running as admin)
+            await CheckAndEnableNTFSCompression();
+
             string gmtPCFolder = GetGMTPCFolder();
             string wintoHddPath = Path.Combine(gmtPCFolder, "wintohdd.exe");
             await InstallWithPromptAsync(WINTOHDD_DOWNLOAD_URL, wintoHddPath, WINTOHDD_INSTALL_ARGUMENTS, "WintoHDD");
+        }
+
+        /// <summary>
+        /// Check if NTFS Compression is enabled on system drive. If not and running as admin, enable it.
+        /// WintoHDD requires NTFS Compression to be enabled.
+        /// If not running as admin, skip the check to avoid UAC prompt.
+        /// </summary>
+        private async Task CheckAndEnableNTFSCompression()
+        {
+            try
+            {
+                UpdateStatus("Đang kiểm tra NTFS Compression...", "Cyan");
+                await Task.Delay(500);
+
+                // Check if running as administrator
+                bool isAdmin = IsRunningAsAdministrator();
+
+                if (!isAdmin)
+                {
+                    // Not running as admin - skip NTFS compression check to avoid UAC prompt
+                    // WintoHDD will handle this itself with its own UAC prompt
+                    UpdateStatus("Không có quyền admin, bỏ qua kiểm tra NTFS Compression.", "Gray");
+                    await Task.Delay(500);
+                    return;
+                }
+
+                // Check NTFS Compression status using compact /compactstate
+                ProcessStartInfo checkStartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = "/c compact /compactstate:C:",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                Process checkProcess = Process.Start(checkStartInfo);
+                string output = checkProcess.StandardOutput.ReadToEnd();
+                checkProcess.WaitForExit();
+
+                // Parse output to check compression status
+                // Output format: "CompactState on C: is Yes" or "CompactState on C: is No"
+                bool isCompressionEnabled = output.Contains("Yes") || output.Contains("1");
+
+                if (!isCompressionEnabled)
+                {
+                    UpdateStatus("NTFS Compression đang tắt. Đang bật (có thể mất vài phút)...", "Yellow");
+                    await Task.Delay(500);
+
+                    // Enable NTFS Compression on Windows folder using compact
+                    // /C = compress, /I = continue on error, /F = force, /Q = quiet
+                    // /S = recurse subdirectories
+                    ProcessStartInfo enableStartInfo = new ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = "/c compact /C /I /F /Q /S:C:\\Windows",
+                        UseShellExecute = true,
+                        CreateNoWindow = false // Show progress window
+                    };
+
+                    Process enableProcess = Process.Start(enableStartInfo);
+                    if (enableProcess != null)
+                    {
+                        await Task.Run(() => enableProcess.WaitForExit());
+                        UpdateStatus("Đã bật NTFS Compression thành công!", "Green");
+                        await Task.Delay(1000);
+                    }
+                }
+                else
+                {
+                    UpdateStatus("NTFS Compression đã được bật.", "Green");
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi kiểm tra/bật NTFS Compression: {ex.Message}", "Red");
+                await Task.Delay(500);
+            }
         }
 
         private void ChkWintoHDD_Click(object sender, RoutedEventArgs e)
