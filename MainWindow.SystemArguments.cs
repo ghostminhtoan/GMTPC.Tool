@@ -11,8 +11,12 @@ namespace GMTPC.Tool
 {
     /*
  * AI Summary:
- * Date: 2026-03-25
+ * Date: 2026-03-26 (2)
+ * - Added ChkWintoHDD and ChkJumpForce to UpdateInstallButtonState()
+ * Date: 2026-03-26
  * - Added THEME_REGISTRY_PATH and THEME_REGISTRY_VALUE constants for Theme Toggle
+ * - Added WINTOHDD_DOWNLOAD_URL, WINTOHDD_INSTALL_ARGUMENTS
+ * - Added JUMP_FORCE_PART01_URL to PART11_URL constants for Jump Force (11 parts)
  * Date: 2026-03-11
  * - Added GHOST_OF_TSUSHIMA_PART01_URL to PART29_URL constants for Ghost of Tsushima
  * Date: 2026-03-09
@@ -624,11 +628,15 @@ namespace GMTPC.Tool
                              ChkWin11_26H1.IsChecked == true ||
                              ChkWin10LtscIot21H2.IsChecked == true ||
                              ChkWin10_22H2_2024_December.IsChecked == true ||
+                             // Windows Mod MMT - WintoHDD
+                             ChkWintoHDD.IsChecked == true ||
                              // Multimedia - Advanced Codec Pack
                              ChkAdvancedCodecPack.IsChecked == true ||
                              // System - TeraCopy and VPN 1111
                              ChkTeraCopy.IsChecked == true ||
-                             ChkVPN1111.IsChecked == true;
+                             ChkVPN1111.IsChecked == true ||
+                             // Gaming - Jump Force
+                             ChkJumpForce.IsChecked == true;
 
             // Bao gồm checkbox cho Tạo WinRE và WinPE
 
