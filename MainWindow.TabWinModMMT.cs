@@ -44,8 +44,9 @@ namespace GMTPC.Tool
         }
 
         /// <summary>
-        /// Check if NTFS Compression is enabled on system drive. If not and running as admin, enable it.
+        /// Check if NTFS Compression is enabled via registry. If not and running as admin, enable it.
         /// WintoHDD requires NTFS Compression to be enabled.
+        /// Registry: HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\NtfsDisableCompression = 0 (enabled)
         /// If not running as admin, skip the check to avoid UAC prompt.
         /// </summary>
         private async Task CheckAndEnableNTFSCompression()
@@ -67,52 +68,67 @@ namespace GMTPC.Tool
                     return;
                 }
 
-                // Check NTFS Compression status using compact /compactstate
-                ProcessStartInfo checkStartInfo = new ProcessStartInfo
+                // Check NTFS Compression status via registry
+                // NtfsDisableCompression = 0 means compression is ENABLED
+                // NtfsDisableCompression = 1 means compression is DISABLED
+                const string registryPath = @"SYSTEM\CurrentControlSet\Control\FileSystem";
+                const string valueName = "NtfsDisableCompression";
+
+                int currentValue = 1; // Default to disabled (safe assumption)
+                try
                 {
-                    FileName = "cmd.exe",
-                    Arguments = "/c compact /compactstate:C:",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
+                    using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(registryPath))
+                    {
+                        if (key != null)
+                        {
+                            object value = key.GetValue(valueName);
+                            if (value != null)
+                            {
+                                currentValue = Convert.ToInt32(value);
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Cannot read registry - assume compression is disabled
+                    currentValue = 1;
+                }
 
-                Process checkProcess = Process.Start(checkStartInfo);
-                string output = checkProcess.StandardOutput.ReadToEnd();
-                checkProcess.WaitForExit();
-
-                // Parse output to check compression status
-                // Output format: "CompactState on C: is Yes" or "CompactState on C: is No"
-                bool isCompressionEnabled = output.Contains("Yes") || output.Contains("1");
+                bool isCompressionEnabled = (currentValue == 0);
 
                 if (!isCompressionEnabled)
                 {
-                    UpdateStatus("NTFS Compression đang tắt. Đang bật (có thể mất vài phút)...", "Yellow");
+                    UpdateStatus("NTFS Compression đang tắt. Đang bật...", "Yellow");
                     await Task.Delay(500);
 
-                    // Enable NTFS Compression on Windows folder using compact
-                    // /C = compress, /I = continue on error, /F = force, /Q = quiet
-                    // /S = recurse subdirectories
+                    // Enable NTFS Compression by setting NtfsDisableCompression = 0
                     ProcessStartInfo enableStartInfo = new ProcessStartInfo
                     {
-                        FileName = "cmd.exe",
-                        Arguments = "/c compact /C /I /F /Q /S:C:\\Windows",
+                        FileName = "reg.exe",
+                        Arguments = @"ADD HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v NtfsDisableCompression /t REG_DWORD /d 0 /f",
                         UseShellExecute = true,
-                        CreateNoWindow = false // Show progress window
+                        Verb = "runas" // Run as administrator - required for writing to HKLM
                     };
 
                     Process enableProcess = Process.Start(enableStartInfo);
                     if (enableProcess != null)
                     {
                         await Task.Run(() => enableProcess.WaitForExit());
-                        UpdateStatus("Đã bật NTFS Compression thành công!", "Green");
+                        UpdateStatus("Đã bật NTFS Compression (set registry về 0)!", "Green");
                         await Task.Delay(1000);
                     }
                 }
                 else
                 {
-                    UpdateStatus("NTFS Compression đã được bật.", "Green");
+                    UpdateStatus("NTFS Compression đã được bật (registry = 0).", "Green");
                 }
+            }
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+            {
+                // User canceled UAC prompt - skip NTFS compression check
+                UpdateStatus("Đã bỏ qua kiểm tra NTFS Compression (người dùng hủy UAC).", "Yellow");
+                await Task.Delay(500);
             }
             catch (Exception ex)
             {
