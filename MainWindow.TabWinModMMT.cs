@@ -32,46 +32,12 @@ namespace GMTPC.Tool
         private const string WIN10_22H2_2024_DEC_PART5_URL = "https://github.com/ghostminhtoan/MMT/releases/download/windows/win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso.005";
         private const string WIN10_22H2_2024_DEC_FINAL_NAME = "win.10.22h2.2024.DECEMBER.-.Office.365.-.win.10.MMTPC.4.0.iso";
 
-        // WintoHDD
+        // WintoHDD - Use InstallWithPromptAsync for Yes/No dialog
         private async Task InstallWintoHDDAsync()
         {
-            try
-            {
-                UpdateStatus("Đang tải WintoHDD...", "Cyan");
-                string wintoHddPath = Path.Combine(GetGMTPCFolder(), "wintohdd.exe");
-                await DownloadWithProgressAsync(WINTOHDD_DOWNLOAD_URL, wintoHddPath, "WintoHDD");
-
-                Dispatcher.Invoke(() =>
-                {
-                    DownloadProgressBar.Value = 0;
-                    ProgressTextBlock.Text = "";
-                    SpeedTextBlock.Text = "";
-                });
-
-                UpdateStatus("Đang cài đặt WintoHDD (silent)...", "Yellow");
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = wintoHddPath,
-                    Arguments = WINTOHDD_INSTALL_ARGUMENTS,
-                    UseShellExecute = true
-                };
-                Process process = Process.Start(startInfo);
-
-                if (process != null)
-                {
-                    await Task.Run(() => process.WaitForExit());
-                    UpdateStatus("Cài đặt WintoHDD hoàn tất!", "Green");
-                }
-
-                if (File.Exists(wintoHddPath))
-                {
-                    File.Delete(wintoHddPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Lỗi khi cài đặt WintoHDD: {ex.Message}", "Red");
-            }
+            string gmtPCFolder = GetGMTPCFolder();
+            string wintoHddPath = Path.Combine(gmtPCFolder, "wintohdd.exe");
+            await InstallWithPromptAsync(WINTOHDD_DOWNLOAD_URL, wintoHddPath, WINTOHDD_INSTALL_ARGUMENTS, "WintoHDD");
         }
 
         private void ChkWintoHDD_Click(object sender, RoutedEventArgs e)
