@@ -3,6 +3,8 @@
 // Chức năng: Xử lý Progress Bar, Segment UI, download engine,
 //            thông báo trạng thái, shared state fields
 // Cập nhật gần đây:
+//   - 2026-03-26 (5): Fixed Open Folder button - uses _openFolderButtonPath which is set
+//                 when user selects a drive. Always opens correct folder.
 //   - 2026-03-26 (4): All drives show same format (C:\ (100GB), D:\ (50GB), etc.)
 //                 C: uses %LocalAppData%\GMTPC\GMTPC Tools\ for actual storage
 //                 Added "Open folder" button with BtnOpenFolder_Click and OpenTempFolder()
@@ -51,6 +53,7 @@ namespace GMTPC.Tool
         private string _previousTempFolderPath = null; // Track previous temp folder for cleanup
         private string _systemTempFolderPath = null; // System folder path (LocalAppData) - never delete
         private string _selectedDriveName = null; // Track selected drive name (C:, D:, etc.)
+        private string _openFolderButtonPath = null; // Path for Open Folder button
 
         // ===================== Build Number Display =====================
         private void SetBuildNumber()
@@ -821,6 +824,7 @@ namespace GMTPC.Tool
                         // Update status and track previous path
                         _previousTempFolderPath = newTempPath;
                         _selectedTempDrivePath = newTempPath;
+                        _openFolderButtonPath = newTempPath; // Store path for Open Folder button
                         UpdateStatus($"Temp folder: {newTempPath}", "Green");
                     }
                 }
@@ -860,26 +864,17 @@ namespace GMTPC.Tool
 
         /// <summary>
         /// Open the selected temp folder in Windows Explorer
+        /// Uses _openFolderButtonPath which is set when user selects a drive from ComboBox
         /// </summary>
         private void OpenTempFolder()
         {
             try
             {
-                string folderPath = null;
+                // Use _openFolderButtonPath which is always in sync with user selection
+                string folderPath = _openFolderButtonPath;
 
-                // Priority 1: Use _selectedTempDrivePath if available
-                if (!string.IsNullOrEmpty(_selectedTempDrivePath))
-                {
-                    folderPath = _selectedTempDrivePath;
-                }
-                // Priority 2: Get path from ComboBox selected item
-                else if (CboTempFolder != null && CboTempFolder.SelectedItem is ComboBoxItem selectedItem)
-                {
-                    folderPath = selectedItem.Tag as string;
-                    _selectedTempDrivePath = folderPath; // Cache it for next time
-                }
-                // Priority 3: Default to system folder
-                else
+                // Fallback to system folder if nothing selected yet
+                if (string.IsNullOrEmpty(folderPath))
                 {
                     folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
                 }
@@ -888,6 +883,7 @@ namespace GMTPC.Tool
                 if (!Directory.Exists(folderPath))
                 {
                     Directory.CreateDirectory(folderPath);
+                    _openFolderButtonPath = folderPath; // Update button path
                     UpdateStatus($"Đã tạo folder: {folderPath}", "Green");
                 }
 
