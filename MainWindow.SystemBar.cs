@@ -865,10 +865,24 @@ namespace GMTPC.Tool
         {
             try
             {
-                // Use _selectedTempDrivePath directly if available, otherwise get default
-                string folderPath = !string.IsNullOrEmpty(_selectedTempDrivePath) 
-                    ? _selectedTempDrivePath 
-                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
+                string folderPath = null;
+
+                // Priority 1: Use _selectedTempDrivePath if available
+                if (!string.IsNullOrEmpty(_selectedTempDrivePath))
+                {
+                    folderPath = _selectedTempDrivePath;
+                }
+                // Priority 2: Get path from ComboBox selected item
+                else if (CboTempFolder != null && CboTempFolder.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    folderPath = selectedItem.Tag as string;
+                    _selectedTempDrivePath = folderPath; // Cache it for next time
+                }
+                // Priority 3: Default to system folder
+                else
+                {
+                    folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
+                }
 
                 // Ensure folder exists
                 if (!Directory.Exists(folderPath))
@@ -877,8 +891,8 @@ namespace GMTPC.Tool
                     UpdateStatus($"Đã tạo folder: {folderPath}", "Green");
                 }
 
+                UpdateStatus($"Mở folder: {folderPath}", "Cyan");
                 Process.Start("explorer.exe", folderPath);
-                UpdateStatus($"Đã mở folder: {folderPath}", "Green");
             }
             catch (Exception ex)
             {
