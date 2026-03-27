@@ -3,6 +3,11 @@
 // Chức năng: Xử lý Progress Bar, Segment UI, download engine,
 //            thông báo trạng thái, shared state fields
 // Cập nhật gần đây:
+//   - 2026-03-26 (4): All drives show same format (C:\ (100GB), D:\ (50GB), etc.)
+//                 C: uses %LocalAppData%\GMTPC\GMTPC Tools\ for actual storage
+//                 Added "Open folder" button with BtnOpenFolder_Click and OpenTempFolder()
+//   - 2026-03-26 (3): All drives show same format (C:\, D:\, etc.). C: uses %LocalAppData%\GMTPC\GMTPC Tools\
+//                 Added OpenTempFolder() method and _selectedDriveName field
 //   - 2026-03-26 (2): Restored multi-drive selection. C: = %LocalAppData%\GMTPC\GMTPC Tools\
 //                 Other drives = D:\Temp Folder, E:\Temp Folder, etc.
 //                 System folder (C:) NEVER has Defender exclusion removed.
@@ -45,6 +50,7 @@ namespace GMTPC.Tool
         private string _selectedTempDrivePath = null;
         private string _previousTempFolderPath = null; // Track previous temp folder for cleanup
         private string _systemTempFolderPath = null; // System folder path (LocalAppData) - never delete
+        private string _selectedDriveName = null; // Track selected drive name (C:, D:, etc.)
 
         // ===================== Build Number Display =====================
         private void SetBuildNumber()
@@ -678,8 +684,9 @@ namespace GMTPC.Tool
         // ===================== Temp Folder ComboBox =====================
         /// <summary>
         /// Populate the Temp folder ComboBox with all available drives (excluding CD-ROM)
-        /// - C: drive always shows %LocalAppData%\GMTPC\GMTPC Tools\
-        /// - Other drives show D:\Temp Folder, E:\Temp Folder, etc.
+        /// - All drives display the same format: "C:\ (100 GB free)", "D:\ (50 GB free)", etc.
+        /// - C: drive uses %LocalAppData%\GMTPC\GMTPC Tools\ as actual path
+        /// - Other drives use D:\Temp Folder, E:\Temp Folder, etc.
         /// </summary>
         private void PopulateTempFolderComboBox()
         {
@@ -689,29 +696,31 @@ namespace GMTPC.Tool
 
                 CboTempFolder.Items.Clear();
 
-                // Add system folder option (C:\%LocalAppData%\GMTPC\GMTPC Tools\)
-                string systemPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
-                CboTempFolder.Items.Add(new ComboBoxItem
-                {
-                    Content = $"Mặc định (C:) - {systemPath}",
-                    Tag = systemPath
-                });
-
-                // Add all drives except C: and CD-ROM
+                // Add all drives except CD-ROM
                 foreach (DriveInfo drive in DriveInfo.GetDrives())
                 {
-                    // Skip C: drive (already added as system folder) and CD-ROM
-                    if (drive.DriveType != DriveType.CDRom && 
-                        drive.IsReady && 
-                        !drive.Name.TrimEnd('\\').Equals("C:", StringComparison.OrdinalIgnoreCase))
+                    if (drive.DriveType != DriveType.CDRom && drive.IsReady)
                     {
-                        string drivePath = Path.Combine(drive.Name.TrimEnd('\\'), "Temp Folder");
-                        string displayText = $"{drive.Name} ({FormatBytes(drive.TotalFreeSpace)} free)";
+                        string actualPath;
+                        string displayText;
+
+                        if (drive.Name.TrimEnd('\\').Equals("C:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // C: drive uses system folder
+                            actualPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
+                            displayText = $"{drive.Name} ({FormatBytes(drive.TotalFreeSpace)} free)";
+                        }
+                        else
+                        {
+                            // Other drives use Temp Folder
+                            actualPath = Path.Combine(drive.Name.TrimEnd('\\'), "Temp Folder");
+                            displayText = $"{drive.Name} ({FormatBytes(drive.TotalFreeSpace)} free)";
+                        }
 
                         CboTempFolder.Items.Add(new ComboBoxItem
                         {
                             Content = displayText,
-                            Tag = drivePath
+                            Tag = actualPath
                         });
                     }
                 }
@@ -744,6 +753,18 @@ namespace GMTPC.Tool
 
                     if (!string.IsNullOrEmpty(newTempPath))
                     {
+                        // Extract drive name from display text (e.g., "C:\ (100 GB free)" -> "C:\")
+                        string driveName = null;
+                        if (newTempPath.Contains("GMTPC Tools"))
+                        {
+                            driveName = "C:\\";
+                        }
+                        else
+                        {
+                            driveName = Path.GetPathRoot(newTempPath);
+                        }
+                        _selectedDriveName = driveName;
+
                         // Initialize system temp folder path on first run
                         if (_systemTempFolderPath == null)
                         {
@@ -811,6 +832,15 @@ namespace GMTPC.Tool
         }
 
         /// <summary>
+        /// Handle Open Folder button click
+        /// Opens the selected temp folder in Windows Explorer
+        /// </summary>
+        private void BtnOpenFolder_Click(object sender, RoutedEventArgs e)
+        {
+            OpenTempFolder();
+        }
+
+        /// <summary>
         /// Get the selected temp folder path
         /// </summary>
         private string GetSelectedTempFolderPath()
@@ -826,6 +856,31 @@ namespace GMTPC.Tool
 
             // Default to LocalAppData if nothing selected
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
+        }
+
+        /// <summary>
+        /// Open the selected temp folder in Windows Explorer
+        /// </summary>
+        private void OpenTempFolder()
+        {
+            try
+            {
+                string folderPath = GetSelectedTempFolderPath();
+
+                if (Directory.Exists(folderPath))
+                {
+                    Process.Start("explorer.exe", folderPath);
+                    UpdateStatus($"Đã mở folder: {folderPath}", "Green");
+                }
+                else
+                {
+                    UpdateStatus($"Folder không tồn tại: {folderPath}", "Yellow");
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi mở folder: {ex.Message}", "Red");
+            }
         }
 
         // ===================== Defender Exclusion Methods =====================
