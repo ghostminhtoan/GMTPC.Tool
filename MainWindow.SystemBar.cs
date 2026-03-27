@@ -865,17 +865,20 @@ namespace GMTPC.Tool
         {
             try
             {
-                string folderPath = GetSelectedTempFolderPath();
+                // Use _selectedTempDrivePath directly if available, otherwise get default
+                string folderPath = !string.IsNullOrEmpty(_selectedTempDrivePath) 
+                    ? _selectedTempDrivePath 
+                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
 
-                if (Directory.Exists(folderPath))
+                // Ensure folder exists
+                if (!Directory.Exists(folderPath))
                 {
-                    Process.Start("explorer.exe", folderPath);
-                    UpdateStatus($"Đã mở folder: {folderPath}", "Green");
+                    Directory.CreateDirectory(folderPath);
+                    UpdateStatus($"Đã tạo folder: {folderPath}", "Green");
                 }
-                else
-                {
-                    UpdateStatus($"Folder không tồn tại: {folderPath}", "Yellow");
-                }
+
+                Process.Start("explorer.exe", folderPath);
+                UpdateStatus($"Đã mở folder: {folderPath}", "Green");
             }
             catch (Exception ex)
             {

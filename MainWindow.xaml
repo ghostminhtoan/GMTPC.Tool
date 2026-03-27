@@ -561,20 +561,22 @@
         <Border Grid.Row="2" Background="Transparent" Margin="0,0,19,10" Grid.ColumnSpan="2">
             <StackPanel Orientation="Vertical">
                 <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,0,0,10">
-                    <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="135">
-                        <StackPanel Margin="0,0,45,0">
-                            <TextBlock Text="Temp folder" Foreground="#FFE6E6E6" FontSize="10" Margin="3,3,3,0" Width="69"/>
-                            <ComboBox x:Name="CboTempFolder" Width="74" Height="22" FontSize="10" Margin="3,0,3,3" SelectionChanged="CboTempFolder_SelectionChanged">
-                                <ComboBox.ItemContainerStyle>
-                                    <Style TargetType="{x:Type ComboBoxItem}">
-                                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                    </Style>
-                                </ComboBox.ItemContainerStyle>
-                            </ComboBox>
+                    <Border BorderBrush="#FF7A7A7A" BorderThickness="1" CornerRadius="5" Width="215">
+                        <StackPanel Orientation="Horizontal" Margin="3,0,0,0">
+                            <StackPanel Margin="0,0,10,0">
+                                <TextBlock Text="Temp folder" Foreground="#FFE6E6E6" FontSize="10" Margin="3,3,3,0" Width="69"/>
+                                <ComboBox x:Name="CboTempFolder" Width="74" Height="22" FontSize="10" Margin="3,0,3,3" SelectionChanged="CboTempFolder_SelectionChanged">
+                                    <ComboBox.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ComboBoxItem}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </ComboBox.ItemContainerStyle>
+                                </ComboBox>
+                            </StackPanel>
+                            <Button x:Name="BtnOpenFolder" Content="Open folder" Width="75" Height="22" Margin="0,3,3,3" Background="DarkCyan" BorderBrush="darkcyan" Click="BtnOpenFolder_Click" VerticalAlignment="Bottom"/>
                         </StackPanel>
                     </Border>
-                    <Button x:Name="BtnOpenFolder" Content="Open folder" Width="75" Height="28" Margin="5,0,0,0" Background="DarkCyan" BorderBrush="darkcyan" Click="BtnOpenFolder_Click"/>
                     <Button x:Name="BtnSelectAll" Content="Select All" Width="72" Height="28" Click="BtnSelectAll_Click"/>
                     <Button x:Name="BtnSelectNone" Content="Select None" Width="77" Height="28" Click="BtnSelectNone_Click"/>
                     <Button x:Name="BtnSelectNoneAllTabs" Content="Select none for all tabs" Width="133" Height="28" Background="DarkCyan" BorderBrush="darkcyan" Click="BtnSelectNoneAllTabs_Click"/>
