@@ -11,6 +11,8 @@ namespace GMTPC.Tool
 {
     /*
  * AI Summary:
+ * Date: 2026-03-28
+ * - Added SUBTITLE_EDIT_DOWNLOAD_URL and SUBTITLE_EDIT_INSTALL_ARGUMENTS for Subtitle Edit
  * Date: 2026-03-26 (2)
  * - Added ChkWintoHDD and ChkJumpForce to UpdateInstallButtonState()
  * Date: 2026-03-26
@@ -160,6 +162,10 @@ namespace GMTPC.Tool
         // Notepad++ (Tab: Office)
         private const string NOTEPAD_PLUS_PLUS_DOWNLOAD_URL = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.x64.msi";
         private const string NOTEPAD_PLUS_PLUS_INSTALL_ARGUMENTS = "/passive /norestart";
+
+        // Subtitle Edit (Tab: Office)
+        private const string SUBTITLE_EDIT_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Subtitle.Edit.exe";
+        private const string SUBTITLE_EDIT_INSTALL_ARGUMENTS = "/verysilent /norestart";
 
         // ===================================================================
         // TabDriver — Links (B) and Arguments (C)
@@ -595,6 +601,8 @@ namespace GMTPC.Tool
                              ChkGouenjiFonts.IsChecked == true ||
                              // Thêm checkbox cho Notepad++
                              ChkNotepadPlusPlus.IsChecked == true ||
+                             // Thêm checkbox cho Subtitle Edit
+                             ChkSubtitleEdit.IsChecked == true ||
                              // Thêm checkbox cho AOMEI Partition Assistant
                              ChkAomeiPartitionAssistant.IsChecked == true ||
                              // Thêm checkbox cho PowerISO

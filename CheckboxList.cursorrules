@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-17 - Added ChkWin10_22H2_2024_December, updated ChkWin10LtscIot21H2 links, removed Ghost of Tsushima Temp button, added Temp folder combobox, added TeraCopy Defender exclusion -->
+<!-- AI Summary: 2026-03-28 - Added ChkSubtitleEdit to Tab Office -->
 
 # Danh sách Checkbox
 
@@ -42,6 +42,7 @@
 | ChkActivateOffice | (Office Activation) | *(script riêng)* |
 | ChkGouenjiFonts | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Gouenji.Fansub.Fonts.exe | `/passive /norestart` |
 | ChkNotepadPlusPlus | https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.9.2/npp.8.9.2.Installer.x64.msi | `/passive /norestart` |
+| ChkSubtitleEdit | https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Subtitle.Edit.exe | `/verysilent /norestart` |
 
 ## Tab Multimedia
 
@@ -126,7 +127,7 @@
 
 ---
 
-**Tổng số:** 50 checkboxes
+**Tổng số:** 51 checkboxes
 
 **Ghi chú:**
 - Các checkbox được phân loại theo Tab tương ứng trong giao diện (MainWindow.xaml)

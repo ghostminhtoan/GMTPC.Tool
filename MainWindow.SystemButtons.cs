@@ -4,6 +4,8 @@
 //            SelectNoneAllTabs, Install, Pause, Resume, Refresh Color,
 //            BtnDownloadPage, DPI controls
 // Cập nhật gần đây:
+//   - 2026-03-28: Added ChkSubtitleEdit to BtnSelectAll, BtnSelectNone,
+//                 BtnSelectNoneAllTabs, UpdateInstallButtonState, BtnInstall_Click
 //   - 2026-03-26: Added ChkJumpForce and ChkWintoHDD to BtnSelectAll, 
 //                 BtnSelectNone, BtnSelectNoneAllTabs, BtnInstall_Click
 //   - 2026-03-11: Added ChkGhostOfTsushima to BtnSelectAll, BtnSelectNone,
@@ -238,6 +240,7 @@ namespace GMTPC.Tool
                     ChkActivateOffice.IsChecked = true;
                     ChkGouenjiFonts.IsChecked = true;
                     ChkNotepadPlusPlus.IsChecked = true;
+                    ChkSubtitleEdit.IsChecked = true;
                 }
                 // Nếu tab là "Partition"
                 else if (tabHeader == "Partition")
@@ -353,6 +356,7 @@ namespace GMTPC.Tool
                     ChkActivateOffice.IsChecked = false;
                     ChkGouenjiFonts.IsChecked = false;
                     ChkNotepadPlusPlus.IsChecked = false;
+                    ChkSubtitleEdit.IsChecked = false;
                 }
                 // Nếu tab là "Partition"
                 else if (tabHeader == "Partition")
@@ -489,6 +493,7 @@ namespace GMTPC.Tool
             ChkActivateOffice.IsChecked = false;
             ChkGouenjiFonts.IsChecked = false;
             ChkNotepadPlusPlus.IsChecked = false;
+            ChkSubtitleEdit.IsChecked = false;
 
             // Bỏ chọn checkbox trong tab Windows - Microsoft
             ChkWin11_26H1.IsChecked = false;
@@ -548,6 +553,7 @@ namespace GMTPC.Tool
             if (ChkOfficeSoftmaker.IsChecked == true) tasks.Add((InstallOfficeSoftmakerAsync, ChkOfficeSoftmaker));
             if (ChkGouenjiFonts.IsChecked == true) tasks.Add((InstallGouenjiFontsAsync, ChkGouenjiFonts));
             if (ChkNotepadPlusPlus.IsChecked == true) tasks.Add((InstallNotepadPlusPlusAsync, ChkNotepadPlusPlus));
+            if (ChkSubtitleEdit.IsChecked == true) tasks.Add((InstallSubtitleEditAsync, ChkSubtitleEdit));
             // Only add once to avoid duplicate install and MessageBox
             if (ChkPowerISO.IsChecked == true) tasks.Add((InstallPowerISOAsync, ChkPowerISO));
             if (ChkTeraCopy.IsChecked == true) tasks.Add((InstallTeraCopyAsync, ChkTeraCopy));

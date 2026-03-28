@@ -22,6 +22,8 @@ namespace GMTPC.Tool
     {
         /*
          * AI Summary:
+         * Date: 2026-03-28
+         * - Added ChkSubtitleEdit_Click and InstallSubtitleEditAsync
          * Date: 2026-03-08
          * - Added ChkGouenjiFonts_Click and InstallGouenjiFontsAsync
          * - Added ChkNotepadPlusPlus_Click and InstallNotepadPlusPlusAsync
@@ -351,6 +353,91 @@ namespace GMTPC.Tool
             catch (Exception ex)
             {
                 UpdateStatus($"Lỗi khi cài đặt Notepad++: {ex.Message}", "Red");
+            }
+        }
+
+        // ===================================================================
+        // TabOffice — Subtitle Edit
+        // ===================================================================
+        private void ChkSubtitleEdit_Click(object sender, RoutedEventArgs e)
+        {
+            if (ChkSubtitleEdit.IsChecked == true)
+            {
+                UpdateStatus("Đã chọn: Subtitle Edit", "Green");
+            }
+            else
+            {
+                UpdateStatus("Đã hủy chọn: Subtitle Edit", "Yellow");
+            }
+
+            UpdateInstallButtonState();
+        }
+
+        private async Task InstallSubtitleEditAsync()
+        {
+            try
+            {
+                UpdateStatus("Đang tải Subtitle Edit...", "Cyan");
+                string subtitleEditPath = Path.Combine(GetGMTPCFolder(), "Subtitle.Edit.exe");
+                await DownloadWithProgressAsync(SUBTITLE_EDIT_DOWNLOAD_URL, subtitleEditPath, "Subtitle Edit");
+
+                Dispatcher.Invoke(() =>
+                {
+                    DownloadProgressBar.Value = 0;
+                    ProgressTextBlock.Text = "";
+                    SpeedTextBlock.Text = "";
+                });
+
+                // Hiển thị popup để hỏi người dùng chọn cài đặt
+                MessageBoxResult result = MessageBox.Show("Yes = Cài đặt tự động (silent)\nNo = Cài đặt thủ công (GUI)", "Cài đặt Subtitle Edit", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Cancel)
+                {
+                    UpdateStatus("Đã hủy cài đặt Subtitle Edit", "Yellow");
+                    if (File.Exists(subtitleEditPath))
+                    {
+                        File.Delete(subtitleEditPath);
+                    }
+                    return;
+                }
+
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = subtitleEditPath,
+                    UseShellExecute = true
+                };
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Cài đặt tự động
+                    startInfo.Arguments = SUBTITLE_EDIT_INSTALL_ARGUMENTS;
+                    UpdateStatus("Đang cài đặt Subtitle Edit (silent)...", "Yellow");
+                }
+                else
+                {
+                    // Cài đặt thủ công
+                    UpdateStatus("Đang mở Subtitle Edit installer (thủ công)...", "Yellow");
+                }
+
+                Process process = Process.Start(startInfo);
+
+                if (process != null)
+                {
+                    // Đợi người dùng tắt installer
+                    await Task.Run(() => process.WaitForExit());
+                    UpdateStatus("Cài đặt Subtitle Edit hoàn tất!", "Green");
+                }
+
+                // Xóa file installer sau khi cài đặt xong
+                if (File.Exists(subtitleEditPath))
+                {
+                    File.Delete(subtitleEditPath);
+                    UpdateStatus("Đã xóa file Subtitle.Edit.exe", "Cyan");
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Lỗi khi cài đặt Subtitle Edit: {ex.Message}", "Red");
             }
         }
 
