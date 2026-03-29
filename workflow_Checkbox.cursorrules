@@ -1,4 +1,4 @@
-<!-- AI Summary: 2026-03-17 - Added 3 installation mechanisms: SystemInstallDefault (basic), SystemInstallPrompt (Yes/No dialog), SystemInstallMultipart (auto merge & delete split files) -->
+<!-- AI Summary: 2026-03-29 - Added mandatory UpdateInstallButtonState() rule to prevent Install button interaction issues -->
 
 <system_context>
 Bạn là một AI Code Agent chuyên nghiệp, làm việc trên dự án "MMT Tools" (WPF, .NET 4.8, C# 7.3).
@@ -138,13 +138,25 @@ nếu chọn ổ D thì sẽ tự tạo  defender exclusion cho D:\Temp Folder, 
                   + Gọi `ProcessStartInfo` với `[Y]_INSTALL_ARGUMENTS` từ Bước 1.
             </step>
 
-            <step number="3" target_file="MainWindow.SystemButtons.cs">
-                - Trong `UpdateInstallButtonState()`: Thêm điều kiện `ChkInstall[Y].IsChecked == true` để kích hoạt BtnInstall.
+            <step number="3" target_file="MainWindow.SystemArguments.cs">
+                **BẮT BUỘC - QUAN TRỌNG NHẤT** - Cập nhật `UpdateInstallButtonState()`:
+                - Tìm phương thức `UpdateInstallButtonState()` trong `MainWindow.SystemArguments.cs`
+                - Thêm điều kiện: `|| ChkInstall[Y].IsChecked == true` vào biến `hasChecked`
+                - **Checklist bắt buộc**:
+                  + [ ] UpdateInstallButtonState(): Đã thêm `ChkInstall[Y].IsChecked == true`
+                  + [ ] BtnSelectAll_Click: Đã thêm `ChkInstall[Y].IsChecked = true`
+                  + [ ] BtnSelectNone_Click: Đã thêm `ChkInstall[Y].IsChecked = false`
+                  + [ ] BtnSelectNoneAllTabs_Click: Đã thêm `ChkInstall[Y].IsChecked = false`
+                  + [ ] BtnInstall_Click: Đã thêm `if (ChkInstall[Y].IsChecked == true) await Install[Y]Async();`
+                  + [ ] BtnDownloadPage_MouseEnter: Đã thêm link vào `_cachedDownloadLinks` (nếu có)
+            </step>
+
+            <step number="4" target_file="MainWindow.SystemButtons.cs">
                 - Trong các hàm `BtnSelectAll_Click`, `BtnSelectNone_Click`, `BtnSelectNoneAllTabs_Click`: Cập nhật trạng thái check/uncheck tương ứng cho `ChkInstall[Y]`.
                 - Trong `BtnInstall_Click()`: Thêm logic `if (ChkInstall[Y].IsChecked == true) await Install[Y]Async();`
             </step>
 
-            <step number="4" target_file="CheckboxList.cursorrules">
+            <step number="5" target_file="CheckboxList.cursorrules">
                 - Mở file `CheckboxList.cursorrules` và thêm thông tin checkbox vào bảng theo đúng Tab:
                   + Tên Checkbox: `ChkInstall[Y]`
                   + Link: `[URL]`
@@ -238,11 +250,24 @@ nếu chọn ổ D thì sẽ tự tạo  defender exclusion cho D:\Temp Folder, 
                 - Tìm và cập nhật phương thức: `private async Task Install[Y]Async()` với link và argument mới.
             </step>
 
-            <step number="3" target_file="MainWindow.SystemButtons.cs">
+            <step number="3" target_file="MainWindow.SystemArguments.cs">
+                **BẮT BUỘC - QUAN TRỌNG NHẤT** - Cập nhật `UpdateInstallButtonState()`:
+                - Tìm phương thức `UpdateInstallButtonState()` trong `MainWindow.SystemArguments.cs`
+                - Thêm điều kiện: `|| ChkInstall[Y].IsChecked == true` vào biến `hasChecked`
+                - **Checklist bắt buộc**:
+                  + [ ] UpdateInstallButtonState(): Đã thêm `ChkInstall[Y].IsChecked == true`
+                  + [ ] BtnSelectAll_Click: Đã thêm `ChkInstall[Y].IsChecked = true`
+                  + [ ] BtnSelectNone_Click: Đã thêm `ChkInstall[Y].IsChecked = false`
+                  + [ ] BtnSelectNoneAllTabs_Click: Đã thêm `ChkInstall[Y].IsChecked = false`
+                  + [ ] BtnInstall_Click: Đã thêm `if (ChkInstall[Y].IsChecked == true) await Install[Y]Async();`
+                  + [ ] BtnDownloadPage_MouseEnter: Đã thêm link vào `_cachedDownloadLinks` (nếu có)
+            </step>
+
+            <step number="5" target_file="MainWindow.SystemButtons.cs">
                 - Kiểm tra logic trong `BtnInstall_Click()` đã gọi đúng `Install[Y]Async()` chưa.
             </step>
 
-            <step number="4" target_file="CheckboxList.cursorrules">
+            <step number="6" target_file="CheckboxList.cursorrules">
                 - Mở file `CheckboxList.cursorrules` và cập nhật thông tin checkbox trong bảng theo đúng Tab:
                   + Tên Checkbox: `ChkInstall[Y]`
                   + Link: `[URL]` (mới)
@@ -272,6 +297,58 @@ nếu chọn ổ D thì sẽ tự tạo  defender exclusion cho D:\Temp Folder, 
 </workflow_definitions>
 
 <implementation_rules>
+    <!-- ==================== MANDATORY: UPDATE INSTALL BUTTON STATE ==================== -->
+    <rule name="Mandatory_UpdateInstallButtonState">
+        <description>
+        BẮT BUỘC: Khi tạo checkbox mới, PHẢI cập nhật hàm UpdateInstallButtonState() trong MainWindow.SystemArguments.cs.
+        Đây là lỗi thường gặp nhất: checkbox mới tạo không tương tác được với nút Install.
+        </description>
+        <critical_requirement>
+            **LUÔN LUÔN KIỂM TRA BƯỚC NÀY TRƯỚC KHI BUILD**
+        </critical_requirement>
+        <requirements>
+            1. Mở file `MainWindow.SystemArguments.cs`
+            2. Tìm phương thức `UpdateInstallButtonState()`
+            3. Thêm điều kiện checkbox mới vào biến `hasChecked`:
+               ```csharp
+               private void UpdateInstallButtonState()
+               {
+                   bool hasChecked = ChkInstallIDM.IsChecked == true ||
+                                    // ... các checkbox cũ ...
+                                    || ChkInstall[Y].IsChecked == true;  // ← THÊM DÒNG NÀY
+                   
+                   BtnInstall.IsEnabled = hasChecked;
+               }
+               ```
+            4. Build và verify: Tick checkbox → nút Install phải enabled
+        </requirements>
+        <checklist>
+            - [ ] Đã thêm `Chk[Y].IsChecked == true` vào UpdateInstallButtonState()?
+            - [ ] Đã thêm vào BtnSelectAll_Click?
+            - [ ] Đã thêm vào BtnSelectNone_Click?
+            - [ ] Đã thêm vào BtnSelectNoneAllTabs_Click?
+            - [ ] Đã thêm vào BtnInstall_Click?
+            - [ ] Đã thêm vào BtnDownloadPage_MouseEnter (nếu có link)?
+        </checklist>
+        <example>
+            // MainWindow.SystemArguments.cs - UpdateInstallButtonState()
+            private void UpdateInstallButtonState()
+            {
+                bool hasChecked = ChkInstallIDM.IsChecked == true ||
+                                 // ... các checkbox khác ...
+                                 // Tab Subtitle
+                                 ChkSubtitleEdit.IsChecked == true ||
+                                 ChkVidCoder.IsChecked == true ||  // ← Checkbox mới thêm
+                                 
+                BtnInstall.IsEnabled = hasChecked;
+            }
+        </example>
+        <consequence>
+            **NẾU QUÊN**: Checkbox sẽ không thể tick để enable nút Install → Người dùng không thể cài đặt phần mềm.
+            **FIX**: Phải commit lại và push lại → Tốn thời gian gấp 3 lần.
+        </consequence>
+    </rule>
+
     <!-- ==================== CHECKBOX HOVER SHOW LINK ==================== -->
     <rule name="Checkbox_Hover_ShowLink">
         <description>
