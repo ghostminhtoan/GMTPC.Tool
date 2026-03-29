@@ -447,7 +447,14 @@
                             <CheckBox x:Name="ChkActivateOffice" Content="Tự động kích hoạt Office" Width="200" Height="34" Click="ChkActivateOffice_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkGouenjiFonts" Content="Gouenji Fansub Fonts" Width="200" Height="34" Click="ChkGouenjiFonts_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                             <CheckBox x:Name="ChkNotepadPlusPlus" Content="Notepad++" Width="200" Height="34" Click="ChkNotepadPlusPlus_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                        </WrapPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Subtitle">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#FF1F1F1F">
+                        <WrapPanel x:Name="SubtitlePanel" Orientation="Horizontal" HorizontalAlignment="Stretch" Style="{StaticResource ResponsiveWrapPanelStyle}">
                             <CheckBox x:Name="ChkSubtitleEdit" Content="Subtitle Edit" Width="200" Height="34" Click="ChkSubtitleEdit_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
+                            <CheckBox x:Name="ChkVidCoder" Content="VidCoder" Width="200" Height="34" Click="ChkVidCoder_Click" Margin="2" MouseEnter="Checkbox_MouseEnter"/>
                         </WrapPanel>
                     </ScrollViewer>
                 </TabItem>

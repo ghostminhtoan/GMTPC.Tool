@@ -715,8 +715,9 @@ namespace GMTPC.Tool
                         }
                         else
                         {
-                            // Other drives use Temp Folder
-                            actualPath = Path.Combine(drive.Name.TrimEnd('\\'), "Temp Folder");
+                            // SỬA Ở ĐÂY: Dùng trực tiếp drive.Name (VD: "D:\") thay vì TrimEnd
+                            // Kết quả sẽ ra "D:\Temp Folder" thay vì "D:Temp Folder"
+                            actualPath = Path.Combine(drive.Name, "Temp Folder");
                             displayText = $"{drive.Name} ({FormatBytes(drive.TotalFreeSpace)} free)";
                         }
 
@@ -825,6 +826,11 @@ namespace GMTPC.Tool
                         _previousTempFolderPath = newTempPath;
                         _selectedTempDrivePath = newTempPath;
                         _openFolderButtonPath = newTempPath; // Store path for Open Folder button
+                        
+                        // Debug logging
+                        UpdateStatus($"[DEBUG] Selected={newTempPath}", "Gray");
+                        UpdateStatus($"[DEBUG] _openFolderButtonPath={_openFolderButtonPath}", "Gray");
+                        
                         UpdateStatus($"Temp folder: {newTempPath}", "Green");
                     }
                 }
@@ -879,6 +885,10 @@ namespace GMTPC.Tool
                     folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GMTPC", "GMTPC Tools");
                 }
 
+                // Debug logging
+                UpdateStatus($"[DEBUG] _openFolderButtonPath={_openFolderButtonPath}", "Gray");
+                UpdateStatus($"[DEBUG] folderPath={folderPath}", "Gray");
+
                 // Ensure folder exists
                 if (!Directory.Exists(folderPath))
                 {
@@ -887,8 +897,17 @@ namespace GMTPC.Tool
                     UpdateStatus($"Đã tạo folder: {folderPath}", "Green");
                 }
 
+                // Open folder using explorer with proper quoting for paths with spaces
                 UpdateStatus($"Mở folder: {folderPath}", "Cyan");
-                Process.Start("explorer.exe", folderPath);
+                
+                // Method 1: Use explorer.exe with quoted path
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"\"{folderPath}\"",
+                    UseShellExecute = true
+                };
+                Process.Start(startInfo);
             }
             catch (Exception ex)
             {

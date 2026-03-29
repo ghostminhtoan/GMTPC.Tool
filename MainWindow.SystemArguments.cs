@@ -165,7 +165,7 @@ namespace GMTPC.Tool
 
         // Subtitle Edit (Tab: Office)
         private const string SUBTITLE_EDIT_DOWNLOAD_URL = "https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Subtitle.Edit.exe";
-        private const string SUBTITLE_EDIT_INSTALL_ARGUMENTS = "/verysilent /norestart";
+        private const string SUBTITLE_EDIT_INSTALL_ARGUMENTS = "/passive";
 
         // ===================================================================
         // TabDriver — Links (B) and Arguments (C)

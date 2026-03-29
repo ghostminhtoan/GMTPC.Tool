@@ -4,9 +4,10 @@
 //            SelectNoneAllTabs, Install, Pause, Resume, Refresh Color,
 //            BtnDownloadPage, DPI controls
 // Cập nhật gần đây:
+//   - 2026-03-29: Added ChkVidCoder and new Subtitle tab support
 //   - 2026-03-28: Added ChkSubtitleEdit to BtnSelectAll, BtnSelectNone,
 //                 BtnSelectNoneAllTabs, UpdateInstallButtonState, BtnInstall_Click
-//   - 2026-03-26: Added ChkJumpForce and ChkWintoHDD to BtnSelectAll, 
+//   - 2026-03-26: Added ChkJumpForce and ChkWintoHDD to BtnSelectAll,
 //                 BtnSelectNone, BtnSelectNoneAllTabs, BtnInstall_Click
 //   - 2026-03-11: Added ChkGhostOfTsushima to BtnSelectAll, BtnSelectNone,
 //                 BtnSelectNoneAllTabs, UpdateInstallButtonState, BtnInstall_Click
@@ -240,7 +241,11 @@ namespace GMTPC.Tool
                     ChkActivateOffice.IsChecked = true;
                     ChkGouenjiFonts.IsChecked = true;
                     ChkNotepadPlusPlus.IsChecked = true;
+                }
+                else if (tabHeader == "Subtitle")
+                {
                     ChkSubtitleEdit.IsChecked = true;
+                    ChkVidCoder.IsChecked = true;
                 }
                 // Nếu tab là "Partition"
                 else if (tabHeader == "Partition")
@@ -356,7 +361,11 @@ namespace GMTPC.Tool
                     ChkActivateOffice.IsChecked = false;
                     ChkGouenjiFonts.IsChecked = false;
                     ChkNotepadPlusPlus.IsChecked = false;
+                }
+                else if (tabHeader == "Subtitle")
+                {
                     ChkSubtitleEdit.IsChecked = false;
+                    ChkVidCoder.IsChecked = false;
                 }
                 // Nếu tab là "Partition"
                 else if (tabHeader == "Partition")
@@ -493,7 +502,10 @@ namespace GMTPC.Tool
             ChkActivateOffice.IsChecked = false;
             ChkGouenjiFonts.IsChecked = false;
             ChkNotepadPlusPlus.IsChecked = false;
+
+            // Bỏ chọn checkbox trong tab Subtitle
             ChkSubtitleEdit.IsChecked = false;
+            ChkVidCoder.IsChecked = false;
 
             // Bỏ chọn checkbox trong tab Windows - Microsoft
             ChkWin11_26H1.IsChecked = false;
@@ -554,6 +566,7 @@ namespace GMTPC.Tool
             if (ChkGouenjiFonts.IsChecked == true) tasks.Add((InstallGouenjiFontsAsync, ChkGouenjiFonts));
             if (ChkNotepadPlusPlus.IsChecked == true) tasks.Add((InstallNotepadPlusPlusAsync, ChkNotepadPlusPlus));
             if (ChkSubtitleEdit.IsChecked == true) tasks.Add((InstallSubtitleEditAsync, ChkSubtitleEdit));
+            if (ChkVidCoder.IsChecked == true) tasks.Add((InstallVidCoderAsync, ChkVidCoder));
             // Only add once to avoid duplicate install and MessageBox
             if (ChkPowerISO.IsChecked == true) tasks.Add((InstallPowerISOAsync, ChkPowerISO));
             if (ChkTeraCopy.IsChecked == true) tasks.Add((InstallTeraCopyAsync, ChkTeraCopy));
@@ -749,6 +762,12 @@ namespace GMTPC.Tool
 
             if (ChkOfficeSoftmaker?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Office.Softmaker.exe");
+
+            if (ChkSubtitleEdit?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/Subtitle.Edit.exe");
+
+            if (ChkVidCoder?.IsChecked == true)
+                _cachedDownloadLinks.Add("https://github.com/RandomEngy/VidCoder/releases");
 
             if (ChkPowerISO?.IsChecked == true)
                 _cachedDownloadLinks.Add("https://github.com/ghostminhtoan/MMT/releases/download/v1.0/PowerISO.exe");
