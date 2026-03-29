@@ -11,6 +11,8 @@ namespace GMTPC.Tool
 {
     /*
  * AI Summary:
+ * Date: 2026-03-29 (2)
+ * - Added ChkVidCoder to UpdateInstallButtonState()
  * Date: 2026-03-28
  * - Added SUBTITLE_EDIT_DOWNLOAD_URL and SUBTITLE_EDIT_INSTALL_ARGUMENTS for Subtitle Edit
  * Date: 2026-03-26 (2)
@@ -603,6 +605,8 @@ namespace GMTPC.Tool
                              ChkNotepadPlusPlus.IsChecked == true ||
                              // Thêm checkbox cho Subtitle Edit
                              ChkSubtitleEdit.IsChecked == true ||
+                             // Thêm checkbox cho VidCoder (Tab Subtitle)
+                             ChkVidCoder.IsChecked == true ||
                              // Thêm checkbox cho AOMEI Partition Assistant
                              ChkAomeiPartitionAssistant.IsChecked == true ||
                              // Thêm checkbox cho PowerISO
